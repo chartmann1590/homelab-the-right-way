@@ -94,3 +94,18 @@ h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0 0 .5em}h1{font-size:cla
 .follow-row{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.3rem 0 .6rem}
 .follow-row .follow{display:inline-flex;align-items:center;gap:.35rem;font-weight:600;text-decoration:none}
 .follow-row .follow svg{width:18px;height:18px}
+
+/* newsletter box */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.nl{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:center;background:linear-gradient(135deg,rgba(25,198,192,.14),rgba(16,32,58,.9));border:1px solid rgba(25,198,192,.35);border-radius:var(--r);padding:24px;box-shadow:var(--glow)}
+.nl h3{margin:.2em 0 .4em;font-size:1.35rem}.nl p{margin:0;color:var(--muted)}.nl .eyebrow{margin:0 0 .3em}
+.nl-form{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.nl-form input[type=email]{flex:1 1 200px;min-width:0;font:inherit;font-size:1rem;padding:12px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(6,12,22,.7);color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+.nl-form input[type=email]:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(25,198,192,.25)}
+.nl-form input::placeholder{color:#6b7d99}
+.nl-form .btn{flex:none;cursor:pointer;border:0;font:inherit;font-size:1rem}
+.nl-form .nl-note{flex-basis:100%;margin:2px 0 0;font-size:.82rem}
+.nl-post{margin:1.6em 0 1.4em}.nl-links{margin:22px 0 6px;text-align:left}
+.nl-band{padding:40px 0}.nl-home{grid-template-columns:1.2fr 1fr}
+@media (max-width:700px){.nl{grid-template-columns:1fr;padding:20px}.nl-form input[type=email]{flex-basis:100%}.nl-form .btn{width:100%;justify-content:center}}
+.thanks{max-width:60ch;padding-top:64px;min-height:50vh}.thanks h1{font-size:clamp(1.8rem,5vw,2.6rem)}

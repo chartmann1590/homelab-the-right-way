@@ -26,8 +26,8 @@
 <link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
 <link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
 <link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
-<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=3" as="style">
-<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=3">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=4" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=4">
 <meta property="article:published_time" content="2026-10-10">
 <meta property="article:tag" content="proxmox">
 <meta property="article:tag" content="cleanup">
@@ -57,7 +57,7 @@
 <div class="wrap prose-wrap">
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-stopped-is-not-the-same-as-unused">The trap: stopped is not the same as unused</a></li><li><a href="#step-0-check-for-linked-clones">Step 0: check for linked clones</a></li><li><a href="#step-1-back-it-up-in-stop-mode">Step 1: back it up, in stop mode</a></li><li><a href="#step-2-verify-the-archive">Step 2: verify the archive</a></li><li><a href="#step-3-destroy-with-purge">Step 3: destroy, with purge</a></li><li><a href="#the-loop">The loop</a></li><li><a href="#two-gotchas">Two gotchas</a></li><li><a href="#afterwards-the-orphans">Afterwards: the orphans</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
 <div class="prose">
-<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 12, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtube.com/shorts/ab6X9sEy8HM" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 12, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtube.com/shorts/xzt3N3cpS1o" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
 <p>Every homelab accumulates guests. The container you built to try something, the VM from a tutorial, the old version of a service you migrated away from. Eventually most of the guest list is grey stopped icons, and the nightly backup job is dutifully copying all of them.</p>
 <p>Cleaning house is easy to put off because deleting things is scary. The way to make it not scary is a routine where every single guest you delete is recoverable: <strong>back it up, verify the backup, then destroy with purge.</strong></p>
 <h2 id="the-trap-stopped-is-not-the-same-as-unused">The trap: stopped is not the same as unused</h2>
@@ -128,6 +128,18 @@ done &lt; /root/cleanup-ids.txt</code></pre>
 <p>3-2-1 with vzdump and Proxmox Backup Server, an off-site copy that keeps working, restore drills, backup-verify-destroy and alerts for jobs that quietly stop. The free sample has a full chapter plus the weekend backup checklist.</p>
 <p class="btns"><a class="btn" href="https://payhip.com/b/1iHXQ" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></p></div>
 </aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
 <p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
 </div>
 </div>
@@ -159,6 +171,6 @@ done &lt; /root/cleanup-ids.txt</code></pre>
 </div>
 <p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
 </div></footer>
-<script src="/homelab-the-right-way/assets/site.js?v=3" defer></script>
+<script src="/homelab-the-right-way/assets/site.js?v=4" defer></script>
 </body>
 </html>
