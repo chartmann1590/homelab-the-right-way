@@ -89,3 +89,8 @@ h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0 0 .5em}h1{font-size:cla
 .no-js .reveal,.no-js .fade{opacity:1;transform:none;animation:none}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fade,.reveal{opacity:1;transform:none;animation:none;transition:none}.card:hover,.btn:hover,.lbtn:hover,.list li:hover{transform:none}.card:hover .thumb img,.yt:hover .yt-link img{transform:none}.cursor,.premiere .dot{animation:none}#net{display:none}.term{transform:none}}
 .links li{display:flex;flex-direction:column;gap:4px}.links .sample{align-self:flex-end;font-size:.85rem;color:var(--amber);padding:0 8px}
+
+/* footer Follow row (social links from links.json) */
+.follow-row{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.3rem 0 .6rem}
+.follow-row .follow{display:inline-flex;align-items:center;gap:.35rem;font-weight:600;text-decoration:none}
+.follow-row .follow svg{width:18px;height:18px}
