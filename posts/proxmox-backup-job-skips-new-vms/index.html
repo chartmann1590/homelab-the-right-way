@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Proxmox backup job is probably skipping your new VMs — Homelab the Right Way</title>
+<meta name="description" content="A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Your Proxmox backup job is probably skipping your new VMs — Homelab the Right Way">
+<meta property="og:description" content="A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Your Proxmox backup job is probably skipping your new VMs — Homelab the Right Way">
+<meta name="twitter:description" content="A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=2" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=2">
+<meta property="article:published_time" content="2026-10-10">
+<meta property="article:tag" content="proxmox">
+<meta property="article:tag" content="backups">
+<meta property="article:tag" content="vzdump">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Your Proxmox backup job is probably skipping your new VMs", "description": "A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to \"All\" with excludes, and the other checks that make the green tick mean something.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/", "datePublished": "2026-10-10T12:30:00-04:00", "dateModified": "2026-10-10T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "proxmox, backups, vzdump", "wordCount": 851, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Never Lose Your Data", "url": "https://payhip.com/b/1iHXQ", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book3.jpg", "description": "A homelabber's backup playbook for Proxmox, Home Assistant and OPNsense.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/1iHXQ", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "Your Proxmox backup job is probably skipping your new VMs", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">Your Proxmox backup job is probably skipping your new VMs</h1>
+<p class="lead fade" style="--d:2">A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read · <span class="tags inline"><span>proxmox</span><span>backups</span><span>vzdump</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/2026-10-10.webp" width="1280" height="720" alt="Your Proxmox backup job is probably skipping your new VMs" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-a-job-built-for-selected-vms">The trap: a job built for &quot;selected VMs&quot;</a></li><li><a href="#the-fix-one-job-that-covers-everything">The fix: one job that covers everything</a></li><li><a href="#three-other-things-hiding-behind-the-green-check">Three other things hiding behind the green check</a></li><li><a href="#prove-it-a-backup-you-haven-t-restored-is-a-rumor">Prove it: a backup you haven&#x27;t restored is a rumor</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
+<div class="prose">
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 10, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtube.com/shorts/KAwKOrQjFi8" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
+<p>Open your Proxmox web UI, click your backup storage and sort by date. Is there a backup of every guest you care about from the last 48 hours? For a lot of homelabs the honest answer is "most of them", and "most" is how data gets lost.</p>
+<p>A backup job in the Datacenter view looks reassuring. It has a schedule, a storage target and a little green check. That check proves one thing: the job wrote some bytes somewhere. It does not prove that every guest you care about is in there.</p>
+<h2 id="the-trap-a-job-built-for-selected-vms">The trap: a job built for "selected VMs"</h2>
+<p>The most common way this goes wrong is the selection mode. Somebody (often past you) created the job for "selected VMs" when the homelab had five guests. Every guest built after that day is unprotected, and the job keeps reporting success every night, because the guests it knows about are fine.</p>
+<p>Nothing errors. Nothing emails you. The list of protected guests and the list of running guests just drift apart, one new container at a time.</p>
+<h2 id="the-fix-one-job-that-covers-everything">The fix: one job that covers everything</h2>
+<p>Make your main job cover all guests, and exclude the few you truly do not want. New guests are protected the day they are created. If you only make one change after reading this, make this one.</p>
+<p>In the UI: <strong>Datacenter → Backup → Add</strong>, then:</p>
+<ul><li><strong>Selection mode:</strong> All, with scratch and test guests under Exclude.</li><li><strong>Mode:</strong> Snapshot for running guests. The guest keeps running. Stopped guests are backed up too; Proxmox just reads their disks, and the forgotten stopped VM is often the one you will want back.</li><li><strong>Compression:</strong> ZSTD. Fast and small.</li><li><strong>Schedule:</strong> nightly, at a time nobody is using anything, for example 02:30.</li><li><strong>Retention:</strong> "use storage defaults", so the numbers live in one place.</li><li><strong>Notes template:</strong> <code>{{guestname}} on {{node}}</code>, so the backup list is readable when a VM ID means nothing to you at 2 AM.</li></ul>
+<p>The same job from the command line, if you like to keep config in version control:</p>
+<pre><code>pvesh create /cluster/backup \
+  --schedule "02:30" \
+  --all 1 \
+  --storage nas-backup \
+  --mode snapshot \
+  --compress zstd \
+  --notes-template "{{guestname}} on {{node}}"</code></pre>
+<p>Need to leave out a scratch VM? Use <code>--exclude 9001,9002</code> instead of switching back to selected guests. <strong>An exclude list fails safe; an include list fails dangerous.</strong> If you forget to update an exclude list, you back up one guest too many. If you forget to update an include list, you lose a guest.</p>
+<h2 id="three-other-things-hiding-behind-the-green-check">Three other things hiding behind the green check</h2>
+<p>The selection mode is the big one, but it is not the only way a "working" job quietly stops protecting you.</p>
+<h3 id="1-the-storage-silently-isn-t-there">1. The storage silently isn't there</h3>
+<p>If your NAS is added as a plain Directory storage on a path you mounted yourself, and that mount fails at boot, Proxmox will happily write backups into the empty folder on your root disk. A night or two later the host's root filesystem is full and things break in confusing ways.</p>
+<p>Either use the native NFS storage type, which lets Proxmox manage the mount and mark the storage offline if it fails, or tell Proxmox the path must be a mountpoint:</p>
+<pre><code>pvesm set nas-backup --is_mountpoint yes</code></pre>
+<p>And check before you trust it:</p>
+<pre><code>pvesm status                 # every storage should say "active"
+df -h /mnt/pve/nas-backup    # should show the NAS size, not the root disk</code></pre>
+<h3 id="2-nobody-gets-told">2. Nobody gets told</h3>
+<p>By default, failures go to the root mailbox on the host, which nobody reads. Proxmox VE 8.1 and later has a proper notification system under <strong>Datacenter → Notifications</strong>. Add a target you actually read, point backup events at it, and set the job's notification mode to use it. Then test it on purpose:</p>
+<pre><code>vzdump 101 --storage does-not-exist</code></pre>
+<p>If no alert arrives, fix that before anything else. A weekly "all good" message is worth having too: silence is ambiguous, and a success message that suddenly stops arriving is a signal.</p>
+<h3 id="3-nothing-gets-pruned">3. Nothing gets pruned</h3>
+<p>Without retention, the backup share fills up and every job after that fails. Set retention on the storage itself so every job that writes there inherits it:</p>
+<pre><code>pvesm set nas-backup \
+  --prune-backups keep-last=2,keep-daily=7,keep-weekly=4,keep-monthly=3</code></pre>
+<p>Those numbers do not mean what most people think they mean. That is a post of its own.</p>
+<h2 id="prove-it-a-backup-you-haven-t-restored-is-a-rumor">Prove it: a backup you haven't restored is a rumor</h2>
+<p>A green check says the job finished writing. A quick integrity check says the archive is readable end to end:</p>
+<pre><code>zstd -t /mnt/pve/nas-backup/dump/vzdump-qemu-101-*.vma.zst</code></pre>
+<p>Only a restore proves the guest actually comes back. Restore to a spare ID, with the network disconnected so it does not fight the original for an IP, boot it, look around, then destroy the test copy:</p>
+<pre><code>qmrestore /mnt/pve/nas-backup/dump/vzdump-qemu-101-&lt;date&gt;.vma.zst 9101 \
+  --storage local-zfs --unique 1</code></pre>
+<p><code>--unique</code> gives the restored VM fresh MAC addresses so it can sit next to the original.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>One backup job set to <strong>All</strong> guests (with excludes), not a hand-picked list</li><li>Backup storage is native NFS or PBS, or has <code>is_mountpoint</code> set</li><li>Retention set on the storage</li><li>Failure notifications reach somewhere you actually read, and you have tested them</li><li>The newest backup of every guest is less than 48 hours old</li><li>One test restore done, to a new ID, and written down with the date</li></ul>
+<p>Five minutes in the Datacenter view now is a lot cheaper than finding out during a restore that the VM you need was never in the job.</p>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="120" height="192" alt="Cover of Never Lose Your Data" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Never Lose Your Data</h3>
+<p>3-2-1 with vzdump and Proxmox Backup Server, an off-site copy that keeps working, restore drills, backup-verify-destroy and alerts for jobs that quietly stop. The free sample has a full chapter plus the weekend backup checklist.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/1iHXQ" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></p></div>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-11-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sun Oct 11</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>RAID is not a backup: the 3-2-1 rule, honestly</h3>
+<p>What actually counts as a copy under the 3-2-1 rule, why a RAID mirror or a snapshot only protects against one kind of failure, and the one-page inventory that exposes the gaps.</p>
+<p class="tags"><span>backups</span><span>3-2-1</span><span>zfs</span><span>proxmox</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/proxmox-backups-that-actually-work/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-14-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Wed Oct 14</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 5 min read</p>
+<h3>Proxmox backups that actually work: 3-2-1, step by step</h3>
+<p>The whole backup playbook in one walk-through: the 3-2-1 plan, vzdump, Proxmox Backup Server, retention, an off-site copy, restore drills and the alert for jobs that quietly stop.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>pbs</span><span>3-2-1</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-13-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Tue Oct 13</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>The one wire that can fry your ESP32 tank monitor</h3>
+<p>A turbidity sensor runs on 5 V and outputs up to about 4.5 V, but an ESP32-C3&#x27;s pins only take 3.3 V. Here is why it needs a voltage divider, how to wire it, and the checks to do before you plug in USB.</p>
+<p class="tags"><span>esp32</span><span>turtle tank</span><span>sensors</span><span>diy</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Elsewhere</p><p><a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">YouTube</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Ebook store</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=2" defer></script>
+</body>
+</html>

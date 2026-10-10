@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 10 Oct 2026 12:30:00 -0400</lastBuildDate>
+<image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
+<item><title>RAID is not a backup: the 3-2-1 rule, honestly</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</guid>
+<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>What actually counts as a copy under the 3-2-1 rule, why a RAID mirror or a snapshot only protects against one kind of failure, and the one-page inventory that exposes the gaps.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-11.jpg" type="image/jpeg" length="0"/>
+<category>backups</category><category>3-2-1</category><category>zfs</category><category>proxmox</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-11.jpg" alt=""></p><p>Three copies of anything you care about, on two different kinds of storage, with one of them somewhere else. Everyone has heard the 3-2-1 rule. Far fewer homelabs actually have it, because the rule is easy to say and the details are where it falls apart.</p>
+<p>The problem is usually not that people have no backups. It is that some of the copies they are counting are not copies at all.</p>
+<h2 id="things-that-feel-like-backups-but-aren-t">Things that feel like backups but aren't</h2>
+<p><strong>RAID or a ZFS mirror.</strong> That is one copy on resilient disks. It protects you from a dead drive and from nothing else: not from <code>rm -rf</code>, not from a bad update, not from ransomware, not from the host catching fire. Delete a file and the mirror faithfully deletes it on both disks.</p>
+<p><strong>Snapshots.</strong> A ZFS or Proxmox snapshot lives on the same pool as the data. It is a wonderful undo button and a terrible backup. Lose the pool and the snapshots go with it.</p>
+<p><strong>A second copy on the same box.</strong> vzdump writing to a different directory on the same host is one disk failure away from losing both copies.</p>
+<p><strong>The NAS.</strong> A copy on the NAS is a real second copy. It is still in the same house, on the same power circuit, behind the same door.</p>
+<p><strong>The cloud sync folder.</strong> Sync is not backup. Delete the file at home and the cloud deletes it too, sometimes with a short grace period, sometimes not.</p>
+<h2 id="what-actually-counts">What actually counts</h2>
+<p>A copy counts when it <strong>survives the loss of the thing it was copied from</strong>. That one sentence settles most arguments about what is and isn't a backup.</p>
+<p><strong>Two kinds of storage</strong> means two things that do not fail together: local disk and a NAS, local disk and object storage, a Proxmox Backup Server datastore and a tape if you are that kind of person.</p>
+<p><strong>Off-site</strong> means a different building. A friend's house across town is off-site. The garage is not.</p>
+<p>A shape that satisfies the rule for a typical Proxmox homelab looks like this:</p>
+<div class="table"><table><thead><tr><th>Copy</th><th>Where</th><th>Protects against</th></tr></thead><tbody><tr><td>1. The live data</td><td>Proxmox hosts, ZFS mirrors</td><td>A dead disk (and nothing else)</td></tr><tr><td>2. Nightly backups</td><td>Proxmox Backup Server on a separate box, plus vzdump to the NAS for a few guests</td><td>Mistakes, bad updates, a dead host</td></tr><tr><td>3. Off-site</td><td>Encrypted copy in object storage, or a PBS sync to a friend's box</td><td>Fire, theft, flood, ransomware that reaches the NAS</td></tr></tbody></table></div>
+<p>Notice that row 1 is in the table. The live data is a copy, it just is not a backup. RAID earns its place by keeping you running through a disk failure, not by protecting your history.</p>
+<h2 id="write-the-inventory-first">Write the inventory first</h2>
+<p>Before touching a single backup job, write down what you are protecting. It fits on one page and it is one of the most useful documents a homelab can have.</p>
+<p>One row per thing, four columns:</p>
+<ol><li><strong>What it is</strong> (Home Assistant VM, OPNsense, the photo server, the Proxmox hosts themselves, the NAS data share)</li><li><strong>How it is backed up</strong></li><li><strong>How far back you can go</strong></li><li><strong>How you would restore it</strong></li></ol>
+<p>The last column is the one that exposes the holes. It is easy to write "nightly backup" in column two. It is much harder to write a restore path you have actually tried. Any row with "none" in column two, or a restore path you have never tested, is your to-do list.</p>
+<p>Keep the table somewhere that survives the homelab: a note on your phone or a printed page. A recovery plan stored only on the server you are recovering is not much of a plan.</p>
+<h2 id="decide-what-you-do-not-back-up">Decide what you do not back up</h2>
+<p>Backing up everything is how backup storage fills up and jobs start failing. Some things are cheaper to rebuild than to store:</p>
+<ul><li>Downloaded ISOs and container templates. Keep a list, not the files.</li><li>Media libraries you can re-rip or re-download, if you are honest about whether you would.</li><li>Scratch VMs and test containers. Tag them <code>scratch</code> so the exclude is obvious.</li><li>Caches: transcodes, thumbnails an app will regenerate, package caches.</li></ul>
+<p>Everything <strong>not</strong> on that list gets backed up by default. "By default" is the important phrase: a backup job that protects new guests automatically, rather than a hand-picked list, is what makes it true.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Inventory written: one row per thing, with how it is backed up, how far back, and the restore path</li><li>Every row has a copy on a second kind of storage and one off-site</li><li>RAID, snapshots and sync folders are not counted as backups anywhere in the table</li><li>A short list of what you deliberately do not back up, and why</li><li>The table lives somewhere that survives the homelab</li></ul>
+<p>RAID keeps you running. Backups get you back. You want both, and you want to know which one you are looking at.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Proxmox backups that actually work: 3-2-1, step by step</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/</guid>
+<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>The whole backup playbook in one walk-through: the 3-2-1 plan, vzdump, Proxmox Backup Server, retention, an off-site copy, restore drills and the alert for jobs that quietly stop.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-14.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>backups</category><category>pbs</category><category>3-2-1</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-14.jpg" alt=""></p><p>Your Proxmox backup job has a schedule, a storage target and a little green check. That check proves one thing: the job wrote some bytes somewhere. It does not prove every guest is covered, that the copy survives a dead host, or that anything actually restores.</p>
+<p>This post walks through a complete homelab backup setup in the order you would build it, one layer at a time. Each layer closes a hole the previous one leaves open.</p>
+<h2 id="1-the-plan-3-2-1-honestly">1. The plan: 3-2-1, honestly</h2>
+<p>Three copies of anything you care about, on two different kinds of storage, with one of them somewhere else.</p>
+<p>A copy only counts if it <strong>survives the loss of the thing it was copied from</strong>. That rules out RAID and ZFS mirrors (one copy on resilient disks), snapshots (same pool as the data), a second copy on the same host, and sync folders (delete at home, delete in the cloud). The NAS is a real second copy, but it is still in the same house. Off-site means a different building.</p>
+<p>Before touching any job, write a one-page inventory: each thing you run, how it is backed up, how far back you can go, and how you would restore it. The restore column is the one that exposes the gaps.</p>
+<h2 id="2-vzdump-the-backup-you-already-have">2. vzdump: the backup you already have</h2>
+<p>Every Proxmox install ships with vzdump. Point it at storage that is <strong>not</strong> the host's own disk, such as an NFS share on the NAS:</p>
+<pre><code>pvesm add nfs nas-backup --server 192.168.10.40 --export /volume1/proxmox \
+  --content backup --options vers=4.1</code></pre>
+<p>Then create one job under <strong>Datacenter → Backup → Add</strong> with <strong>Selection mode: All</strong> and your scratch guests under Exclude, so every new guest is protected the day it is created. Snapshot mode, ZSTD compression, a nightly schedule and a notes template like <code>{{guestname}} on {{node}}</code>.</p>
+<p>Install the QEMU guest agent in every VM and enable it in the VM's Options. With it, snapshot mode asks the guest to flush its filesystems first, which is the difference between a consistent backup and one that needs fsck on restore.</p>
+<h2 id="3-proxmox-backup-server-when-vzdump-isn-t-enough">3. Proxmox Backup Server: when vzdump isn't enough</h2>
+<p>PBS adds deduplication, incremental backups, verify jobs and client-side encryption. The trap is running it on the same host, or in a VM on the same host with its datastore on the same pool. It works beautifully until the host dies, and then the backups die with it. Give PBS its own hardware, however modest: an old office PC with one large disk and 4 GB of RAM is plenty for a home datastore.</p>
+<p>Connect it with a dedicated <code>backup@pbs</code> user rather than root, and turn on client-side encryption:</p>
+<pre><code>pvesm set pbs01 --encryption-key autogen</code></pre>
+<p>Every chunk is then encrypted before it leaves the node. <strong>Download that key immediately</strong> and store it somewhere that is not the cluster, such as a password manager or a printed QR code. Without the key, every encrypted backup is unrecoverable. Losing it is the one mistake with no undo.</p>
+<p>Running both is a sensible shape: PBS nightly for everything, plus vzdump to the NAS for the few guests you want as single portable files.</p>
+<h2 id="4-retention-that-lets-you-sleep">4. Retention that lets you sleep</h2>
+<p><code>keep-daily=7</code> does <strong>not</strong> mean "keep seven days". It means "keep the last backup from each of the last seven days that have a backup". If the job failed for a month and then ran once, that one run can satisfy every keep rule at once, and pruning deletes the older history. The rules keep the newest backup per calendar bucket; they never promise coverage of time.</p>
+<p>Retention also does not protect you from a bad backup: if the guest was already corrupted, you just have seven copies of the corruption. That is why weekly and monthly buckets matter. Set retention on the storage or the PBS prune job, not per job, check it in the prune simulator, and take a <strong>protected</strong> backup before every risky change so pruning cannot touch it.</p>
+<h2 id="5-off-site-the-copy-that-survives-the-house">5. Off-site: the copy that survives the house</h2>
+<p>Three realistic options: an encrypted copy in Backblaze B2 via rclone, a PBS sync job to a friend's box over Tailscale, or a USB disk rotated to work. The USB disk is cheap and fast to restore from, but it is not automatic, and that is its problem.</p>
+<p>For B2, put an rclone <strong>crypt</strong> remote on top of the bucket with a key scoped to that bucket, sync the dump directory nightly with a bandwidth limit during the day, add a lifecycle rule so hidden versions expire, and run <code>rclone check</code> monthly. Store the two crypt passwords with your PBS key, outside the homelab. And read the current B2 price from Backblaze's own pricing page rather than from any guide, including this one.</p>
+<p>The trap here is the off-site copy that was set up once and never checked: an expired app key, a friend's box that was powered off, a bucket that filled up. Off-site is where "no news is good news" does the most damage.</p>
+<h2 id="6-restore-testing-the-only-proof">6. Restore testing: the only proof</h2>
+<p>"Verified" means different things at each layer. A job reporting OK means it finished writing. <code>zstd -t</code> means the archive is complete and decompresses. A PBS verify job means the chunks still match their hashes. None of them means the guest boots.</p>
+<p>Once a quarter, run four drills, each restored to a <strong>new ID with the network unplugged</strong>, then destroyed:</p>
+<ol><li>A VM from PBS. Does it boot, and is last night's data there?</li><li>A container from a vzdump archive on the NAS (second tool, second storage).</li><li>A single file from PBS using File Restore. This is the restore you will do most often.</li><li>Something from off-site. This is the only drill that proves the copy that survives the house.</li></ol>
+<pre><code>qmrestore pbs01:backup/vm/101/2026-10-08T01:30:00Z 9101 \
+  --storage local-zfs --unique 1
+qm set 9101 --net0 virtio,bridge=vmbr0,link_down=1
+qm start 9101</code></pre>
+<p>Write each drill down: date, what, from where, result. A drill nobody wrote down did not happen.</p>
+<h2 id="7-alerts-for-the-jobs-that-quietly-stop">7. Alerts for the jobs that quietly stop</h2>
+<p>Alerting only on failure has a blind spot: <strong>a job that never runs never fails.</strong> The alert you need is "nothing succeeded recently".</p>
+<p>Use the Proxmox notification system (VE 8.1+) for warnings and errors, then add a dead-man's switch: a check URL, from a service like healthchecks.io or a self-hosted Uptime Kuma push monitor, that your job pings on success. vzdump's hook script makes it a few lines in <code>/etc/vzdump.conf</code>. Set the check's period to a day with a grace of a few hours, and a night the job does not run becomes a phone notification by breakfast. Do the same for the rclone sync.</p>
+<p>Finally, a weekly backup-age report that lists the newest backup of every guest and flags any older than two days, or any guest with no backup at all. That catches the "selected VMs" trap no matter how it sneaks back in.</p>
+<h2 id="the-short-version">The short version</h2>
+<ul><li>An inventory with a tested restore path per row</li><li>One vzdump or PBS job in Selection mode <strong>All</strong>, on storage that is not the host</li><li>PBS on its own hardware, encrypted, key saved outside the cluster</li><li>Retention you have actually checked in the simulator</li><li>An off-site copy that is automatic and monitored</li><li>Quarterly restore drills, written down</li><li>A dead-man's switch, so silence becomes an alert</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Your Proxmox backup job is probably skipping your new VMs</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/</guid>
+<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>backups</category><category>vzdump</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg" alt=""></p><p>Open your Proxmox web UI, click your backup storage and sort by date. Is there a backup of every guest you care about from the last 48 hours? For a lot of homelabs the honest answer is "most of them", and "most" is how data gets lost.</p>
+<p>A backup job in the Datacenter view looks reassuring. It has a schedule, a storage target and a little green check. That check proves one thing: the job wrote some bytes somewhere. It does not prove that every guest you care about is in there.</p>
+<h2 id="the-trap-a-job-built-for-selected-vms">The trap: a job built for "selected VMs"</h2>
+<p>The most common way this goes wrong is the selection mode. Somebody (often past you) created the job for "selected VMs" when the homelab had five guests. Every guest built after that day is unprotected, and the job keeps reporting success every night, because the guests it knows about are fine.</p>
+<p>Nothing errors. Nothing emails you. The list of protected guests and the list of running guests just drift apart, one new container at a time.</p>
+<h2 id="the-fix-one-job-that-covers-everything">The fix: one job that covers everything</h2>
+<p>Make your main job cover all guests, and exclude the few you truly do not want. New guests are protected the day they are created. If you only make one change after reading this, make this one.</p>
+<p>In the UI: <strong>Datacenter → Backup → Add</strong>, then:</p>
+<ul><li><strong>Selection mode:</strong> All, with scratch and test guests under Exclude.</li><li><strong>Mode:</strong> Snapshot for running guests. The guest keeps running. Stopped guests are backed up too; Proxmox just reads their disks, and the forgotten stopped VM is often the one you will want back.</li><li><strong>Compression:</strong> ZSTD. Fast and small.</li><li><strong>Schedule:</strong> nightly, at a time nobody is using anything, for example 02:30.</li><li><strong>Retention:</strong> "use storage defaults", so the numbers live in one place.</li><li><strong>Notes template:</strong> <code>{{guestname}} on {{node}}</code>, so the backup list is readable when a VM ID means nothing to you at 2 AM.</li></ul>
+<p>The same job from the command line, if you like to keep config in version control:</p>
+<pre><code>pvesh create /cluster/backup \
+  --schedule "02:30" \
+  --all 1 \
+  --storage nas-backup \
+  --mode snapshot \
+  --compress zstd \
+  --notes-template "{{guestname}} on {{node}}"</code></pre>
+<p>Need to leave out a scratch VM? Use <code>--exclude 9001,9002</code> instead of switching back to selected guests. <strong>An exclude list fails safe; an include list fails dangerous.</strong> If you forget to update an exclude list, you back up one guest too many. If you forget to update an include list, you lose a guest.</p>
+<h2 id="three-other-things-hiding-behind-the-green-check">Three other things hiding behind the green check</h2>
+<p>The selection mode is the big one, but it is not the only way a "working" job quietly stops protecting you.</p>
+<h3 id="1-the-storage-silently-isn-t-there">1. The storage silently isn't there</h3>
+<p>If your NAS is added as a plain Directory storage on a path you mounted yourself, and that mount fails at boot, Proxmox will happily write backups into the empty folder on your root disk. A night or two later the host's root filesystem is full and things break in confusing ways.</p>
+<p>Either use the native NFS storage type, which lets Proxmox manage the mount and mark the storage offline if it fails, or tell Proxmox the path must be a mountpoint:</p>
+<pre><code>pvesm set nas-backup --is_mountpoint yes</code></pre>
+<p>And check before you trust it:</p>
+<pre><code>pvesm status                 # every storage should say "active"
+df -h /mnt/pve/nas-backup    # should show the NAS size, not the root disk</code></pre>
+<h3 id="2-nobody-gets-told">2. Nobody gets told</h3>
+<p>By default, failures go to the root mailbox on the host, which nobody reads. Proxmox VE 8.1 and later has a proper notification system under <strong>Datacenter → Notifications</strong>. Add a target you actually read, point backup events at it, and set the job's notification mode to use it. Then test it on purpose:</p>
+<pre><code>vzdump 101 --storage does-not-exist</code></pre>
+<p>If no alert arrives, fix that before anything else. A weekly "all good" message is worth having too: silence is ambiguous, and a success message that suddenly stops arriving is a signal.</p>
+<h3 id="3-nothing-gets-pruned">3. Nothing gets pruned</h3>
+<p>Without retention, the backup share fills up and every job after that fails. Set retention on the storage itself so every job that writes there inherits it:</p>
+<pre><code>pvesm set nas-backup \
+  --prune-backups keep-last=2,keep-daily=7,keep-weekly=4,keep-monthly=3</code></pre>
+<p>Those numbers do not mean what most people think they mean. That is a post of its own.</p>
+<h2 id="prove-it-a-backup-you-haven-t-restored-is-a-rumor">Prove it: a backup you haven't restored is a rumor</h2>
+<p>A green check says the job finished writing. A quick integrity check says the archive is readable end to end:</p>
+<pre><code>zstd -t /mnt/pve/nas-backup/dump/vzdump-qemu-101-*.vma.zst</code></pre>
+<p>Only a restore proves the guest actually comes back. Restore to a spare ID, with the network disconnected so it does not fight the original for an IP, boot it, look around, then destroy the test copy:</p>
+<pre><code>qmrestore /mnt/pve/nas-backup/dump/vzdump-qemu-101-&lt;date&gt;.vma.zst 9101 \
+  --storage local-zfs --unique 1</code></pre>
+<p><code>--unique</code> gives the restored VM fresh MAC addresses so it can sit next to the original.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>One backup job set to <strong>All</strong> guests (with excludes), not a hand-picked list</li><li>Backup storage is native NFS or PBS, or has <code>is_mountpoint</code> set</li><li>Retention set on the storage</li><li>Failure notifications reach somewhere you actually read, and you have tested them</li><li>The newest backup of every guest is less than 48 hours old</li><li>One test restore done, to a new ID, and written down with the date</li></ul>
+<p>Five minutes in the Datacenter view now is a lot cheaper than finding out during a restore that the VM you need was never in the job.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>The one wire that can fry your ESP32 tank monitor</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/</guid>
+<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>A turbidity sensor runs on 5 V and outputs up to about 4.5 V, but an ESP32-C3&#x27;s pins only take 3.3 V. Here is why it needs a voltage divider, how to wire it, and the checks to do before you plug in USB.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-13.jpg" type="image/jpeg" length="0"/>
+<category>esp32</category><category>turtle tank</category><category>sensors</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-13.jpg" alt=""></p><p>A water-quality monitor for an aquarium or turtle tank is a great first ESP32 project: a temperature probe, a TDS probe and a turbidity (water clarity) sensor, all reporting into Home Assistant. Two of those three sensors are easy. The third one has a wire that can kill the board if it goes in the wrong place.</p>
+<p>This walkthrough uses the Seeed XIAO ESP32-C3, the board used in the Smart Turtle Tank build, but the rule applies to any 3.3 V microcontroller.</p>
+<h2 id="the-rule-that-keeps-the-board-alive">The rule that keeps the board alive</h2>
+<p>Two voltages come out of the XIAO:</p>
+<ul><li><strong>5V</strong> is the USB supply passed straight through.</li><li><strong>3V3</strong> is regulated down for the chip.</li></ul>
+<p>The chip's pins can only take <strong>3.3 V on their inputs</strong>. So the rule is simple: a sensor's <em>power</em> can come from 5V if it needs it, but anything that goes back <em>into</em> a D pin must be at or under 3.3 V.</p>
+<p>The DS18B20 temperature probe and the TDS board both run happily on 3.3 V and produce signals under 3.3 V. The turbidity board is the odd one out: it needs 5 V to run and its output can reach about <strong>4.5 V</strong>. That is the wire that can fry your board, and it is why the turbidity sensor is the one with a voltage divider between it and the XIAO.</p>
+<p>A common mistake is plugging a sensor into 5V "because it is more power". The TDS board and the temperature adapter are powered from 3.3 V precisely so their signal pins stay under the XIAO's limit. More volts in means more volts out.</p>
+<h2 id="what-the-divider-does">What the divider does</h2>
+<p>A voltage divider is two resistors in series. The output is taken from across the smaller one, so the voltage is split in a fixed ratio. The divider module used in this build divides by 5, so a 4.5 V signal comes out at 0.9 V: safe for the pin.</p>
+<p>The trade-off is detail. The XIAO reads analog accurately only up to about 2.5 V, and 0.9 V uses about a third of that range. For more resolution you can swap in two 10 kΩ resistors as a ÷2 divider, which keeps the output under 2.25 V. Either way, you multiply the reading by the ratio (5 or 2) in code.</p>
+<p>The divider module's labels confuse almost everyone the first time:</p>
+<div class="table"><table><thead><tr><th>Label on the module</th><th>What it actually is</th></tr></thead><tbody><tr><td>VCC screw terminal</td><td>The input (IN+)</td></tr><tr><td>GND screw terminal</td><td>IN−</td></tr><tr><td>S pin</td><td>The divided output</td></tr><tr><td>− pin</td><td>Ground</td></tr></tbody></table></div>
+<h2 id="wiring-the-turbidity-sensor">Wiring the turbidity sensor</h2>
+<p>Keep the USB-C cable <strong>unplugged</strong> the whole time you wire. It goes in last.</p>
+<p><strong>Part 1: power the sensor and feed its signal into the divider</strong></p>
+<ol><li>Slide the switch on the turbidity board to <strong>A</strong> (analog), not D.</li><li>Plug the included 3-wire cable into the board, and connect the probe.</li><li>Red jumper from the XIAO's <strong>5V</strong> pin to the cable's <strong>V</strong> pin. This is the only 5V wire in the build, and it skips the breadboard power strip.</li><li>Cable's <strong>G</strong> wire into the ground (−) rail.</li><li>Cable's <strong>S</strong> wire into the divider's <strong>VCC</strong> screw terminal (the input). Tighten it and give it a gentle tug.</li></ol>
+<p><strong>Part 2: ground the divider and send its safe signal to D2</strong></p>
+<ol><li>Ground jumper from the − rail to the divider's <strong>GND</strong> terminal.</li><li>Ground jumper from the − rail to the divider's <strong>−</strong> pin.</li><li>Signal jumper from the divider's <strong>S</strong> pin to the XIAO's <strong>D2</strong>.</li><li>Leave the divider's <strong>+</strong> pin empty.</li></ol>
+<p>Only the clear lower part of the probe goes in the water. The top of the probe and every board stay dry.</p>
+<p><strong>Never plug the turbidity S pin straight into the XIAO.</strong></p>
+<h2 id="check-everything-before-you-power-up">Check everything before you power up</h2>
+<p>With the USB still unplugged, go through this list:</p>
+<ul><li>The turbidity switch is on <strong>A</strong>.</li><li>The 3V3 (+) rail has three wires: XIAO 3V3, temperature adapter VCC, TDS +. <strong>Nothing from 5V.</strong></li><li>Only <strong>one</strong> wire on 5V, going to the turbidity board's V.</li><li>Turbidity S goes to the divider, not to the XIAO. D2 connects to the divider's S pin.</li><li>Signals: D4 to the temperature adapter's DAT, D1 to the TDS board's A, D2 to the divider's S.</li><li>No bare metal touching anything it should not. Every board is dry and above the water line.</li><li>Each cable hangs in a small U-shaped drip loop below the electronics, so water runs off the bottom of the loop instead of into the boards.</li></ul>
+<p>Then plug in USB. Nothing should get warm and nothing should smell; if it does, unplug right away and recheck the 5V and GND wires.</p>
+<p>Another common mistake: plugging the USB in "just to see the light" halfway through wiring. Every wire you add after that goes onto a live board, and a jumper that brushes 5V against a signal pin on its way in can take out the whole board. USB last, every time.</p>
+<h2 id="two-readings-that-tell-you-something-is-wrong">Two readings that tell you something is wrong</h2>
+<p>Once firmware is loaded, temperature should show a sensible number, TDS reads near zero in air and a steady number in the tank, and turbidity reads higher in clear water and drops when the water gets cloudy.</p>
+<p>Two problems catch almost everyone:</p>
+<ul><li><strong>The temperature reads 85 °C.</strong> That is the DS18B20's power-on value, which means it never got a successful read. It is usually a loose DAT wire.</li><li><strong>Turbidity is flat no matter what the water does.</strong> The board's switch was left on D (digital) instead of A.</li></ul>
+<p>Get the one 5V wire right, put the divider in the turbidity signal path, and plug in USB last. The rest of the build is forgiving.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>Delete old Proxmox VMs without regret</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/</guid>
+<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>The backup, verify, then destroy-with-purge routine for clearing out stopped guests safely, including the linked-clone check that stops you deleting something a running VM depends on.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-12.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>cleanup</category><category>vzdump</category><category>backups</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-12.jpg" alt=""></p><p>Every homelab accumulates guests. The container you built to try something, the VM from a tutorial, the old version of a service you migrated away from. Eventually most of the guest list is grey stopped icons, and the nightly backup job is dutifully copying all of them.</p>
+<p>Cleaning house is easy to put off because deleting things is scary. The way to make it not scary is a routine where every single guest you delete is recoverable: <strong>back it up, verify the backup, then destroy with purge.</strong></p>
+<h2 id="the-trap-stopped-is-not-the-same-as-unused">The trap: stopped is not the same as unused</h2>
+<p>A template is always stopped. A container that was turned into the base of linked clones is always stopped. Delete the base and the clones keep running until the next reboot, and then they do not.</p>
+<p>So before you delete anything, find out what is actually unused.</p>
+<h2 id="step-0-check-for-linked-clones">Step 0: check for linked clones</h2>
+<p>For every stopped guest, check whether any config references its disks as a base:</p>
+<pre><code>for id in $(pct list | awk 'NR&gt;1 &amp;&amp; $2=="stopped"{print $1}') \
+          $(qm list | awk 'NR&gt;1 &amp;&amp; $3=="stopped"{print $1}'); do
+  if grep -lq "base-${id}-" /etc/pve/nodes/*/*/*.conf 2&gt;/dev/null; then
+    echo "KEEP $id: base for linked clones"
+  else
+    echo "candidate $id"
+  fi
+done</code></pre>
+<p>Tag anything marked KEEP as <code>keep</code> in the GUI and it is out of the discussion. Then walk the candidates with a human eye: the name, the notes, the last-modified date of its config. If you are not sure what a guest is, start it, look, stop it. Ten minutes per mystery guest is cheaper than one wrong destroy.</p>
+<h2 id="step-1-back-it-up-in-stop-mode">Step 1: back it up, in stop mode</h2>
+<p>A stopped guest does not need snapshot mode, and stop mode gives the most consistent archive. Write it to your backup storage with vzdump so the result is one portable file, and give it a note that will mean something in a year:</p>
+<pre><code>vzdump 212 --storage nas-backup --mode stop --compress zstd --bwlimit 60000 \
+  --notes-template 'DELETED {{guestname}} ({{vmid}}) cleanup 2026-10'</code></pre>
+<p>Watch the backup storage's free space as you go. Work in order of "would be saddest to lose", and if the share gets tight, prune old nightly backups to make room before carrying on. The bandwidth limit keeps your busy guests from lagging while the dumps run; it costs a few minutes per guest.</p>
+<h2 id="step-2-verify-the-archive">Step 2: verify the archive</h2>
+<p>A backup you have not at least integrity-checked is a rumour. For a container archive:</p>
+<pre><code>zstd -t /mnt/pve/nas-backup/dump/vzdump-lxc-212-2026_10_09-21_14_03.tar.zst</code></pre>
+<p>VM archives are <code>.vma.zst</code> files and the same <code>zstd -t</code> works. This proves the file is whole and decompresses. It does <strong>not</strong> prove the guest boots. For anything you would truly mourn, go further: restore it to a new ID and start it with the network unplugged.</p>
+<p>Then mark the archive protected, so the nightly prune cannot eat it:</p>
+<pre><code>F=vzdump-lxc-212-2026_10_09-21_14_03.tar.zst
+pvesh set /nodes/pve1/storage/nas-backup/content/nas-backup:backup/$F \
+  --protected 1</code></pre>
+<h2 id="step-3-destroy-with-purge">Step 3: destroy, with purge</h2>
+<pre><code>pct destroy 212 --purge
+# or
+qm destroy 212 --purge</code></pre>
+<p><code>--purge</code> removes the guest from every backup job, the replication config and HA. Without it, the nightly backup job keeps a reference to a guest that no longer exists and fails with an error about that ID every night until you edit the job by hand.</p>
+<h2 id="the-loop">The loop</h2>
+<p>For more than a handful of guests, put the IDs in a file (one per line, after the human pass) and let a script do the three steps:</p>
+<pre><code>#!/bin/bash
+set -u
+STORE=nas-backup
+DUMP=/mnt/pve/$STORE/dump
+NOTE="DELETED {{guestname}} ({{vmid}}) cleanup $(date +%Y-%m)"
+while read -r id; do
+  if pct config "$id" &gt;/dev/null 2&gt;&amp;1; then kind=lxc; cmd=pct
+  else kind=qemu; cmd=qm; fi
+  echo "== $id ($kind)"
+  vzdump "$id" --storage $STORE --mode stop --compress zstd \
+    --bwlimit 60000 --notes-template "$NOTE" \
+    || { echo "backup FAILED $id"; continue; }
+  f=$(ls -t $DUMP/vzdump-$kind-$id-*.zst | head -1)
+  zstd -t "$f" || { echo "verify FAILED $id"; continue; }
+  vol="$STORE:backup/$(basename "$f")"
+  pvesh set /nodes/$(hostname)/storage/$STORE/content/$vol --protected 1
+  $cmd destroy "$id" --purge || echo "destroy FAILED $id (retry later)"
+done &lt; /root/cleanup-ids.txt</code></pre>
+<p>Every <code>continue</code> means a failure leaves the guest in place. <strong>Nothing is ever destroyed without a verified archive ahead of it.</strong></p>
+<h2 id="two-gotchas">Two gotchas</h2>
+<p><strong>Cluster quorum.</strong> On a two-node cluster, if one node drops off, destroys on the cluster fail with a quorum error while it is out. Re-run the failed IDs once the cluster is quorate again. The proper fix is a QDevice, so the cluster has a third vote.</p>
+<p><strong>Leftover locks.</strong> Proxmox will not back up or destroy a guest while a lock from an earlier interrupted job is set. <code>pct unlock 212</code> or <code>qm unlock 212</code> clears it, once you have checked nothing is actually running against the guest.</p>
+<h2 id="afterwards-the-orphans">Afterwards: the orphans</h2>
+<p>With the guests gone, there is a second layer of junk:</p>
+<ul><li><strong>Orphan disks:</strong> entries in <code>pvesm list local-zfs</code> that no config references. Compare against <code>grep -h 'local-zfs:' /etc/pve/nodes/*/*/*.conf</code>. Back each one up as a raw image before removing it, same rule.</li><li><strong>Old ISOs and container templates</strong> in <code>local</code>. They download again in minutes.</li><li><strong>Year-old snapshots</strong> on running guests (<code>qm listsnapshot &lt;id&gt;</code>, <code>pct listsnapshot &lt;id&gt;</code>). A snapshot that old is a backup you forgot, on the same disk as the data, slowing every write.</li></ul>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Every stopped guest checked for linked clones (<code>base-&lt;id&gt;-</code> in any config); templates tagged keep</li><li>A stop-mode vzdump of each candidate with a "DELETED" note, bandwidth-limited</li><li><code>zstd -t</code> on every archive, and the archive marked protected</li><li><code>destroy --purge</code>, never plain destroy</li><li>Failed steps leave the guest in place</li><li>Orphan disks, old ISOs and year-old snapshots cleaned in a second pass</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+</channel></rss>

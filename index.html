@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Homelab the Right Way — Proxmox, OPNsense, Home Assistant &amp; backup guides</title>
+<meta name="description" content="Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Homelab the Right Way — Proxmox, OPNsense, Home Assistant &amp; backup guides">
+<meta property="og:description" content="Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Homelab the Right Way — Proxmox, OPNsense, Home Assistant &amp; backup guides">
+<meta name="twitter:description" content="Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=2" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=2">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "description": "Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.", "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"], "@context": "https://schema.org"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ItemList", "name": "Homelab the Right Way ebooks", "itemListElement": [{"@type": "ListItem", "position": 1, "item": {"@type": "Book", "name": "Homelab the Right Way", "url": "https://payhip.com/b/mJKnI", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book1.jpg", "description": "Proxmox, OPNsense and Home Assistant without the pain: the lessons most people learn the hard way.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/mJKnI", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}, {"@type": "ListItem", "position": 2, "item": {"@type": "Book", "name": "Self-Host Your Life", "url": "https://payhip.com/b/Ut72a", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book2.jpg", "description": "Replace Google Photos, Drive and your password manager with Immich, Nextcloud and Vaultwarden.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/Ut72a", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}, {"@type": "ListItem", "position": 3, "item": {"@type": "Book", "name": "Never Lose Your Data", "url": "https://payhip.com/b/1iHXQ", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book3.jpg", "description": "A homelabber's backup playbook for Proxmox, Home Assistant and OPNsense.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/1iHXQ", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}, {"@type": "ListItem", "position": 4, "item": {"@type": "Book", "name": "Smart Turtle Tank", "url": "https://payhip.com/b/k0nzS", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book4.jpg", "description": "Build a DIY camera, water sensor and monitoring setup for your turtle with an ESP32.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/k0nzS", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "blogPost": [{"@type": "BlogPosting", "headline": "RAID is not a backup: the 3-2-1 rule, honestly", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/", "datePublished": "2026-10-10", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-11.jpg"}, {"@type": "BlogPosting", "headline": "Proxmox backups that actually work: 3-2-1, step by step", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/", "datePublished": "2026-10-10", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-14.jpg"}, {"@type": "BlogPosting", "headline": "Your Proxmox backup job is probably skipping your new VMs", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/", "datePublished": "2026-10-10", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg"}, {"@type": "BlogPosting", "headline": "The one wire that can fry your ESP32 tank monitor", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/", "datePublished": "2026-10-10", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-13.jpg"}, {"@type": "BlogPosting", "headline": "Delete old Proxmox VMs without regret", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/", "datePublished": "2026-10-10", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-12.jpg"}]}</script>
+</head>
+<body class="home">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<section class="hero">
+<canvas id="net" aria-hidden="true"></canvas>
+<div class="wrap hero-grid">
+<div class="hero-copy">
+<p class="eyebrow fade" style="--d:0">Proxmox · OPNsense · Home Assistant · Backups</p>
+<h1 class="fade" style="--d:1">Homelab <span class="grad">the Right Way</span></h1>
+<p class="lead fade" style="--d:2">Practical, no-drama guides for people past the &quot;install Proxmox, spin up Plex&quot; stage. Backups that actually restore, networks that stay up, and builds that still work next month. A new article every day, each with a short companion video.</p>
+<p class="btns fade" style="--d:3"><a class="btn big" href="/homelab-the-right-way/#posts">Read the latest</a><a class="btn ghost big" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Watch on YouTube</a></p>
+<p class="muted small fade" style="--d:4">Free articles · 4 ebooks · new video daily at 12 PM ET</p>
+</div>
+<div class="term fade" style="--d:2" aria-hidden="true"><div class="term-bar"><i></i><i></i><i></i><span>root@pve:~</span></div><pre class="term-body"><span class="ln" data-line="vzdump --all 1 --mode snapshot --compress zstd"></span><span class="ln" data-line="zstd -t /mnt/backup/dump/vzdump-qemu-101-*.zst  # verify"></span><span class="ln" data-line="qm destroy 101 --purge  # only after a verified backup"></span><span class="ln" data-line="pvesm set shared-nfs --disable 0"></span><span class="cursor"></span></pre></div>
+</div>
+</section>
+
+<section class="wrap section" id="posts">
+<div class="sec-head reveal"><h2>Latest articles</h2><p class="muted">One a day. The trap, the fix, and a checklist.</p></div>
+<ul class="grid posts"><li class="card post reveal featured" style="--i:0"><a href="/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-11.webp" width="1280" height="720" alt="" loading="eager"><span class="pill">Premieres Sun Oct 11</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>RAID is not a backup: the 3-2-1 rule, honestly</h3>
+<p>What actually counts as a copy under the 3-2-1 rule, why a RAID mirror or a snapshot only protects against one kind of failure, and the one-page inventory that exposes the gaps.</p>
+<p class="tags"><span>backups</span><span>3-2-1</span><span>zfs</span><span>proxmox</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/proxmox-backups-that-actually-work/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-14-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Wed Oct 14</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 5 min read</p>
+<h3>Proxmox backups that actually work: 3-2-1, step by step</h3>
+<p>The whole backup playbook in one walk-through: the 3-2-1 plan, vzdump, Proxmox Backup Server, retention, an off-site copy, restore drills and the alert for jobs that quietly stop.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>pbs</span><span>3-2-1</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-10-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sat Oct 10</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>Your Proxmox backup job is probably skipping your new VMs</h3>
+<p>A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>vzdump</span></p></div></a></li><li class="card post reveal" style="--i:3"><a href="/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-13-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Tue Oct 13</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>The one wire that can fry your ESP32 tank monitor</h3>
+<p>A turbidity sensor runs on 5 V and outputs up to about 4.5 V, but an ESP32-C3&#x27;s pins only take 3.3 V. Here is why it needs a voltage divider, how to wire it, and the checks to do before you plug in USB.</p>
+<p class="tags"><span>esp32</span><span>turtle tank</span><span>sensors</span><span>diy</span></p></div></a></li><li class="card post reveal" style="--i:4"><a href="/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-12-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Mon Oct 12</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 3 min read</p>
+<h3>Delete old Proxmox VMs without regret</h3>
+<p>The backup, verify, then destroy-with-purge routine for clearing out stopped guests safely, including the linked-clone check that stops you deleting something a running VM depends on.</p>
+<p class="tags"><span>proxmox</span><span>cleanup</span><span>vzdump</span><span>backups</span></p></div></a></li></ul>
+</section>
+
+<section class="band"><div class="wrap">
+<div class="yt-block reveal">
+<div><p class="eyebrow">On YouTube</p><h2>A new video every day</h2>
+<p>Short, specific videos on the same topics as the articles: Proxmox backups, OPNsense, Home Assistant, ESP32 builds. Subscribe so the premieres land in your feed.</p>
+<p class="btns"><a class="btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a></p></div>
+<div class="sched"><ul class="list"><li><span class="when">Sat Oct 10</span><a href="https://youtube.com/shorts/KAwKOrQjFi8" rel="noopener">Your Proxmox backup job is skipping your new VMs</a><span class="pill">Premieres 12 PM ET</span></li><li><span class="when">Sun Oct 11</span><a href="https://youtube.com/shorts/XjwLPg9FbF4" rel="noopener">RAID is not a backup: the 3-2-1 rule, honestly</a><span class="pill">Premieres 12 PM ET</span></li><li><span class="when">Mon Oct 12</span><a href="https://youtube.com/shorts/ab6X9sEy8HM" rel="noopener">Delete old Proxmox VMs without regret</a><span class="pill">Premieres 12 PM ET</span></li><li><span class="when">Tue Oct 13</span><a href="https://youtube.com/shorts/RJp71mkdtlY" rel="noopener">The one wire that can fry your ESP32 tank monitor</a><span class="pill">Premieres 12 PM ET</span></li><li><span class="when">Wed Oct 14</span><a href="https://youtu.be/tgRsqFPJ8Jg" rel="noopener">Proxmox backups that actually work: 3-2-1, step by step</a><span class="pill">Premieres 12 PM ET</span></li></ul></div>
+</div>
+</div></section>
+
+<section class="wrap section" id="ebooks">
+<div class="sec-head reveal"><h2>The ebooks</h2><p class="muted">Each one is the trap, the fix and a checklist, chapter after chapter. Sold on Payhip.</p></div>
+<ul class="grid books"><li class="card book reveal tilt" style="--i:0">
+<div class="cover"><img src="/homelab-the-right-way/assets/img/book1.webp" width="240" height="384" alt="Cover of Homelab the Right Way" loading="lazy"></div>
+<div class="bk"><h3>Homelab the Right Way</h3>
+<p>Proxmox, OPNsense and Home Assistant without the pain: the lessons most people learn the hard way.</p>
+<p class="price">$19</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/mJKnI" rel="noopener">Get the book</a><a class="btn ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></p></div></li><li class="card book reveal tilt" style="--i:1">
+<div class="cover"><img src="/homelab-the-right-way/assets/img/book2.webp" width="240" height="384" alt="Cover of Self-Host Your Life" loading="lazy"></div>
+<div class="bk"><h3>Self-Host Your Life</h3>
+<p>Replace Google Photos, Drive and your password manager with Immich, Nextcloud and Vaultwarden.</p>
+<p class="price">$19</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/Ut72a" rel="noopener">Get the book</a><span class="nosample">No free sample yet</span></p></div></li><li class="card book reveal tilt" style="--i:2">
+<div class="cover"><img src="/homelab-the-right-way/assets/img/book3.webp" width="240" height="384" alt="Cover of Never Lose Your Data" loading="lazy"></div>
+<div class="bk"><h3>Never Lose Your Data</h3>
+<p>A homelabber&#x27;s backup playbook for Proxmox, Home Assistant and OPNsense.</p>
+<p class="price">$19</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/1iHXQ" rel="noopener">Get the book</a><a class="btn ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></p></div></li><li class="card book reveal tilt" style="--i:3">
+<div class="cover"><img src="/homelab-the-right-way/assets/img/book4.webp" width="240" height="384" alt="Cover of Smart Turtle Tank" loading="lazy"></div>
+<div class="bk"><h3>Smart Turtle Tank</h3>
+<p>Build a DIY camera, water sensor and monitoring setup for your turtle with an ESP32.</p>
+<p class="price">$19</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/k0nzS" rel="noopener">Get the book</a><a class="btn ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></p></div></li></ul>
+<p class="center reveal"><a class="btn ghost" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Elsewhere</p><p><a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">YouTube</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Ebook store</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=2" defer></script>
+</body>
+</html>
