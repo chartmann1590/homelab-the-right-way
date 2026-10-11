@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Never delete this stopped Proxmox VM — Homelab the Right Way</title>
+<meta name="description" content="A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Never delete this stopped Proxmox VM — Homelab the Right Way">
+<meta property="og:description" content="A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Never delete this stopped Proxmox VM — Homelab the Right Way">
+<meta name="twitter:description" content="A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=5" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=5">
+<meta property="article:published_time" content="2026-10-11">
+<meta property="article:tag" content="proxmox">
+<meta property="article:tag" content="templates">
+<meta property="article:tag" content="linked clones">
+<meta property="article:tag" content="homelab">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Never delete this stopped Proxmox VM", "description": "A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/", "datePublished": "2026-10-11T12:30:00-04:00", "dateModified": "2026-10-11T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "proxmox, templates, linked clones, homelab", "wordCount": 850, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Homelab the Right Way", "url": "https://payhip.com/b/mJKnI", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book1.jpg", "description": "Proxmox, OPNsense and Home Assistant without the pain: the lessons most people learn the hard way.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/mJKnI", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "Never delete this stopped Proxmox VM", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">Never delete this stopped Proxmox VM</h1>
+<p class="lead fade" style="--d:2">A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-11">October 11, 2026</time> · 4 min read · <span class="tags inline"><span>proxmox</span><span>templates</span><span>linked clones</span><span>homelab</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/2026-10-16.webp" width="1280" height="720" alt="Never delete this stopped Proxmox VM" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#full-clones-vs-linked-clones">Full clones vs linked clones</a></li><li><a href="#the-trap-it-s-stopped-so-it-s-junk">The trap: &quot;it&#x27;s stopped, so it&#x27;s junk&quot;</a></li><li><a href="#the-fix-part-1-find-every-dependent">The fix, part 1: find every dependent</a></li><li><a href="#the-fix-part-2-label-the-load-bearing-guests">The fix, part 2: label the load-bearing guests</a></li><li><a href="#the-fix-part-3-untangle-before-you-retire">The fix, part 3: untangle before you retire</a></li><li><a href="#long-lived-guests-should-be-full-clones">Long-lived guests should be full clones</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
+<div class="prose">
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 16, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtube.com/shorts/TFawLLli3DI" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
+<p>Templates are one of Proxmox's best features. You build a base image once, and new guests come off it in seconds. They are also one of its quietest traps, because they create dependencies you cannot see in the guest list, and those dependencies bite on the day you tidy up.</p>
+<p>This post is about that day: what a template really is to the guests built from it, how to prove whether one is load-bearing, and how to retire one without breaking anything.</p>
+<h2 id="full-clones-vs-linked-clones">Full clones vs linked clones</h2>
+<p>When you clone a template, Proxmox offers two modes:</p>
+<ul><li><strong>Full clone:</strong> a complete, independent copy of the disk. Slower to create, uses more space, depends on nothing.</li><li><strong>Linked clone:</strong> a thin copy that stores only the differences from the template's disk. Instant, tiny, and <strong>permanently tied to the template's base disk</strong>.</li></ul>
+<p>That last part is the whole story. A linked clone is not a copy of the template. It is a layer of changes sitting on top of it. Take away the bottom layer and the top layer has nothing to stand on.</p>
+<p>You can see the relationship in the disk names. A template's disks are named like <code>base-9000-disk-0</code>, and a linked clone's config refers to that base, like this:</p>
+<pre><code>local-lvm:base-9000-disk-0/vm-105-disk-0</code></pre>
+<p>Read it left to right: VM 105's disk lives on top of template 9000's base disk.</p>
+<h2 id="the-trap-it-s-stopped-so-it-s-junk">The trap: "it's stopped, so it's junk"</h2>
+<p>Templates are always stopped. In a list of guests, a template looks exactly like an abandoned VM.</p>
+<p>There is a nastier version too. A plain stopped container that was converted to a template, then used as the source for linked clones, looks like any other forgotten container. Nothing about it shouts "other guests need me".</p>
+<p>Delete that base, and what happens depends on your storage:</p>
+<div class="table"><table><thead><tr><th>Storage</th><th>What happens when you delete the base</th></tr></thead><tbody><tr><td>ZFS and some others</td><td>Proxmox refuses, because the base still has dependents</td></tr><tr><td>File-based (qcow2 on a directory or NFS)</td><td>The clones' backing file can simply vanish, and every linked clone built from it stops booting</td></tr></tbody></table></div>
+<p>Either way, you find out at the worst possible moment. The rule of thumb from the book: <strong>never delete a template, or anything named <code>base-*</code>, until you have proven nothing references it.</strong></p>
+<h2 id="the-fix-part-1-find-every-dependent">The fix, part 1: find every dependent</h2>
+<p>Every guest config lives in <code>/etc/pve</code>, so one grep tells you who depends on a base. For template 9000:</p>
+<pre><code># Who uses template 9000's disks?
+grep -rl "base-9000-" /etc/pve/nodes/*/qemu-server/ /etc/pve/nodes/*/lxc/</code></pre>
+<p>If the grep returns anything other than the template's own config, the template is load-bearing. Leave it, label it, and move on.</p>
+<p>To see every template on the cluster in the first place:</p>
+<pre><code># All templates on the cluster
+grep -l "^template: 1" /etc/pve/nodes/*/qemu-server/*.conf \
+  /etc/pve/nodes/*/lxc/*.conf</code></pre>
+<h2 id="the-fix-part-2-label-the-load-bearing-guests">The fix, part 2: label the load-bearing guests</h2>
+<p>The cheapest fix in the whole chapter is a note and a tag. Write it in the guest's Notes field (the Summary tab), and add a <code>keep</code> tag:</p>
+<pre><code>qm set 9000 --tags "template,keep" \
+  --description "BASE TEMPLATE. Linked clones depend on this. Do not delete."
+pct set 9050 --tags "template,keep"</code></pre>
+<p>Tags show up as colored pills in the resource tree. A bright red <code>keep</code> tag stops a lot of 1 a.m. mistakes, and the note tells whoever is cleaning up why the guest is there.</p>
+<p>The same idea carries into any cleanup script. The book's backup-before-delete loop skips templates outright before it touches anything:</p>
+<pre><code>grep -q "^template: 1" /etc/pve/{lxc,qemu-server}/$id.conf 2&gt;/dev/null &amp;&amp; \
+  { echo "SKIP $id: template"; continue; }</code></pre>
+<h2 id="the-fix-part-3-untangle-before-you-retire">The fix, part 3: untangle before you retire</h2>
+<p>Sometimes you really do want a template gone: it is old, its OS is out of date, and you have built a better one. You can retire it, but only after its linked clones stop needing it. That means turning each linked clone into a full, independent guest first.</p>
+<p>The simplest way is a fresh full clone of each linked clone:</p>
+<pre><code># VM: full, independent copy of linked clone 105 as 305
+qm clone 105 305 --full 1 --name app-server
+# Container: same idea
+pct clone 205 405 --full 1 --hostname app-ct</code></pre>
+<p>Moving a disk to a different storage also writes a full copy:</p>
+<pre><code>qm disk move 105 scsi0 other-store --delete 1</code></pre>
+<p>For containers, <code>pct move-volume</code> does the same job.</p>
+<p>Then work through it in order:</p>
+<ol><li>Test the full clone.</li><li>Retire the linked one.</li><li>Rerun the dependents grep for that template.</li><li>When it comes back with nothing but the template's own config, the template is finally safe to remove.</li></ol>
+<p>Deleting it is still a cleanup like any other: back it up, verify the archive, then destroy with purge.</p>
+<h2 id="long-lived-guests-should-be-full-clones">Long-lived guests should be full clones</h2>
+<p>Linked clones are instant and tiny, which makes them tempting. But the book's checklist is clear: long-lived production guests should be <strong>full clones</strong>, so they depend on nothing and a future cleanup cannot pull the floor out from under them.</p>
+<p>And because templates stick around, keep them fresh: rebuild or update them on a schedule, with a patched OS and current cloud-init, so new guests do not start life months behind.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Every template is tagged <code>keep</code>, with a note saying what depends on it</li><li>You have grepped for <code>base-&lt;id&gt;-</code> before deleting anything that might be a base</li><li>Any cleanup script skips guests with <code>template: 1</code> in their config</li><li>Long-lived production guests are full clones, not linked clones</li><li>Before retiring a template: full-clone (or disk-move) each linked clone, test it, retire the linked one, rerun the grep</li><li>Templates are rebuilt or updated on a schedule (patched OS, current cloud-init)</li></ul>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="120" height="192" alt="Cover of Homelab the Right Way" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Homelab the Right Way</h3>
+<p>Backups, NFS gotchas, clusters and quorum, OPNsense as a VM and Home Assistant, each as the trap, the fix and a checklist.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/mJKnI" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></p></div>
+</aside>
+<aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 5 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-11-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>RAID is not a backup: the 3-2-1 rule, honestly</h3>
+<p>What actually counts as a copy under the 3-2-1 rule, why a RAID mirror or a snapshot only protects against one kind of failure, and the one-page inventory that exposes the gaps.</p>
+<p class="tags"><span>backups</span><span>3-2-1</span><span>zfs</span><span>proxmox</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/proxmox-backups-that-actually-work/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-14-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Wed Oct 14</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 5 min read</p>
+<h3>Proxmox backups that actually work: 3-2-1, step by step</h3>
+<p>The whole backup playbook in one walk-through: the 3-2-1 plan, vzdump, Proxmox Backup Server, retention, an off-site copy, restore drills and the alert for jobs that quietly stop.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>pbs</span><span>3-2-1</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-10-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-10">October 10, 2026</time> · 4 min read</p>
+<h3>Your Proxmox backup job is probably skipping your new VMs</h3>
+<p>A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>vzdump</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>5 ebooks, $19 each, every one with a free sample.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=5" defer></script>
+</body>
+</html>

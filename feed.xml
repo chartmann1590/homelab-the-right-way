@@ -1,9 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 10 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 11 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>RAID is not a backup: the 3-2-1 rule, honestly</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</guid>
+<item><title>Never delete this stopped Proxmox VM</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/</guid>
+<pubDate>Sun, 11 Oct 2026 12:30:00 -0400</pubDate><description>A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>templates</category><category>linked clones</category><category>homelab</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg" alt=""></p><p>Templates are one of Proxmox's best features. You build a base image once, and new guests come off it in seconds. They are also one of its quietest traps, because they create dependencies you cannot see in the guest list, and those dependencies bite on the day you tidy up.</p>
+<p>This post is about that day: what a template really is to the guests built from it, how to prove whether one is load-bearing, and how to retire one without breaking anything.</p>
+<h2 id="full-clones-vs-linked-clones">Full clones vs linked clones</h2>
+<p>When you clone a template, Proxmox offers two modes:</p>
+<ul><li><strong>Full clone:</strong> a complete, independent copy of the disk. Slower to create, uses more space, depends on nothing.</li><li><strong>Linked clone:</strong> a thin copy that stores only the differences from the template's disk. Instant, tiny, and <strong>permanently tied to the template's base disk</strong>.</li></ul>
+<p>That last part is the whole story. A linked clone is not a copy of the template. It is a layer of changes sitting on top of it. Take away the bottom layer and the top layer has nothing to stand on.</p>
+<p>You can see the relationship in the disk names. A template's disks are named like <code>base-9000-disk-0</code>, and a linked clone's config refers to that base, like this:</p>
+<pre><code>local-lvm:base-9000-disk-0/vm-105-disk-0</code></pre>
+<p>Read it left to right: VM 105's disk lives on top of template 9000's base disk.</p>
+<h2 id="the-trap-it-s-stopped-so-it-s-junk">The trap: "it's stopped, so it's junk"</h2>
+<p>Templates are always stopped. In a list of guests, a template looks exactly like an abandoned VM.</p>
+<p>There is a nastier version too. A plain stopped container that was converted to a template, then used as the source for linked clones, looks like any other forgotten container. Nothing about it shouts "other guests need me".</p>
+<p>Delete that base, and what happens depends on your storage:</p>
+<div class="table"><table><thead><tr><th>Storage</th><th>What happens when you delete the base</th></tr></thead><tbody><tr><td>ZFS and some others</td><td>Proxmox refuses, because the base still has dependents</td></tr><tr><td>File-based (qcow2 on a directory or NFS)</td><td>The clones' backing file can simply vanish, and every linked clone built from it stops booting</td></tr></tbody></table></div>
+<p>Either way, you find out at the worst possible moment. The rule of thumb from the book: <strong>never delete a template, or anything named <code>base-*</code>, until you have proven nothing references it.</strong></p>
+<h2 id="the-fix-part-1-find-every-dependent">The fix, part 1: find every dependent</h2>
+<p>Every guest config lives in <code>/etc/pve</code>, so one grep tells you who depends on a base. For template 9000:</p>
+<pre><code># Who uses template 9000's disks?
+grep -rl "base-9000-" /etc/pve/nodes/*/qemu-server/ /etc/pve/nodes/*/lxc/</code></pre>
+<p>If the grep returns anything other than the template's own config, the template is load-bearing. Leave it, label it, and move on.</p>
+<p>To see every template on the cluster in the first place:</p>
+<pre><code># All templates on the cluster
+grep -l "^template: 1" /etc/pve/nodes/*/qemu-server/*.conf \
+  /etc/pve/nodes/*/lxc/*.conf</code></pre>
+<h2 id="the-fix-part-2-label-the-load-bearing-guests">The fix, part 2: label the load-bearing guests</h2>
+<p>The cheapest fix in the whole chapter is a note and a tag. Write it in the guest's Notes field (the Summary tab), and add a <code>keep</code> tag:</p>
+<pre><code>qm set 9000 --tags "template,keep" \
+  --description "BASE TEMPLATE. Linked clones depend on this. Do not delete."
+pct set 9050 --tags "template,keep"</code></pre>
+<p>Tags show up as colored pills in the resource tree. A bright red <code>keep</code> tag stops a lot of 1 a.m. mistakes, and the note tells whoever is cleaning up why the guest is there.</p>
+<p>The same idea carries into any cleanup script. The book's backup-before-delete loop skips templates outright before it touches anything:</p>
+<pre><code>grep -q "^template: 1" /etc/pve/{lxc,qemu-server}/$id.conf 2&gt;/dev/null &amp;&amp; \
+  { echo "SKIP $id: template"; continue; }</code></pre>
+<h2 id="the-fix-part-3-untangle-before-you-retire">The fix, part 3: untangle before you retire</h2>
+<p>Sometimes you really do want a template gone: it is old, its OS is out of date, and you have built a better one. You can retire it, but only after its linked clones stop needing it. That means turning each linked clone into a full, independent guest first.</p>
+<p>The simplest way is a fresh full clone of each linked clone:</p>
+<pre><code># VM: full, independent copy of linked clone 105 as 305
+qm clone 105 305 --full 1 --name app-server
+# Container: same idea
+pct clone 205 405 --full 1 --hostname app-ct</code></pre>
+<p>Moving a disk to a different storage also writes a full copy:</p>
+<pre><code>qm disk move 105 scsi0 other-store --delete 1</code></pre>
+<p>For containers, <code>pct move-volume</code> does the same job.</p>
+<p>Then work through it in order:</p>
+<ol><li>Test the full clone.</li><li>Retire the linked one.</li><li>Rerun the dependents grep for that template.</li><li>When it comes back with nothing but the template's own config, the template is finally safe to remove.</li></ol>
+<p>Deleting it is still a cleanup like any other: back it up, verify the archive, then destroy with purge.</p>
+<h2 id="long-lived-guests-should-be-full-clones">Long-lived guests should be full clones</h2>
+<p>Linked clones are instant and tiny, which makes them tempting. But the book's checklist is clear: long-lived production guests should be <strong>full clones</strong>, so they depend on nothing and a future cleanup cannot pull the floor out from under them.</p>
+<p>And because templates stick around, keep them fresh: rebuild or update them on a schedule, with a patched OS and current cloud-init, so new guests do not start life months behind.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Every template is tagged <code>keep</code>, with a note saying what depends on it</li><li>You have grepped for <code>base-&lt;id&gt;-</code> before deleting anything that might be a base</li><li>Any cleanup script skips guests with <code>template: 1</code> in their config</li><li>Long-lived production guests are full clones, not linked clones</li><li>Before retiring a template: full-clone (or disk-move) each linked clone, test it, retire the linked one, rerun the grep</li><li>Templates are rebuilt or updated on a schedule (patched OS, current cloud-init)</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>RAID is not a backup: the 3-2-1 rule, honestly</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/</guid>
 <pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>What actually counts as a copy under the 3-2-1 rule, why a RAID mirror or a snapshot only protects against one kind of failure, and the one-page inventory that exposes the gaps.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-11.jpg" type="image/jpeg" length="0"/>
 <category>backups</category><category>3-2-1</category><category>zfs</category><category>proxmox</category>
