@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New book: Automations That Just Work (Home Assistant without the surprises) — Homelab the Right Way</title>
+<meta name="description" content="Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="New book: Automations That Just Work (Home Assistant without the surprises) — Homelab the Right Way">
+<meta property="og:description" content="Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="New book: Automations That Just Work (Home Assistant without the surprises) — Homelab the Right Way">
+<meta name="twitter:description" content="Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=6" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=6">
+<meta property="article:published_time" content="2026-10-12">
+<meta property="article:tag" content="home assistant">
+<meta property="article:tag" content="zigbee">
+<meta property="article:tag" content="z-wave">
+<meta property="article:tag" content="automations">
+<meta property="article:tag" content="ebook">
+<meta property="article:tag" content="homelab">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "New book: Automations That Just Work (Home Assistant without the surprises)", "description": "Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/", "datePublished": "2026-10-12T12:30:00-04:00", "dateModified": "2026-10-12T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "home assistant, zigbee, z-wave, automations, ebook, homelab", "wordCount": 791, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Automations That Just Work", "url": "https://payhip.com/b/eHgh0", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book6.jpg", "description": "Reliable Home Assistant: Zigbee and Z-Wave that stay up, automations you can read a year later, dashboards people tap, and updates that don't break things.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/eHgh0", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "New book: Automations That Just Work (Home Assistant without the surprises)", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">New book: Automations That Just Work (Home Assistant without the surprises)</h1>
+<p class="lead fade" style="--d:2">Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-12">October 12, 2026</time> · 4 min read · <span class="tags inline"><span>home assistant</span><span>zigbee</span><span>z-wave</span><span>automations</span><span>ebook</span><span>homelab</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/og.jpg" width="1280" height="720" alt="New book: Automations That Just Work (Home Assistant without the surprises)" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-a-motion-light-that-turns-off-while-you-are-still-there">The trap: a motion light that turns off while you are still there</a></li><li><a href="#the-fix-restart-and-a-wait-not-a-delay">The fix: restart and a wait, not a delay</a></li><li><a href="#the-zigbee-fix-that-comes-first">The Zigbee fix that comes first</a></li><li><a href="#what-the-book-covers">What the book covers</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
+<div class="prose">
+
+<p>Book 6 in the series is out today: <strong>Automations That Just Work: Reliable Home Assistant with Zigbee, Z-Wave, Dashboards and Updates That Don't Break Things</strong>. It is 56 pages and 23 diagrams on the second six months of a Home Assistant install, the part where the magic has worn off and the family has stopped trusting the house.</p>
+<p>The free sample is the whole of Chapter 4, the automations chapter. Here is a taste of what is in it, plus the Zigbee fix from Chapter 2 that most people need first.</p>
+<h2 id="the-trap-a-motion-light-that-turns-off-while-you-are-still-there">The trap: a motion light that turns off while you are still there</h2>
+<p>The usual motion light has a motion trigger, a "turn on", a fixed two-minute delay, and a "turn off". It works most nights. Then someone stands still in the hallway reading a label and the light goes out on them.</p>
+<p>The reason is the automation's <strong>mode</strong>. The default, <code>single</code>, means that when motion fires again while the first run is still waiting out its delay, the second trigger is silently dropped (there is a warning in the log, which nobody reads). The countdown that started on the first motion keeps running, and the light goes off two minutes after the <em>first</em> movement, not the last.</p>
+<h2 id="the-fix-restart-and-a-wait-not-a-delay">The fix: <code>restart</code> and a wait, not a delay</h2>
+<p>Two changes. Set the mode to <code>restart</code>, so fresh motion cancels the running countdown and starts over. And wait for the sensor to be off <em>for</em> two minutes instead of sleeping for two minutes:</p>
+<pre><code>alias: Hallway light on motion
+description: On with motion after dark; off 2 min after motion stops
+mode: restart
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.hallway_motion
+    to: "on"
+conditions:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.hallway_ceiling
+    data:
+      brightness_pct: 60
+  - wait_for_trigger:
+      - trigger: state
+        entity_id: binary_sensor.hallway_motion
+        to: "off"
+        for: "00:02:00"
+  - action: light.turn_off
+    target:
+      entity_id: light.hallway_ceiling</code></pre>
+<p>Every new motion restarts the run, so the light only goes off two minutes after the last movement ends. The <code>for:</code> on the wait also absorbs a sensor that flaps on and off within a second.</p>
+<p>Three more rules from the chapter that keep automations readable:</p>
+<ul><li>Every <code>state</code> trigger gets a <code>to:</code>. Without it, the automation fires on <em>any</em> change, including attribute updates like brightness or <code>last_seen</code>, and runs twenty times an hour.</li><li>Flappy sensors get <code>for:</code> on the trigger. A door that reports open, closed, open within a second fires three times without it and zero times with <code>for: "00:00:05"</code>.</li><li>When an automation "didn't work", read its <strong>trace</strong> (Settings, Automations &amp; Scenes, the automation, three-dot menu, Traces) before changing anything. It shows which trigger fired, what every condition evaluated to, and what each action did. Guessing is slower than reading.</li></ul>
+<h2 id="the-zigbee-fix-that-comes-first">The Zigbee fix that comes first</h2>
+<p>Most "the bedroom sensor dropped again" problems are not the sensor. They are the coordinator stick plugged straight into a USB 3.0 port on the server, inside a metal case, next to the access point. USB 3.0 ports and cables radiate noise in the 2.4 GHz band, which is exactly where Zigbee lives.</p>
+<p>The fix is a <strong>USB 2.0 extension cable</strong>, one to two metres long, with the stick on the end of it, a metre away from any SSD, hub or access point. If the machine has a USB 2.0 port, use that. This single change fixes more Zigbee networks than any setting. The chapter goes on to the channel choice (Zigbee 15, 20 or 25, between Wi-Fi channels 1, 6 and 11, chosen before pairing anything), why battery sensors never route and a mains plug in each room is the mesh, and pairing devices in the room they will live in.</p>
+<h2 id="what-the-book-covers">What the book covers</h2>
+<ol><li>A home that works when the internet doesn't: the five-minute WAN unplug test, one naming scheme, areas and labels</li><li>Zigbee that stays up: coordinator choice and placement, channels, ZHA or Zigbee2MQTT, routers, a working Zigbee2MQTT configuration</li><li>Z-Wave without the mystery: 800-series controllers, Z-Wave JS UI, S2 inclusion, node statistics instead of nightly heals</li><li>Automations that mean something: triggers, conditions, modes, the motion light, traces (the free sample chapter)</li><li>Helpers, templates and blueprints: house mode and guest mode, template sensors with defaults, a motion-light blueprint</li><li>Dashboards people actually use: phone, wall tablet and admin; Sections and tiles; conditional cards</li><li>Notifications that don't cry wolf: tags, actionable alerts, one daily battery report, quiet hours, the alert integration</li><li>Updates without breaking things: the monthly routine, backup plus Proxmox snapshot, one layer at a time, three ways back</li></ol>
+<p>Plus the Weekend Reliability Checklist and a cheat sheet. PDF and EPUB, with the full automations chapter free below.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Motion lights on <code>mode: restart</code> with a <code>wait_for_trigger</code>, not a fixed delay</li><li>Every <code>state</code> trigger has a <code>to:</code>; flappy sensors have <code>for:</code></li><li>Coordinator on a USB 2.0 extension cable, away from the case and the access point</li><li>Zigbee on channel 15, 20 or 25, set before pairing</li><li>A mains-powered router in each room between the coordinator and the far sensors</li></ul>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="120" height="192" alt="Cover of Automations That Just Work" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Automations That Just Work</h3>
+<p>Coordinator placement and channel planning, ZHA or Zigbee2MQTT, Z-Wave JS with S2 done right, automations as sentences with modes and traces, helpers and blueprints, phone and wall-tablet dashboards, actionable notifications, and a monthly update hour with three ways back. The free sample has the whole automations chapter.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/eHgh0" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></p></div>
+</aside><aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 6 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/eHgh0" rel="noopener"><img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="90" height="144" alt="Cover of Automations That Just Work" loading="lazy"></a><div><b>Automations That Just Work</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/eHgh0" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/why-your-2-node-proxmox-cluster-freezes/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-17-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sat Oct 17</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-12">October 12, 2026</time> · 4 min read</p>
+<h3>Why your 2-node Proxmox cluster freezes</h3>
+<p>With two Proxmox nodes, losing either one leaves the survivor with one vote out of two, so it loses quorum and /etc/pve goes read-only. Here is how a QDevice adds a third vote without a third server, plus the Wi-Fi trap and the emergency lever.</p>
+<p class="tags"><span>proxmox</span><span>cluster</span><span>quorum</span><span>qdevice</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/grocy-fridge-scanner-android-app/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/app-com.charleshartmann.grocyfridge-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Tue Nov 3</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-12">October 12, 2026</time> · 3 min read</p>
+<h3>Grocy Fridge Scanner: update your Grocy stock from a photo</h3>
+<p>Take a photo of your fridge or pantry and on-device AI updates your Grocy inventory. No cloud uploads, no account required.</p>
+<p class="tags"><span>android</span><span>grocy</span><span>self-hosted</span><span>home-inventory</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-16-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Fri Oct 16</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-11">October 11, 2026</time> · 4 min read</p>
+<h3>Never delete this stopped Proxmox VM</h3>
+<p>A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.</p>
+<p class="tags"><span>proxmox</span><span>templates</span><span>linked clones</span><span>homelab</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>6 ebooks, $19 each, every one with a free sample.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=6" defer></script>
+</body>
+</html>
