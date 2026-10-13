@@ -3,7 +3,53 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 13 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Android the Right Way: 5 new ebooks on making Android apps</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-the-right-way-5-new-ebooks/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-the-right-way-5-new-ebooks/</guid>
+<item><title>DS18B20 reads 85 °C or -127 °C? Here&#x27;s why</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/ds18b20-reads-85c-or-minus-127c/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/ds18b20-reads-85c-or-minus-127c/</guid>
+<pubDate>Tue, 13 Oct 2026 12:30:00 -0400</pubDate><description>A DS18B20 that reports 85 °C hasn&#x27;t measured anything; that is its power-on value, and -127 °C means no probe is connected. How the tank monitor&#x27;s firmware and ESPHome drop both, and the wire to check when the probe is stuck at 85.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-19.jpg" type="image/jpeg" length="0"/>
+<category>esp32</category><category>ds18b20</category><category>esphome</category><category>turtle tank</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-19.jpg" alt=""></p><p>The DS18B20 is the easy sensor in a water-quality monitor. It is a waterproof stainless probe, the probe and its cable can go fully underwater, and it is accurate to ±0.5 °C out of the box with no calibration maths. So when the tank card suddenly says the water is 85 °C, or -127 °C, it is tempting to blame the probe, the board or the tank heater.</p>
+<p>None of those is the cause. Both numbers are the sensor telling you it has no reading. This post covers what each one means, how the Smart Turtle Tank firmware keeps them off your graphs, and where to look when the probe will not stop saying 85.</p>
+<h2 id="the-trap-two-numbers-that-look-like-readings">The trap: two numbers that look like readings</h2>
+<p>The DS18B20 is a digital sensor. It talks over a single wire using a protocol called 1-Wire and sends the temperature as a number rather than as a voltage. That is why it is the accurate one, and also why it can hand you a perfectly formatted number that has nothing to do with the water.</p>
+<p>There are two of these:</p>
+<div class="table"><table><thead><tr><th>Value</th><th>What it actually means</th></tr></thead><tbody><tr><td>85 °C</td><td>The power-on value, before the first conversion finishes. The sensor never got a successful read.</td></tr><tr><td>-127 °C</td><td>What the Dallas library returns when the probe is not connected.</td></tr></tbody></table></div>
+<p>Neither is a temperature. If your code passes them through, the server stores them like any other reading, and your graph and alerts treat them as real. The book's alert rule fires when the water goes under 73 °F or over 85 °F, so a fake 85 °C sails straight past the upper limit and sets off an alert for water that is fine.</p>
+<h2 id="the-fix-in-the-firmware">The fix in the firmware</h2>
+<p>The Smart Turtle Tank firmware reads the probe once per sample with the OneWire and DallasTemperature libraries (in <code>platformio.ini</code> they are <code>paulstoffregen/OneWire</code> and <code>milesburton/DallasTemperature</code>). The probe sits on D4:</p>
+<pre><code>#define TEMP_PIN D4        // GPIO6, DS18B20 DAT (adapter has the pull-up)</code></pre>
+<p>And this is the part of the sample loop that does the rejecting:</p>
+<pre><code>temp.requestTemperatures();        // ~750 ms at 12-bit
+float t = temp.getTempCByIndex(0);
+if (t &gt; -100 &amp;&amp; t != 85.0f) { accT += t; nT++; } // drop -127 and 85</code></pre>
+<p>Line by line:</p>
+<ul><li><code>temp.requestTemperatures()</code> tells the DS18B20 to measure. At 12-bit resolution that takes about 750 ms, and the call waits for it.</li><li><code>getTempCByIndex(0)</code> reads the first (and only) probe on the wire.</li><li>The <code>if</code> throws away -127 (no probe) and exactly 85.0 (the power-on value), and counts only good reads in <code>nT</code>.</li></ul>
+<p>Every five minutes (ten samples) the firmware averages the good samples into one reading. When there were none, the temperature field is sent as <code>null</code>. A null on the graph is honest; a fake 85 °C would page you.</p>
+<p>The server backs this up. Its validation accepts <code>t</code> only as null or between -5 and 50 °C, so anything else is rejected with a 400 and never reaches history.</p>
+<h2 id="the-fix-in-esphome">The fix in ESPHome</h2>
+<p>If you would rather run the probe through ESPHome and Home Assistant, the same rejection is two filter lines on the <code>dallas_temp</code> sensor:</p>
+<pre><code>one_wire:
+  - platform: gpio
+    pin: GPIO6            # XIAO D4
+
+sensor:
+  - platform: dallas_temp
+    name: "Tank water temperature"
+    update_interval: 30s
+    filters:
+      - filter_out: 85.0
+      - filter_out: -127.0</code></pre>
+<p><code>one_wire:</code> sets up the 1-Wire bus on GPIO6, which is the XIAO's D4, and the <code>dallas_temp</code> sensor finds the probe on it. The two <code>filter_out</code> lines drop the 85 °C power-on value and the -127 °C unplugged value, the same job the PlatformIO firmware does.</p>
+<h2 id="stuck-at-85-check-the-wiring-not-the-code">Stuck at 85: check the wiring, not the code</h2>
+<p>Filtering keeps the bad values off the graph, but it does not fix them. If the temperature field stays null, or the raw value keeps coming back as 85 or -127, the sensor is not getting a clean read. The book's troubleshooting puts it plainly: an 85 °C reading usually means a loose DAT wire.</p>
+<p>The probe has three wires that screw into a small adapter board, matched by the printed letters:</p>
+<ul><li><strong>Red</strong> to <strong>VCC</strong></li><li><strong>Yellow</strong> to <strong>DAT</strong></li><li><strong>Black</strong> to <strong>GND</strong></li></ul>
+<p>Then three jumpers connect the adapter to the XIAO:</p>
+<ul><li>The + rail (3V3) to the adapter's <strong>VCC</strong> pin.</li><li>The - rail (GND) to the adapter's <strong>GND</strong> pin.</li><li>XIAO <strong>D4</strong> to the adapter's <strong>DAT</strong> pin.</li></ul>
+<p>Two details catch people here. First, the pins on your adapter may be in a different order than any picture you are following, so go by the printed letters, not by position. Second, the adapter belongs on 3V3, not 5V. Its VCC comes from the + rail, which is fed by the XIAO's 3V3 pin, so the signal on DAT stays under the 3.3 V the XIAO's pins can take.</p>
+<p>You also do not need to add a resistor. The DS18B20 needs a 4.7 kΩ pull-up on its data line, and the kit's adapter board already has it built in.</p>
+<p>Once the probe reads, the only adjustment left is a one-time offset. Put the DS18B20 and a reference aquarium thermometer in the same cup of water for five minutes; the difference is <code>temp_offset_c</code>, a setting on the server. Expect a few tenths of a degree, since the probe is rated ±0.5 °C.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Probe wires screwed into the adapter by letter: red to VCC, yellow to DAT, black to GND, each one tugged gently.</li><li>Adapter VCC from the 3V3 (+) rail, GND from the - rail, DAT to XIAO D4.</li><li>No extra pull-up resistor; the adapter has the 4.7 kΩ one.</li><li>Only the metal probe and its cable go in the water. The adapter board stays dry, with the cable hanging in a U-shaped drip loop below the electronics.</li><li>Firmware drops <code>-127</code> and exactly <code>85.0</code> and sends <code>null</code> when there was no good read.</li><li>In ESPHome, <code>filter_out: 85.0</code> and <code>filter_out: -127.0</code> are on the <code>dallas_temp</code> sensor.</li><li>Still null or stuck at 85? Re-seat the DAT, VCC and GND wires and confirm the adapter is on 3V3.</li><li>Probe reading for real? Set <code>temp_offset_c</code> once against a reference thermometer.</li></ul><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>Android the Right Way: 5 new ebooks on making Android apps</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-the-right-way-5-new-ebooks/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-the-right-way-5-new-ebooks/</guid>
 <pubDate>Tue, 13 Oct 2026 12:30:00 -0400</pubDate><description>A new five-book series on building and shipping Android apps, from an empty Android Studio project to Play review, monetization and on-device AI. Every book has a free sample chapter.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>kotlin</category><category>jetpack compose</category><category>google play</category><category>ebook</category>
