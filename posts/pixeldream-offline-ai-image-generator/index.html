@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PixelDream: generate AI images offline, entirely on your phone — Homelab the Right Way</title>
+<meta name="description" content="PixelDream turns a short description into an image using AI models that run on your phone. No account, no uploads, no internet after setup.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/pixeldream-offline-ai-image-generator/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="PixelDream: generate AI images offline, entirely on your phone — Homelab the Right Way">
+<meta property="og:description" content="PixelDream turns a short description into an image using AI models that run on your phone. No account, no uploads, no internet after setup.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/pixeldream-offline-ai-image-generator/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.hartmann.pixeldream.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PixelDream: generate AI images offline, entirely on your phone — Homelab the Right Way">
+<meta name="twitter:description" content="PixelDream turns a short description into an image using AI models that run on your phone. No account, no uploads, no internet after setup.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.hartmann.pixeldream.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=6" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=6">
+<meta property="article:published_time" content="2026-10-13">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="ai-images">
+<meta property="article:tag" content="offline">
+<meta property="article:tag" content="privacy">
+<meta property="article:tag" content="stable-diffusion">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "PixelDream: generate AI images offline, entirely on your phone", "description": "PixelDream turns a short description into an image using AI models that run on your phone. No account, no uploads, no internet after setup.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/pixeldream-offline-ai-image-generator/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/pixeldream-offline-ai-image-generator/", "datePublished": "2026-10-13T12:30:00-04:00", "dateModified": "2026-10-13T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.hartmann.pixeldream.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, ai-images, offline, privacy, stable-diffusion", "wordCount": 615, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "SoftwareApplication", "name": "PixelDream: Offline AI Images", "operatingSystem": "Android", "url": "https://play.google.com/store/apps/details?id=com.hartmann.pixeldream"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "PixelDream: generate AI images offline, entirely on your phone", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/pixeldream-offline-ai-image-generator/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">PixelDream: generate AI images offline, entirely on your phone</h1>
+<p class="lead fade" style="--d:2">PixelDream turns a short description into an image using AI models that run on your phone. No account, no uploads, no internet after setup.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-13">October 13, 2026</time> · 3 min read · <span class="tags inline"><span>android</span><span>ai-images</span><span>offline</span><span>privacy</span><span>stable-diffusion</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/app-com.hartmann.pixeldream.webp" width="1280" height="720" alt="PixelDream: generate AI images offline, entirely on your phone" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#what-it-does">What it does</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#what-your-phone-needs">What your phone needs</a></li><li><a href="#privacy">Privacy</a></li><li><a href="#good-to-know">Good to know</a></li><li><a href="#is-it-for-you">Is it for you?</a></li></ol></nav>
+<div class="prose">
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres November 9, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> to catch it.</p></div></aside>
+<p>Most AI image generators work the same way: you type a prompt, it goes to a server, and a picture comes back. That means an account, a connection, and your prompts sitting on somebody else's machine. PixelDream takes the other route. The models run on your phone, so once setup is done you can create images with no Wi-Fi, no mobile data and no account.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Text to image, on the device.</strong> Describe what you are imagining, tap Create, and a local image model renders it using your phone's own hardware.</li><li><strong>Optional prompt enhancement.</strong> An on-device AI can expand a short idea into a richer prompt before rendering, so you do not need prompt-engineering experience. You can switch this off.</li><li><strong>Works anywhere.</strong> After the one-time setup download, generation needs no network, which the listing pitches for planes and off-grid use.</li><li><strong>A private local gallery.</strong> Every image is saved on the device, where you can revisit, export or share it when you choose.</li><li><strong>Quality and size controls.</strong> Pick generation quality and image size to trade detail against speed.</li><li><strong>Safety checks.</strong> On-device checks run before and after prompt enhancement to steer away from harmful content, and there is an in-app report option.</li></ul>
+<h2 id="how-it-works">How it works</h2>
+<p>The listing breaks it into three steps:</p>
+<ol><li>Describe your idea in a sentence or two.</li><li>PixelDream optionally expands it into a fuller visual prompt, then a local diffusion model renders the image on your phone.</li><li>The finished image lands in your private gallery, ready to view, export or share.</li></ol>
+<p>The prompt expansion is the part that makes it approachable. A one-line idea is often too thin for a diffusion model to do much with, and the on-device language model fills in the visual detail for you before the image model runs.</p>
+<h2 id="what-your-phone-needs">What your phone needs</h2>
+<p>Running image models locally is demanding, and the listing is specific about hardware. Check this before you install:</p>
+<div class="table"><table><thead><tr><th>Requirement</th><th>Minimum</th><th>Recommended</th></tr></thead><tbody><tr><td>Android version</td><td>Android 10 (API 29)</td><td>Android 13 or newer</td></tr><tr><td>RAM</td><td>6 GB</td><td>8 GB or more</td></tr><tr><td>Free storage</td><td>5 GB</td><td>8 GB or more</td></tr><tr><td>Processor</td><td>64-bit ARM (arm64-v8a), octa-core</td><td></td></tr></tbody></table></div>
+<p>The models total roughly 4.1 GB and download once over Wi-Fi during setup. The listing notes that older or lower-spec devices may run slowly or may not be supported.</p>
+<h2 id="privacy">Privacy</h2>
+<p>Image generation runs entirely on the device, and nothing about what you type or create is uploaded as part of making an image. Your prompts and pictures stay on the phone unless you choose to share them.</p>
+<p>The listing is also clear about the exceptions: some diagnostics and the optional in-app feedback and bug-report tool use the network. Image generation itself does not.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download, with optional ads and an optional ad-free upgrade (an in-app purchase).</li><li><strong>Content filtering:</strong> the on-device checks try to steer prompts and results away from harmful content, but the listing states plainly that no filter is perfect. Use it responsibly and report anything that slips through.</li><li><strong>Problems:</strong> bugs can be reported from Settings, then Report a Problem.</li><li><strong>Setup download:</strong> plan for a 4.1 GB download on Wi-Fi before first use.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want to make AI images without an account or a subscription service.</li><li>You want your prompts and images to stay on your own phone.</li><li>You want something that works on a plane or with no signal.</li><li>Your phone meets the RAM, storage and processor requirements above.</li></ul>
+<aside class="cta app-cta reveal">
+<img class="app-ico" src="/homelab-the-right-way/assets/img/apps/com.hartmann.pixeldream.webp" width="120" height="120" alt="PixelDream: Offline AI Images icon" loading="lazy">
+<div><p class="eyebrow">Android app</p>
+<h3>PixelDream: Offline AI Images</h3>
+<p>Private, offline AI image generator. Your prompts and pictures never leave.</p>
+<p class="muted small">Free on Google Play (contains ads, in-app purchases).</p>
+<p class="btns"><a class="btn gp" href="https://play.google.com/store/apps/details?id=com.hartmann.pixeldream" rel="noopener" aria-label="Get PixelDream: Offline AI Images on Google Play"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg><span><small>Get it on</small>Google Play</span></a><a class="btn ghost" href="/homelab-the-right-way/apps/">See all 38 apps</a></p></div>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/android-the-right-way-5-new-ebooks/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-13">October 13, 2026</time> · 4 min read</p>
+<h3>Android the Right Way: 5 new ebooks on making Android apps</h3>
+<p>A new five-book series on building and shipping Android apps, from an empty Android Studio project to Play review, monetization and on-device AI. Every book has a free sample chapter.</p>
+<p class="tags"><span>android</span><span>kotlin</span><span>jetpack compose</span><span>google play</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/why-your-2-node-proxmox-cluster-freezes/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-17-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sat Oct 17</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-12">October 12, 2026</time> · 4 min read</p>
+<h3>Why your 2-node Proxmox cluster freezes</h3>
+<p>With two Proxmox nodes, losing either one leaves the survivor with one vote out of two, so it loses quorum and /etc/pve goes read-only. Here is how a QDevice adds a third vote without a third server, plus the Wi-Fi trap and the emergency lever.</p>
+<p class="tags"><span>proxmox</span><span>cluster</span><span>quorum</span><span>qdevice</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/automations-that-just-work-book-6/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-12">October 12, 2026</time> · 4 min read</p>
+<h3>New book: Automations That Just Work (Home Assistant without the surprises)</h3>
+<p>Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.</p>
+<p class="tags"><span>home assistant</span><span>zigbee</span><span>z-wave</span><span>automations</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>11 ebooks, $19 each, every one with a free sample.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=6" defer></script>
+</body>
+</html>
