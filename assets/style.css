@@ -147,3 +147,6 @@ h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0 0 .5em}h1{font-size:cla
 .app-strip a:hover{text-decoration:none;color:var(--teal)}
 @media (max-width:820px){.app-strip{grid-template-columns:repeat(4,1fr)}}
 .foot-apps{display:flex;align-items:center;gap:6px}.foot-apps svg{width:14px;height:14px;color:var(--teal)}
+
+.merch-card .merch-img{width:120px;height:120px;border-radius:12px;object-fit:cover;flex:none}.merch-card .mini.store-btn{background:var(--ink);color:var(--bg)}
+.merch-band .app-strip img{width:56px;height:56px;border-radius:12px;object-fit:cover}
