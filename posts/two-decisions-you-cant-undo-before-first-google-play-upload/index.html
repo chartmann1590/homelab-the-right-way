@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The two decisions you can&#x27;t undo before your first Google Play upload — Homelab the Right Way</title>
+<meta name="description" content="Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="The two decisions you can&#x27;t undo before your first Google Play upload — Homelab the Right Way">
+<meta property="og:description" content="Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The two decisions you can&#x27;t undo before your first Google Play upload — Homelab the Right Way">
+<meta name="twitter:description" content="Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=8" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=8">
+<meta property="article:published_time" content="2026-10-14">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="google play">
+<meta property="article:tag" content="kotlin">
+<meta property="article:tag" content="gradle">
+<meta property="article:tag" content="app signing">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "The two decisions you can't undo before your first Google Play upload", "description": "Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/", "datePublished": "2026-10-14T12:30:00-04:00", "dateModified": "2026-10-14T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, google play, kotlin, gradle, app signing", "wordCount": 831, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Ship Your First Android App", "url": "https://payhip.com/b/Qdxgz", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book7.jpg", "description": "From an empty Android Studio project to a real app live on Google Play: setup, a first Kotlin + Compose app, the decisions you can't undo, a signed release build, Play Console and the 12-tester closed test.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/Qdxgz", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "The two decisions you can't undo before your first Google Play upload", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">The two decisions you can&#x27;t undo before your first Google Play upload</h1>
+<p class="lead fade" style="--d:2">Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-14">October 14, 2026</time> · 4 min read · <span class="tags inline"><span>android</span><span>google play</span><span>kotlin</span><span>gradle</span><span>app signing</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/og.jpg" width="1280" height="720" alt="The two decisions you can&#x27;t undo before your first Google Play upload" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-com-example-goes-live">The trap: com.example goes live</a></li><li><a href="#the-fix-pick-an-id-you-can-live-with-forever">The fix: pick an ID you can live with forever</a></li><li><a href="#the-second-decision-how-your-app-is-signed">The second decision: how your app is signed</a></li><li><a href="#a-bonus-rule-versioncode-only-goes-up">A bonus rule: versionCode only goes up</a></li><li><a href="#checklist-before-the-first-upload">Checklist before the first upload</a></li></ol></nav>
+<div class="prose">
+
+<p>Most of an Android project can be changed later. A screen can be redesigned, a library swapped, a name on the store edited. Two things are different. The application ID and the signing setup are decided before your first upload, and changing either one afterwards ranges from painful to impossible.</p>
+<p>Both take minutes to get right. Here is what to do, with the code from <em>Ship Your First Android App</em>.</p>
+<h2 id="the-trap-com-example-goes-live">The trap: com.example goes live</h2>
+<p>Every tutorial starts with <code>com.example.something</code>. It works fine on your phone, so it is easy to forget. Then the first bundle goes up to Play Console and the placeholder becomes the app's permanent identity.</p>
+<p>Android's documentation is blunt about this. Once you publish, you should never change the <code>applicationId</code> in <code>app/build.gradle.kts</code>, because if you change it, Google Play treats the upload as a completely different app. Your installs, ratings and reviews stay with the old ID.</p>
+<h2 id="the-fix-pick-an-id-you-can-live-with-forever">The fix: pick an ID you can live with forever</h2>
+<p>The naming rules from developer.android.com:</p>
+<ul><li>At least two segments, separated by dots.</li><li>Each segment starts with a letter.</li><li>Only letters, digits and underscores: <code>[a-zA-Z0-9_]</code>.</li></ul>
+<p>The convention is your domain, reversed, plus the app: <code>com.yourname.torchlight</code>. If you have no domain, a reversed form of a name you control works. What matters is that it is unique and yours. Replace <code>com.example</code> before the first upload, while it is still free to change.</p>
+<p>One thing that confuses people: <code>namespace</code> and <code>applicationId</code> start out identical, but they are different things. The namespace is only the Kotlin package for the generated <code>R</code> and <code>BuildConfig</code> classes and can be refactored any time. The application ID is the public identity. Changing one does not change the other.</p>
+<h2 id="the-second-decision-how-your-app-is-signed">The second decision: how your app is signed</h2>
+<p>Every Android app is signed, and devices only install an update signed by the same key as the installed version. Google Play splits this into two keys:</p>
+<div class="table"><table><thead><tr><th>Key</th><th>Who holds it</th><th>What it signs</th><th>If you lose it</th></tr></thead><tbody><tr><td>Upload key</td><td>You, in a keystore file (.jks)</td><td>The bundle you upload to Play Console</td><td>Google can reset it; you request a reset</td></tr><tr><td>App signing key</td><td>Google Play</td><td>The APKs delivered to users' devices</td><td>Nothing to lose; Google keeps it</td></tr></tbody></table></div>
+<p>Play App Signing is required for new apps, and new apps are automatically enrolled with Google-generated keys. Your job is only the upload key. Play Console asks for an RSA key of 2048 bits or more in a Java keystore, and Android's signing guide recommends a validity of at least 25 years:</p>
+<pre><code>keytool -genkeypair -v \
+  -keystore upload-keystore.jks \
+  -alias upload \
+  -keyalg RSA -keysize 2048 \
+  -validity 10000</code></pre>
+<p><code>-validity</code> is in days. 10,000 days is a little over 27 years.</p>
+<h3 id="where-the-key-must-not-live">Where the key must not live</h3>
+<p>The common mistake is keeping the keystore in the project folder and committing it to Git, or keeping the only copy on one laptop. Store the <code>.jks</code> file outside the repository, back it up in at least two places (for example an encrypted cloud drive and a USB stick), and keep the passwords in a password manager. Google can reset a lost upload key, but a reset takes a support request and waiting, and a leaked key lets someone else upload as you until it is reset.</p>
+<h3 id="wire-signing-into-gradle-without-leaking-passwords">Wire signing into Gradle without leaking passwords</h3>
+<p>Never write passwords into <code>build.gradle.kts</code>. Put them in a <code>keystore.properties</code> file in the project root:</p>
+<pre><code># keystore.properties (add this file to .gitignore!)
+storeFile=/home/you/keys/upload-keystore.jks
+storePassword=your-keystore-password
+keyAlias=upload
+keyPassword=your-key-password</code></pre>
+<p>And add these lines to <code>.gitignore</code> right away:</p>
+<pre><code>keystore.properties
+*.jks
+*.keystore</code></pre>
+<p>Then load it in <code>app/build.gradle.kts</code>. This version also reads environment variables, so the same file works on a build server later, and someone who clones the project without the keys still gets a working unsigned build instead of an error:</p>
+<pre><code>import java.io.FileInputStream
+import java.util.Properties
+
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
+}
+fun signingValue(key: String, env: String): String? =
+    System.getenv(env) ?: keystoreProps.getProperty(key)
+
+android {
+    signingConfigs {
+        create("release") {
+            val path = signingValue("storeFile", "RELEASE_STORE_FILE")
+            if (path != null) {
+                storeFile = file(path)
+                storePassword =
+                    signingValue("storePassword", "RELEASE_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "RELEASE_KEY_ALIAS")
+                keyPassword =
+                    signingValue("keyPassword", "RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            optimization { enable = true }
+            // Sign only when keys are available; otherwise build unsigned.
+            if (signingValue("storeFile", "RELEASE_STORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+}</code></pre>
+<p>The book's example comes from a real repository: the author's Flashlight app (chartmann1590/Flashlight) ships a <code>keystore.properties.example</code> with empty values, so anyone who clones the project knows exactly what to provide without anything being exposed.</p>
+<h2 id="a-bonus-rule-versioncode-only-goes-up">A bonus rule: versionCode only goes up</h2>
+<p>Every upload needs a <code>versionCode</code> greater than the one before, and a value can never be reused. That includes builds uploaded to internal tests and builds you later abandon. The author's Dosely app is the book's example: version 1.1.1 had to go out as versionCode 4 because versionCode 3 had already been used by an earlier upload.</p>
+<p>The greatest value Google Play allows is 2100000000. Don't jump to a huge number "to be safe" or use a full date-and-time stamp; it can get close to the ceiling quickly. Small, steady increments last forever:</p>
+<pre><code>defaultConfig {
+    versionCode = 1        // 1, 2, 3 ... one more for every upload
+    versionName = "1.0.0"  // major.minor.patch, for humans
+}</code></pre>
+<h2 id="checklist-before-the-first-upload">Checklist before the first upload</h2>
+<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book7-sm.webp" width="120" height="192" alt="Cover of Ship Your First Android App" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Ship Your First Android App</h3>
+<p>Android Studio and SDK 36 set up right, a new Compose project explained file by file, a small real app (Torchlight), application ID and versionCode, R8 release builds with an upload key kept out of Git, Play App Signing, Play Console sign-up and developer verification, and the 12-testers-for-14-days rule. The free sample has the whole testing tracks chapter.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/Qdxgz" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/mIYh9" rel="noopener">Free sample</a></p></div>
+</aside><aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 11 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<p class="sc-offer"><b>Bundles:</b> <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 11 ebooks, $89</a> · <a href="https://payhip.com/b/yVteh" rel="noopener">Homelab Bundle: 6 ebooks, $59</a> · <a href="https://payhip.com/b/CFiT9" rel="noopener">Android Bundle: 5 ebooks, $49</a>. Use code <b>RIGHTWAY20</b> for 20% off any order through Oct 31.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/eHgh0" rel="noopener"><img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="90" height="144" alt="Cover of Automations That Just Work" loading="lazy"></a><div><b>Automations That Just Work</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/eHgh0" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Qdxgz" rel="noopener"><img src="/homelab-the-right-way/assets/img/book7-sm.webp" width="90" height="144" alt="Cover of Ship Your First Android App" loading="lazy"></a><div><b>Ship Your First Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Qdxgz" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/mIYh9" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/fNO53" rel="noopener"><img src="/homelab-the-right-way/assets/img/book8-sm.webp" width="90" height="144" alt="Cover of Compose Without the Confusion" loading="lazy"></a><div><b>Compose Without the Confusion</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/fNO53" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/LsD1t" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/YcoD4" rel="noopener"><img src="/homelab-the-right-way/assets/img/book9-sm.webp" width="90" height="144" alt="Cover of Pass Google Play Review" loading="lazy"></a><div><b>Pass Google Play Review</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/YcoD4" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/VcvYH" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/zRXe3" rel="noopener"><img src="/homelab-the-right-way/assets/img/book10-sm.webp" width="90" height="144" alt="Cover of Get Paid for Your Android App" loading="lazy"></a><div><b>Get Paid for Your Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/zRXe3" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/8lBGE" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/J9jlp" rel="noopener"><img src="/homelab-the-right-way/assets/img/book11-sm.webp" width="90" height="144" alt="Cover of On-Device AI for Android" loading="lazy"></a><div><b>On-Device AI for Android</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/J9jlp" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/Hz16R" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 11 ebooks for $89</a><a class="btn ghost" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-20-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Tue Oct 20</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-14">October 14, 2026</time> · 4 min read</p>
+<h3>A backup job that never runs never fails</h3>
+<p>Failure alerts can&#x27;t warn you about a backup job that stopped running. A vzdump hook that pings a dead-man&#x27;s switch, plus a weekly backup-age report, turns that silence into a phone notification.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>vzdump</span><span>monitoring</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/aria-on-device-ai-assistant/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/app-com.aria.assistant-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sun Nov 15</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-14">October 14, 2026</time> · 3 min read</p>
+<h3>Aria: a private voice assistant that runs on your Android phone</h3>
+<p>Aria handles speech recognition, the language model and voice output on your phone. No cloud LLM, no voice uploads, no account.</p>
+<p class="tags"><span>android</span><span>voice-assistant</span><span>on-device-ai</span><span>privacy</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/merch-store-open-every-item-reviewed/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/merch/showcase-hero.jpg" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-13">October 13, 2026</time> · 1 min read</p>
+<h3>The Homelab the Right Way merch store is open: every item, reviewed</h3>
+<p>The merch store is open. Here is every item in it, the design behind each one, and a one-minute video review that shows the real products.</p>
+<p class="tags"><span>merch</span><span>homelab</span><span>selfhosted</span><span>store</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>11 ebooks, $19 each, every one with a free sample. All 11 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=8" defer></script>
+</body>
+</html>

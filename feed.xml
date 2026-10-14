@@ -1,9 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 13 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 14 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>The Homelab the Right Way merch store is open: every item, reviewed</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-store-open-every-item-reviewed/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-store-open-every-item-reviewed/</guid>
+<item><title>The two decisions you can&#x27;t undo before your first Google Play upload</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</guid>
+<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>google play</category><category>kotlin</category><category>gradle</category><category>app signing</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most of an Android project can be changed later. A screen can be redesigned, a library swapped, a name on the store edited. Two things are different. The application ID and the signing setup are decided before your first upload, and changing either one afterwards ranges from painful to impossible.</p>
+<p>Both take minutes to get right. Here is what to do, with the code from <em>Ship Your First Android App</em>.</p>
+<h2 id="the-trap-com-example-goes-live">The trap: com.example goes live</h2>
+<p>Every tutorial starts with <code>com.example.something</code>. It works fine on your phone, so it is easy to forget. Then the first bundle goes up to Play Console and the placeholder becomes the app's permanent identity.</p>
+<p>Android's documentation is blunt about this. Once you publish, you should never change the <code>applicationId</code> in <code>app/build.gradle.kts</code>, because if you change it, Google Play treats the upload as a completely different app. Your installs, ratings and reviews stay with the old ID.</p>
+<h2 id="the-fix-pick-an-id-you-can-live-with-forever">The fix: pick an ID you can live with forever</h2>
+<p>The naming rules from developer.android.com:</p>
+<ul><li>At least two segments, separated by dots.</li><li>Each segment starts with a letter.</li><li>Only letters, digits and underscores: <code>[a-zA-Z0-9_]</code>.</li></ul>
+<p>The convention is your domain, reversed, plus the app: <code>com.yourname.torchlight</code>. If you have no domain, a reversed form of a name you control works. What matters is that it is unique and yours. Replace <code>com.example</code> before the first upload, while it is still free to change.</p>
+<p>One thing that confuses people: <code>namespace</code> and <code>applicationId</code> start out identical, but they are different things. The namespace is only the Kotlin package for the generated <code>R</code> and <code>BuildConfig</code> classes and can be refactored any time. The application ID is the public identity. Changing one does not change the other.</p>
+<h2 id="the-second-decision-how-your-app-is-signed">The second decision: how your app is signed</h2>
+<p>Every Android app is signed, and devices only install an update signed by the same key as the installed version. Google Play splits this into two keys:</p>
+<div class="table"><table><thead><tr><th>Key</th><th>Who holds it</th><th>What it signs</th><th>If you lose it</th></tr></thead><tbody><tr><td>Upload key</td><td>You, in a keystore file (.jks)</td><td>The bundle you upload to Play Console</td><td>Google can reset it; you request a reset</td></tr><tr><td>App signing key</td><td>Google Play</td><td>The APKs delivered to users' devices</td><td>Nothing to lose; Google keeps it</td></tr></tbody></table></div>
+<p>Play App Signing is required for new apps, and new apps are automatically enrolled with Google-generated keys. Your job is only the upload key. Play Console asks for an RSA key of 2048 bits or more in a Java keystore, and Android's signing guide recommends a validity of at least 25 years:</p>
+<pre><code>keytool -genkeypair -v \
+  -keystore upload-keystore.jks \
+  -alias upload \
+  -keyalg RSA -keysize 2048 \
+  -validity 10000</code></pre>
+<p><code>-validity</code> is in days. 10,000 days is a little over 27 years.</p>
+<h3 id="where-the-key-must-not-live">Where the key must not live</h3>
+<p>The common mistake is keeping the keystore in the project folder and committing it to Git, or keeping the only copy on one laptop. Store the <code>.jks</code> file outside the repository, back it up in at least two places (for example an encrypted cloud drive and a USB stick), and keep the passwords in a password manager. Google can reset a lost upload key, but a reset takes a support request and waiting, and a leaked key lets someone else upload as you until it is reset.</p>
+<h3 id="wire-signing-into-gradle-without-leaking-passwords">Wire signing into Gradle without leaking passwords</h3>
+<p>Never write passwords into <code>build.gradle.kts</code>. Put them in a <code>keystore.properties</code> file in the project root:</p>
+<pre><code># keystore.properties (add this file to .gitignore!)
+storeFile=/home/you/keys/upload-keystore.jks
+storePassword=your-keystore-password
+keyAlias=upload
+keyPassword=your-key-password</code></pre>
+<p>And add these lines to <code>.gitignore</code> right away:</p>
+<pre><code>keystore.properties
+*.jks
+*.keystore</code></pre>
+<p>Then load it in <code>app/build.gradle.kts</code>. This version also reads environment variables, so the same file works on a build server later, and someone who clones the project without the keys still gets a working unsigned build instead of an error:</p>
+<pre><code>import java.io.FileInputStream
+import java.util.Properties
+
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
+}
+fun signingValue(key: String, env: String): String? =
+    System.getenv(env) ?: keystoreProps.getProperty(key)
+
+android {
+    signingConfigs {
+        create("release") {
+            val path = signingValue("storeFile", "RELEASE_STORE_FILE")
+            if (path != null) {
+                storeFile = file(path)
+                storePassword =
+                    signingValue("storePassword", "RELEASE_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "RELEASE_KEY_ALIAS")
+                keyPassword =
+                    signingValue("keyPassword", "RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            optimization { enable = true }
+            // Sign only when keys are available; otherwise build unsigned.
+            if (signingValue("storeFile", "RELEASE_STORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+}</code></pre>
+<p>The book's example comes from a real repository: the author's Flashlight app (chartmann1590/Flashlight) ships a <code>keystore.properties.example</code> with empty values, so anyone who clones the project knows exactly what to provide without anything being exposed.</p>
+<h2 id="a-bonus-rule-versioncode-only-goes-up">A bonus rule: versionCode only goes up</h2>
+<p>Every upload needs a <code>versionCode</code> greater than the one before, and a value can never be reused. That includes builds uploaded to internal tests and builds you later abandon. The author's Dosely app is the book's example: version 1.1.1 had to go out as versionCode 4 because versionCode 3 had already been used by an earlier upload.</p>
+<p>The greatest value Google Play allows is 2100000000. Don't jump to a huge number "to be safe" or use a full date-and-time stamp; it can get close to the ceiling quickly. Small, steady increments last forever:</p>
+<pre><code>defaultConfig {
+    versionCode = 1        // 1, 2, 3 ... one more for every upload
+    versionName = "1.0.0"  // major.minor.patch, for humans
+}</code></pre>
+<h2 id="checklist-before-the-first-upload">Checklist before the first upload</h2>
+<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul><p><a href="https://payhip.com/b/Qdxgz">Go deeper: Ship Your First Android App</a></p>]]></content:encoded></item><item><title>A backup job that never runs never fails</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</guid>
+<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Failure alerts can&#x27;t warn you about a backup job that stopped running. A vzdump hook that pings a dead-man&#x27;s switch, plus a weekly backup-age report, turns that silence into a phone notification.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-20.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>backups</category><category>vzdump</category><category>monitoring</category><category>alerts</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-20.jpg" alt=""></p><p>Backups fail in two ways. Loudly, when a job runs and reports an error. And quietly, when a job stops running at all: the timer was disabled during an upgrade, the node was off, the cron line was lost in a rebuild, the API key expired.</p>
+<p>Loud failures are easy, because every backup tool can email you. Quiet failures need a different shape of alert, and they are the ones that catch people out.</p>
+<h2 id="the-trap-alerting-only-on-failure">The trap: alerting only on failure</h2>
+<p><strong>A job that never runs never fails.</strong> An off-site rclone sync that stopped in February will not send a single error between then and the day you need it. Your inbox stays clean the whole time, and a clean inbox looks exactly like a healthy backup.</p>
+<p>So the alert you need is not "something failed". It is "nothing succeeded recently". That takes three pieces: notifications for the loud failures, a dead-man's switch for the quiet ones, and a report that checks every guest is actually covered.</p>
+<h2 id="step-1-route-the-loud-failures-to-your-phone">Step 1: route the loud failures to your phone</h2>
+<p>Since Proxmox VE 8.1 there is a proper notification system under <strong>Datacenter → Notifications</strong>. It has two parts.</p>
+<ul><li><strong>Targets</strong> are where notifications go: SMTP (your own mail account), Gotify, a generic webhook, or the local sendmail. A webhook to a self-hosted ntfy server pushes straight to your phone, which matters because email from a homelab tends to land in spam exactly when it counts.</li><li><strong>Matchers</strong> decide which events go to which target. The default matcher sends everything to the mail-to-root target. Add one for backups: match field <code>type</code> equals <code>vzdump</code>, severity error and warning, target: your phone. A second matcher can send info events to email if you like a morning receipt.</li></ul>
+<p>One setting is easy to miss: every backup job's <strong>Notification mode</strong> has to be set to the notification system, or the matchers never see it. On the command line that is:</p>
+<pre><code>vzdump --all 1 --exclude 900,901 --mode snapshot --compress zstd \
+  --notification-mode notification-system</code></pre>
+<p>The older <code>--mailto</code> option still works, but it is deprecated; the notification system replaces it.</p>
+<p>Proxmox Backup Server has the same system under <strong>Configuration → Notifications</strong> for its own verify, prune, GC and sync jobs. Wire the sync job's failures to the same phone target, because the sync job is your off-site copy.</p>
+<h2 id="step-2-a-dead-man-s-switch-for-the-quiet-failures">Step 2: a dead-man's switch for the quiet failures</h2>
+<p>For "nothing succeeded recently", use a check that <em>expects</em> a ping. A dead-man's switch service such as healthchecks.io, or a self-hosted Uptime Kuma push monitor, gives you a URL. Your job pings it on success. If the pings stop, you get a message.</p>
+<p>vzdump has hook scripts for exactly this. Add one line to <code>/etc/vzdump.conf</code>:</p>
+<pre><code>script: /usr/local/bin/vzdump-hook.sh</code></pre>
+<p>Then the hook itself:</p>
+<pre><code>#!/bin/bash
+# vzdump calls this with the phase as $1
+URL=https://hc-ping.com/your-uuid-here
+case "$1" in
+  job-end)   curl -fsS -m 10 --retry 3 "$URL" &gt;/dev/null ;;
+  job-abort) curl -fsS -m 10 --retry 3 "$URL/fail" &gt;/dev/null ;;
+esac
+exit 0</code></pre>
+<p>A clean finish pings the check; an aborted job pings its <code>/fail</code> URL so you hear about it straight away.</p>
+<p>Set the check's period to a day and its grace to a few hours. A night the job does not run, for any reason, becomes a phone notification by breakfast.</p>
+<p>Do the same for everything else on a timer: the rclone sync (a <code>&amp;&amp; curl</code> at the end of the cron line) and the database dump timer.</p>
+<h2 id="step-3-a-weekly-report-of-each-guest-s-newest-backup">Step 3: a weekly report of each guest's newest backup</h2>
+<p>Hooks tell you a job ran. They do not tell you it covered every guest. A job built for a hand-picked list of guests keeps pinging happily while every VM you created after it goes unprotected.</p>
+<p>So once a week, a script on the node lists the newest backup of every guest and complains about any older than two days:</p>
+<pre><code>#!/bin/bash
+# newest backup per guest on a storage; flag any older than MAXAGE days
+STORE=pbs01; MAXAGE=2; now=$(date +%s)
+API=/nodes/$(hostname)/storage/$STORE/content
+pvesh get $API --content backup --output-format json \
+ | jq -r '.[] | "\(.vmid) \(.ctime)"' | sort -k1,1n -k2,2nr | sort -u -k1,1n \
+ | while read -r vmid ctime; do
+     age=$(( (now - ctime) / 86400 ))
+     [ "$age" -gt "$MAXAGE" ] &amp;&amp; echo "STALE: guest $vmid, last backup ${age}d"
+   done
+ids="$(qm list | awk 'NR&gt;1{print $1}') $(pct list | awk 'NR&gt;1{print $1}')"
+for id in $ids; do
+  pvesh get $API --content backup --vmid "$id" --output-format json \
+    | jq -e 'length &gt; 0' &gt;/dev/null || echo "NONE: guest $id has no backup"
+done</code></pre>
+<p>Change <code>STORE</code> to your backup storage's name. Send the output to ntfy or email only when it is not empty, so a quiet week stays quiet.</p>
+<p>The second loop is the important one. It catches a guest that has never been backed up at all, which is exactly the gap a hand-picked job list leaves.</p>
+<h2 id="step-4-let-home-assistant-watch-its-own-backups">Step 4: let Home Assistant watch its own backups</h2>
+<p>Home Assistant's Backup integration exposes sensors for the backup manager's state and the last successful automatic backup. An automation that fires when the last success is more than two days old closes the loop for the one system in the house that already knows how to notify your phone:</p>
+<pre><code>alias: Backup is stale
+triggers:
+  - trigger: time
+    at: "09:00:00"
+conditions:
+  - condition: template
+    value_template: &gt;
+      {% set last = states('sensor.backup_last_successful_automatic_backup') %}
+      {{ (now() - last | as_datetime) &gt; timedelta(days=2) }}
+actions:
+  - action: notify.mobile_app_your_phone
+    data:
+      message: "Home Assistant has not completed a backup in over two days."</code></pre>
+<p>Check the sensor's exact entity ID in <strong>Developer Tools → States</strong>. The Backup integration creates it once automatic backups are configured.</p>
+<h2 id="step-5-watch-the-disk-before-it-fails-the-job">Step 5: watch the disk before it fails the job</h2>
+<p>Backup storage filling up is a backup failure in waiting, and a common cause of failed jobs. Proxmox shows storage usage on the Datacenter summary; PBS shows datastore usage and has its own notification for it.</p>
+<p>A simple rule: when the backup target passes <strong>80 percent</strong>, either prune harder or add a disk, and do it that week.</p>
+<h2 id="step-6-break-something-on-purpose">Step 6: break something on purpose</h2>
+<p>An alert you have never seen fire is in the same category as a backup you have never restored. Test every path once:</p>
+<ul><li>Disable the backup job for a day and confirm the dead-man's switch fires.</li><li>Point rclone at a bucket name that does not exist and confirm you hear about it.</li></ul>
+<p>If nothing arrives, fix the alert before you trust anything else in this post.</p>
+<h2 id="checklist-monitoring">Checklist: monitoring</h2>
+<ul><li>Notification targets set up (phone push plus email), with a matcher for vzdump warnings and errors</li><li>Every backup job on the notification system, on Proxmox and on PBS</li><li>A dead-man's switch pinged by the vzdump hook, the rclone sync and the database dump timer</li><li>A weekly backup-age report that also lists guests with no backup at all</li><li>A Home Assistant automation that complains when its own backup is stale</li><li>Backup storage usage watched, with 80 percent as the act-now line</li><li>Every alert path deliberately triggered once</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Aria: a private voice assistant that runs on your Android phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</guid>
+<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Aria handles speech recognition, the language model and voice output on your phone. No cloud LLM, no voice uploads, no account.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.aria.assistant.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>voice-assistant</category><category>on-device-ai</category><category>privacy</category><category>offline</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.aria.assistant.jpg" alt=""></p><p>Using a typical voice assistant means accepting a trade. To get answers, your voice is recorded and sent to a server, processed there, and often kept. If you run a homelab, that kind of trade is probably what pushed you toward self-hosting in the first place. Aria is a voice assistant built the other way around: the listening, the thinking and the talking all happen on your Android device.</p>
+<h2 id="what-runs-on-the-phone">What runs on the phone</h2>
+<p>According to the listing, Aria does all of this locally:</p>
+<ul><li><strong>Speech recognition</strong>, turning what you say into text.</li><li><strong>Wake-word detection</strong>, so it can listen for its trigger without streaming audio anywhere.</li><li><strong>Language model inference</strong>, the part that actually understands and answers your request.</li><li><strong>Voice synthesis</strong>, for spoken replies.</li><li><strong>Translation</strong>, also handled on the device.</li><li><strong>Text-to-speech in multiple languages.</strong></li></ul>
+<p>The key line is that there is no cloud LLM. Many assistants that call themselves private still send the actual request to a hosted model. Aria's listing says it does not, and that your voice is not uploaded. Conversation history stays local, and no account is required.</p>
+<h2 id="optional-features-and-what-they-need">Optional features, and what they need</h2>
+<p>Some useful things an assistant can do require more than a microphone. Aria treats those as opt-in. The listing names:</p>
+<ul><li><strong>Web search</strong>, with visible source cards so you can see where an answer came from.</li><li><strong>Notification access</strong>, for smart replies.</li><li><strong>Phone, contacts, calendar, camera and location</strong> access.</li></ul>
+<p>Permissions are requested only when you use the feature that needs them. If you never turn on web search, Aria never needs to reach the web for it. If you never ask it to deal with your calendar, it never asks for calendar access.</p>
+<p>That approach is worth understanding before you start. The core assistant works offline and on the device. The extras are there when you want them, and each one comes with its own permission prompt at the moment you first use it, rather than a long list of grants on install.</p>
+<h3 id="web-search-with-sources">Web search with sources</h3>
+<p>The web search option is the one feature that, by nature, has to touch the internet. The listing's detail here is the source cards: when Aria uses search, the sources are shown, so you are not left guessing whether an answer came from the model or from a page.</p>
+<h2 id="why-on-device-matters">Why on-device matters</h2>
+<p>The listing puts the case simply: most assistants send your voice and data to the cloud, and Aria keeps everything on your device. In practice that means:</p>
+<ul><li>Nothing you say has to leave the phone for the assistant to work.</li><li>It keeps working in places with no connection.</li><li>There is no account tying your history to an identity on a server.</li></ul>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download. The app contains ads, and the Play listing notes in-app purchases.</li><li><strong>Category:</strong> Tools, rated Everyone.</li><li><strong>Offline by default:</strong> the core features run without a network; web search is the opt-in exception.</li><li><strong>Permissions on demand:</strong> phone, contacts, calendar, camera, location and notification access are only requested when you use a feature that needs them.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want a voice assistant but do not want your voice uploaded.</li><li>You spend time somewhere offline, or you travel often.</li><li>You want to decide feature by feature what an assistant can access.</li><li>You want search answers to show their sources.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.aria.assistant">Get Aria: On-Device Assistant on Google Play</a></p>]]></content:encoded></item><item><title>The Homelab the Right Way merch store is open: every item, reviewed</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-store-open-every-item-reviewed/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-store-open-every-item-reviewed/</guid>
 <pubDate>Tue, 13 Oct 2026 12:30:00 -0400</pubDate><description>The merch store is open. Here is every item in it, the design behind each one, and a one-minute video review that shows the real products.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/showcase-hero.jpg" type="image/jpeg" length="0"/>
 <category>merch</category><category>homelab</category><category>selfhosted</category><category>store</category>
