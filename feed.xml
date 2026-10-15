@@ -32,7 +32,61 @@
 <h2 id="how-they-fit-with-the-first-six">How they fit with the first six</h2>
 <p>Book 1 sets up Proxmox, OPNsense and Home Assistant; Book 3 is the backup playbook; Book 5 locks down the network; Book 6 makes Home Assistant automations reliable. The new three assume those exist and build on them: Book 7 watches all of it, Book 8 is where your self-hosted apps live, and Book 9 is how the whole lab gets written down and rebuilt. Each book stands on its own, with cross-references where another book goes deeper.</p>
 <h2 id="bundles">Bundles</h2>
-<p>All nine homelab books are in the Homelab Bundle ($59), and every book in the store, the Android series included, is in the Everything Bundle ($89). The code RIGHTWAY20 takes 20% off any order through October 31.</p><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item><item><title>Pawdub: your dog finally has subtitles (and yes, it&#x27;s a joke app that really listens)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/pawdub-funny-pet-translator-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/pawdub-funny-pet-translator-android-app/</guid>
+<p>All nine homelab books are in the Homelab Bundle ($59), and every book in the store, the Android series included, is in the Everything Bundle ($89). The code RIGHTWAY20 takes 20% off any order through October 31.</p><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item><item><title>Self-host your photos, files and passwords the safe way</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/</guid>
+<pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn&#x27;t one, and updates that are never or always.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-21.jpg" type="image/jpeg" length="0"/>
+<category>self-hosting</category><category>immich</category><category>nextcloud</category><category>vaultwarden</category><category>tailscale</category><category>proxmox</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-21.jpg" alt=""></p><p>Your photos, your files and your passwords, running on a small box in your house. That is the whole promise of self-hosting your life: Immich instead of Google Photos, Nextcloud (or Syncthing) instead of Drive, Vaultwarden instead of a cloud password manager.</p>
+<p>None of the individual installs is hard. What goes wrong is the layout around them. Each stage of the build has one classic trap, and each trap has a short, documented fix. Here is the path end to end.</p>
+<h2 id="trap-1-one-disk-one-bad-day">Trap 1: one disk, one bad day</h2>
+<p>The most common beginner layout is a single SSD holding Proxmox, the containers and every photo you own. When that SSD wears out or fills up, you lose the server and the data at the same moment, and the restore needs the very disk that died.</p>
+<p><strong>The fix:</strong> separate the system from the data. A small SSD (256 to 512 GB) holds Proxmox and the guests' virtual disks, databases included. A second, large drive holds the photo library, the Nextcloud files and backups waiting to go elsewhere.</p>
+<p>Then run all three apps in one Debian 13 VM as a Docker host. Immich's documentation recommends a full VM and calls Docker inside an LXC container not recommended, possible only for advanced users. Give the VM at least 8 GB of RAM (12 to 16 GB is comfortable) and set its CPU type to <code>host</code> or <code>x86-64-v2-AES</code>, because Immich's machine-learning container needs the x86-64-v2 instruction level.</p>
+<p>Inside the VM, mount the data disk by its label, with <code>nofail</code>:</p>
+<pre><code>mkfs.ext4 -L data /dev/sdb
+mkdir -p /srv/data
+echo "LABEL=data /srv/data ext4 defaults,nofail 0 2" &gt;&gt; /etc/fstab
+mount -a &amp;&amp; df -h /srv/data</code></pre>
+<p>The label means a reordered disk never mounts in the wrong place, and <code>nofail</code> means a missing disk still lets the VM boot so you can fix it over SSH.</p>
+<h2 id="trap-2-the-immich-database-on-a-network-share">Trap 2: the Immich database on a network share</h2>
+<p>Immich keeps your files on disk and everything else (who is in the photo, which album it belongs to, where the file lives) in Postgres. The documentation is blunt: the database belongs on local SSD storage, never on a network share of any kind. Point <code>DB_DATA_LOCATION</code> at the NAS and a network hiccup during a write can leave Postgres corrupted and the timeline empty.</p>
+<p>The second Immich trap is the version: the server only talks to mobile apps of a compatible major version, so running <code>latest</code> with auto-updates can silently stop your phone backups.</p>
+<p><strong>The fix</strong> is a handful of lines in <code>.env</code>:</p>
+<pre><code>UPLOAD_LOCATION=/srv/data/immich
+DB_DATA_LOCATION=/opt/immich/postgres
+IMMICH_VERSION=v3
+DB_PASSWORD=ChangeMeToALongRandomString</code></pre>
+<p>Library on the data disk, database on the SSD, pinned to the major version. Use only letters and digits in the password; the docs warn that special characters confuse Docker's parsing. Turn on the storage template (Administration → Settings → Storage Template) before the first upload, so the library on disk is a readable year/month/day tree.</p>
+<h2 id="trap-3-the-hand-built-nextcloud">Trap 3: the hand-built Nextcloud</h2>
+<p>Web server, PHP, database, Redis, cron jobs and a dozen tuning settings, all by hand. Each piece is easy; together they are a full-time hobby, and months later the admin page is a wall of warnings.</p>
+<p><strong>The fix:</strong> first decide honestly what you need. A folder that stays the same on your laptop and phone is a Syncthing job. Documents, family sharing, calendars and contacts is a Nextcloud job, and then Nextcloud All-in-One (AIO) is the way: the official Docker setup that runs and updates the whole stack for you. Set <code>NEXTCLOUD_DATADIR=/srv/data/nextcloud</code> in the start command before the first start, because it can't be changed later without a fiddly migration. And don't rename the <code>nextcloud-aio-mastercontainer</code> container; AIO's self-updates depend on that exact name.</p>
+<h2 id="trap-4-open-signups-and-plain-http-on-vaultwarden">Trap 4: open signups and plain HTTP on Vaultwarden</h2>
+<p>Leave registration open and anyone who finds your URL can create an account; bots scan for exactly that. Serve it over plain HTTP and the web vault fails, because it relies on browser crypto APIs that most browsers only allow over HTTPS.</p>
+<p><strong>The fix</strong> is in the compose file:</p>
+<pre><code>SIGNUPS_ALLOWED: "false"
+INVITATIONS_ALLOWED: "true"
+SHOW_PASSWORD_HINT: "false"
+ports:
+  - "127.0.0.1:8081:80"</code></pre>
+<p>Generate the admin token as an Argon2 hash with <code>docker run --rm -it vaultwarden/server /vaultwarden hash</code>, paste it in, and double every one of its five dollar signs, or Docker Compose silently breaks it. Then <code>chmod 600 /opt/vaultwarden/compose.yaml</code>, turn on two-step login, and print an emergency sheet with your vault URL, email and master passphrase.</p>
+<h2 id="trap-5-forwarding-ports-to-everything">Trap 5: forwarding ports to everything</h2>
+<p>Forward port 443 on the router to the server and every service is reachable from the whole internet; within hours your logs fill with bots trying <code>/admin</code> and <code>/wp-login.php</code>.</p>
+<p><strong>The fix:</strong> Tailscale on the Docker VM as a subnet router, so your phone reaches home with no open router ports:</p>
+<pre><code>tailscale up --advertise-routes=192.168.10.0/24</code></pre>
+<p>Approve the route in the admin console and disable key expiry for the server. For real HTTPS names, use a reverse proxy with a wildcard certificate from the DNS challenge, with <code>*.example.com</code> pointing at the proxy's private address. If family members need a shared album link, forward only 443, only to the proxy, and never expose Vaultwarden or the AIO admin interface.</p>
+<h2 id="trap-6-the-backup-that-isn-t-one-and-updates-that-are-never-or-always">Trap 6: the backup that isn't one, and updates that are never or always</h2>
+<p>A file copy of a running database can restore as garbage. For Vaultwarden, use its built-in online backup in a nightly script:</p>
+<pre><code>docker exec vaultwarden /vaultwarden backup
+tar -czf /srv/data/backups/vw-$(date +%F).tgz \
+  -C /opt/vaultwarden data compose.yaml</code></pre>
+<p>Put the whole Docker VM on Proxmox Backup Server with a nightly snapshot-mode job, add an off-site copy, and test a restore once a quarter. On the bad day, restore passwords first: Vaultwarden comes back from the newest <code>vw-*.tgz</code> on any Linux machine with Docker, and it unlocks everything else.</p>
+<p>For updates, never updating leaves known holes open, and auto-pulling every new image lands breaking releases at 3 AM. Pick a monthly maintenance hour and snapshot before touching anything:</p>
+<pre><code>qm snapshot 201 pre-update-$(date +%Y%m%d)
+cd /opt/immich
+docker compose pull &amp;&amp; docker compose up -d</code></pre>
+<p>On the Proxmox host itself, use <code>apt full-upgrade</code>, never plain <code>apt upgrade</code>. Then test each app, and delete the snapshot so it doesn't slowly fill thin storage.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>System and guest disks on an SSD; photos and files on a separate data drive mounted by label with <code>nofail</code></li><li>One Debian 13 VM as the Docker host, CPU type <code>host</code> or <code>x86-64-v2-AES</code></li><li>Immich: <code>DB_DATA_LOCATION</code> on local SSD, <code>IMMICH_VERSION=v3</code>, storage template on before the first upload</li><li>Nextcloud via AIO with <code>NEXTCLOUD_DATADIR</code> set before the first start, or Syncthing with file versioning on</li><li>Vaultwarden: signups off, HTTPS only, Argon2 admin token with doubled dollar signs, two-step login, emergency sheet printed</li><li>Tailscale subnet router, key expiry off; no ports forwarded except 443 to the proxy if you must share</li><li>Nightly PBS job, Vaultwarden online backup in cron, an off-site copy, a dated quarterly restore test</li><li>A monthly update hour that starts with a snapshot</li></ul><p><a href="https://payhip.com/b/Ut72a">Go deeper: Self-Host Your Life</a></p>]]></content:encoded></item><item><title>Pawdub: your dog finally has subtitles (and yes, it&#x27;s a joke app that really listens)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/pawdub-funny-pet-translator-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/pawdub-funny-pet-translator-android-app/</guid>
 <pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>Pawdub puts funny movie subtitles on your dog or cat when it actually barks or meows. Real on-device sound and scene detection, 8 personas, 59 languages, no account and nothing uploaded. It is a joke app and says so. Coming soon to Google Play.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.pawdub.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>pets</category><category>on-device-ai</category><category>fun</category>

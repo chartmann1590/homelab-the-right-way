@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self-host your photos, files and passwords the safe way — Homelab the Right Way</title>
+<meta name="description" content="Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn&#x27;t one, and updates that are never or always.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Self-host your photos, files and passwords the safe way — Homelab the Right Way">
+<meta property="og:description" content="Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn&#x27;t one, and updates that are never or always.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-21.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Self-host your photos, files and passwords the safe way — Homelab the Right Way">
+<meta name="twitter:description" content="Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn&#x27;t one, and updates that are never or always.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-21.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s"><meta name="p:domain_verify" content="1d759906fad752c78978c6793547e68a"/>
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=9" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=9">
+<meta property="article:published_time" content="2026-10-15">
+<meta property="article:tag" content="self-hosting">
+<meta property="article:tag" content="immich">
+<meta property="article:tag" content="nextcloud">
+<meta property="article:tag" content="vaultwarden">
+<meta property="article:tag" content="tailscale">
+<meta property="article:tag" content="proxmox">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Self-host your photos, files and passwords the safe way", "description": "Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn't one, and updates that are never or always.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/", "datePublished": "2026-10-15T12:30:00-04:00", "dateModified": "2026-10-15T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-21.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "self-hosting, immich, nextcloud, vaultwarden, tailscale, proxmox", "wordCount": 1091, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Self-Host Your Life", "url": "https://payhip.com/b/Ut72a", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book2.jpg", "description": "Replace Google Photos, Drive and your password manager with Immich, Nextcloud and Vaultwarden.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/Ut72a", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "Self-host your photos, files and passwords the safe way", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">Self-host your photos, files and passwords the safe way</h1>
+<p class="lead fade" style="--d:2">Immich, Nextcloud and Vaultwarden on one small box at home, without the six classic traps: one disk for everything, a database on a network share, open signups, forwarded ports, a backup that isn&#x27;t one, and updates that are never or always.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-15">October 15, 2026</time> · 5 min read · <span class="tags inline"><span>self-hosting</span><span>immich</span><span>nextcloud</span><span>vaultwarden</span><span>tailscale</span><span>proxmox</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/2026-10-21.webp" width="1280" height="720" alt="Self-host your photos, files and passwords the safe way" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#trap-1-one-disk-one-bad-day">Trap 1: one disk, one bad day</a></li><li><a href="#trap-2-the-immich-database-on-a-network-share">Trap 2: the Immich database on a network share</a></li><li><a href="#trap-3-the-hand-built-nextcloud">Trap 3: the hand-built Nextcloud</a></li><li><a href="#trap-4-open-signups-and-plain-http-on-vaultwarden">Trap 4: open signups and plain HTTP on Vaultwarden</a></li><li><a href="#trap-5-forwarding-ports-to-everything">Trap 5: forwarding ports to everything</a></li><li><a href="#trap-6-the-backup-that-isn-t-one-and-updates-that-are-never-or-always">Trap 6: the backup that isn&#x27;t one, and updates that are never or always</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
+<div class="prose">
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 21, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtu.be/GEnRCbczuGw" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
+<p>Your photos, your files and your passwords, running on a small box in your house. That is the whole promise of self-hosting your life: Immich instead of Google Photos, Nextcloud (or Syncthing) instead of Drive, Vaultwarden instead of a cloud password manager.</p>
+<p>None of the individual installs is hard. What goes wrong is the layout around them. Each stage of the build has one classic trap, and each trap has a short, documented fix. Here is the path end to end.</p>
+<h2 id="trap-1-one-disk-one-bad-day">Trap 1: one disk, one bad day</h2>
+<p>The most common beginner layout is a single SSD holding Proxmox, the containers and every photo you own. When that SSD wears out or fills up, you lose the server and the data at the same moment, and the restore needs the very disk that died.</p>
+<p><strong>The fix:</strong> separate the system from the data. A small SSD (256 to 512 GB) holds Proxmox and the guests' virtual disks, databases included. A second, large drive holds the photo library, the Nextcloud files and backups waiting to go elsewhere.</p>
+<p>Then run all three apps in one Debian 13 VM as a Docker host. Immich's documentation recommends a full VM and calls Docker inside an LXC container not recommended, possible only for advanced users. Give the VM at least 8 GB of RAM (12 to 16 GB is comfortable) and set its CPU type to <code>host</code> or <code>x86-64-v2-AES</code>, because Immich's machine-learning container needs the x86-64-v2 instruction level.</p>
+<p>Inside the VM, mount the data disk by its label, with <code>nofail</code>:</p>
+<pre><code>mkfs.ext4 -L data /dev/sdb
+mkdir -p /srv/data
+echo "LABEL=data /srv/data ext4 defaults,nofail 0 2" &gt;&gt; /etc/fstab
+mount -a &amp;&amp; df -h /srv/data</code></pre>
+<p>The label means a reordered disk never mounts in the wrong place, and <code>nofail</code> means a missing disk still lets the VM boot so you can fix it over SSH.</p>
+<h2 id="trap-2-the-immich-database-on-a-network-share">Trap 2: the Immich database on a network share</h2>
+<p>Immich keeps your files on disk and everything else (who is in the photo, which album it belongs to, where the file lives) in Postgres. The documentation is blunt: the database belongs on local SSD storage, never on a network share of any kind. Point <code>DB_DATA_LOCATION</code> at the NAS and a network hiccup during a write can leave Postgres corrupted and the timeline empty.</p>
+<p>The second Immich trap is the version: the server only talks to mobile apps of a compatible major version, so running <code>latest</code> with auto-updates can silently stop your phone backups.</p>
+<p><strong>The fix</strong> is a handful of lines in <code>.env</code>:</p>
+<pre><code>UPLOAD_LOCATION=/srv/data/immich
+DB_DATA_LOCATION=/opt/immich/postgres
+IMMICH_VERSION=v3
+DB_PASSWORD=ChangeMeToALongRandomString</code></pre>
+<p>Library on the data disk, database on the SSD, pinned to the major version. Use only letters and digits in the password; the docs warn that special characters confuse Docker's parsing. Turn on the storage template (Administration → Settings → Storage Template) before the first upload, so the library on disk is a readable year/month/day tree.</p>
+<h2 id="trap-3-the-hand-built-nextcloud">Trap 3: the hand-built Nextcloud</h2>
+<p>Web server, PHP, database, Redis, cron jobs and a dozen tuning settings, all by hand. Each piece is easy; together they are a full-time hobby, and months later the admin page is a wall of warnings.</p>
+<p><strong>The fix:</strong> first decide honestly what you need. A folder that stays the same on your laptop and phone is a Syncthing job. Documents, family sharing, calendars and contacts is a Nextcloud job, and then Nextcloud All-in-One (AIO) is the way: the official Docker setup that runs and updates the whole stack for you. Set <code>NEXTCLOUD_DATADIR=/srv/data/nextcloud</code> in the start command before the first start, because it can't be changed later without a fiddly migration. And don't rename the <code>nextcloud-aio-mastercontainer</code> container; AIO's self-updates depend on that exact name.</p>
+<h2 id="trap-4-open-signups-and-plain-http-on-vaultwarden">Trap 4: open signups and plain HTTP on Vaultwarden</h2>
+<p>Leave registration open and anyone who finds your URL can create an account; bots scan for exactly that. Serve it over plain HTTP and the web vault fails, because it relies on browser crypto APIs that most browsers only allow over HTTPS.</p>
+<p><strong>The fix</strong> is in the compose file:</p>
+<pre><code>SIGNUPS_ALLOWED: "false"
+INVITATIONS_ALLOWED: "true"
+SHOW_PASSWORD_HINT: "false"
+ports:
+  - "127.0.0.1:8081:80"</code></pre>
+<p>Generate the admin token as an Argon2 hash with <code>docker run --rm -it vaultwarden/server /vaultwarden hash</code>, paste it in, and double every one of its five dollar signs, or Docker Compose silently breaks it. Then <code>chmod 600 /opt/vaultwarden/compose.yaml</code>, turn on two-step login, and print an emergency sheet with your vault URL, email and master passphrase.</p>
+<h2 id="trap-5-forwarding-ports-to-everything">Trap 5: forwarding ports to everything</h2>
+<p>Forward port 443 on the router to the server and every service is reachable from the whole internet; within hours your logs fill with bots trying <code>/admin</code> and <code>/wp-login.php</code>.</p>
+<p><strong>The fix:</strong> Tailscale on the Docker VM as a subnet router, so your phone reaches home with no open router ports:</p>
+<pre><code>tailscale up --advertise-routes=192.168.10.0/24</code></pre>
+<p>Approve the route in the admin console and disable key expiry for the server. For real HTTPS names, use a reverse proxy with a wildcard certificate from the DNS challenge, with <code>*.example.com</code> pointing at the proxy's private address. If family members need a shared album link, forward only 443, only to the proxy, and never expose Vaultwarden or the AIO admin interface.</p>
+<h2 id="trap-6-the-backup-that-isn-t-one-and-updates-that-are-never-or-always">Trap 6: the backup that isn't one, and updates that are never or always</h2>
+<p>A file copy of a running database can restore as garbage. For Vaultwarden, use its built-in online backup in a nightly script:</p>
+<pre><code>docker exec vaultwarden /vaultwarden backup
+tar -czf /srv/data/backups/vw-$(date +%F).tgz \
+  -C /opt/vaultwarden data compose.yaml</code></pre>
+<p>Put the whole Docker VM on Proxmox Backup Server with a nightly snapshot-mode job, add an off-site copy, and test a restore once a quarter. On the bad day, restore passwords first: Vaultwarden comes back from the newest <code>vw-*.tgz</code> on any Linux machine with Docker, and it unlocks everything else.</p>
+<p>For updates, never updating leaves known holes open, and auto-pulling every new image lands breaking releases at 3 AM. Pick a monthly maintenance hour and snapshot before touching anything:</p>
+<pre><code>qm snapshot 201 pre-update-$(date +%Y%m%d)
+cd /opt/immich
+docker compose pull &amp;&amp; docker compose up -d</code></pre>
+<p>On the Proxmox host itself, use <code>apt full-upgrade</code>, never plain <code>apt upgrade</code>. Then test each app, and delete the snapshot so it doesn't slowly fill thin storage.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>System and guest disks on an SSD; photos and files on a separate data drive mounted by label with <code>nofail</code></li><li>One Debian 13 VM as the Docker host, CPU type <code>host</code> or <code>x86-64-v2-AES</code></li><li>Immich: <code>DB_DATA_LOCATION</code> on local SSD, <code>IMMICH_VERSION=v3</code>, storage template on before the first upload</li><li>Nextcloud via AIO with <code>NEXTCLOUD_DATADIR</code> set before the first start, or Syncthing with file versioning on</li><li>Vaultwarden: signups off, HTTPS only, Argon2 admin token with doubled dollar signs, two-step login, emergency sheet printed</li><li>Tailscale subnet router, key expiry off; no ports forwarded except 443 to the proxy if you must share</li><li>Nightly PBS job, Vaultwarden online backup in cron, an off-site copy, a dated quarterly restore test</li><li>A monthly update hour that starts with a snapshot</li></ul>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="120" height="192" alt="Cover of Self-Host Your Life" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Self-Host Your Life</h3>
+<p>Move photos, files and passwords to your own hardware with Immich, Nextcloud and Vaultwarden, backed up properly.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/Ut72a" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></p></div>
+</aside><aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 14 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<p class="sc-offer"><b>Bundles:</b> <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 14 ebooks, $89</a> · <a href="https://payhip.com/b/yVteh" rel="noopener">Homelab Bundle: 9 ebooks, $59</a> · <a href="https://payhip.com/b/CFiT9" rel="noopener">Android Bundle: 5 ebooks, $49</a>. Use code <b>RIGHTWAY20</b> for 20% off any order through Oct 31.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/eHgh0" rel="noopener"><img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="90" height="144" alt="Cover of Automations That Just Work" loading="lazy"></a><div><b>Automations That Just Work</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/eHgh0" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Qdxgz" rel="noopener"><img src="/homelab-the-right-way/assets/img/book7-sm.webp" width="90" height="144" alt="Cover of Ship Your First Android App" loading="lazy"></a><div><b>Ship Your First Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Qdxgz" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/mIYh9" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/fNO53" rel="noopener"><img src="/homelab-the-right-way/assets/img/book8-sm.webp" width="90" height="144" alt="Cover of Compose Without the Confusion" loading="lazy"></a><div><b>Compose Without the Confusion</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/fNO53" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/LsD1t" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/YcoD4" rel="noopener"><img src="/homelab-the-right-way/assets/img/book9-sm.webp" width="90" height="144" alt="Cover of Pass Google Play Review" loading="lazy"></a><div><b>Pass Google Play Review</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/YcoD4" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/VcvYH" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/zRXe3" rel="noopener"><img src="/homelab-the-right-way/assets/img/book10-sm.webp" width="90" height="144" alt="Cover of Get Paid for Your Android App" loading="lazy"></a><div><b>Get Paid for Your Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/zRXe3" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/8lBGE" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/J9jlp" rel="noopener"><img src="/homelab-the-right-way/assets/img/book11-sm.webp" width="90" height="144" alt="Cover of On-Device AI for Android" loading="lazy"></a><div><b>On-Device AI for Android</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/J9jlp" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/Hz16R" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/An62R" rel="noopener"><img src="/homelab-the-right-way/assets/img/book12-sm.webp" width="90" height="144" alt="Cover of Watch Your Homelab" loading="lazy"></a><div><b>Watch Your Homelab</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/An62R" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/cIY8z" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Lmhcb" rel="noopener"><img src="/homelab-the-right-way/assets/img/book13-sm.webp" width="90" height="144" alt="Cover of Containers Without the Chaos" loading="lazy"></a><div><b>Containers Without the Chaos</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Lmhcb" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/1qoiW" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/ZcsXi" rel="noopener"><img src="/homelab-the-right-way/assets/img/book14-sm.webp" width="90" height="144" alt="Cover of Automate Your Homelab" loading="lazy"></a><div><b>Automate Your Homelab</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/ZcsXi" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/yql34" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 14 ebooks for $89</a><a class="btn ghost" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/three-new-homelab-ebooks-monitoring-containers-automation/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-15">October 15, 2026</time> · 4 min read</p>
+<h3>Three new Homelab the Right Way ebooks: monitoring, containers and automation</h3>
+<p>Homelab the Right Way Books 7, 8 and 9 are out: Watch Your Homelab (monitoring and alerts), Containers Without the Chaos (Docker Compose, Caddy, HTTPS and single sign-on) and Automate Your Homelab (Git, cloud-init, OpenTofu and Ansible). Each has a free sample chapter.</p>
+<p class="tags"><span>homelab</span><span>monitoring</span><span>docker</span><span>ansible</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/pawdub-funny-pet-translator-android-app/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/app-com.charles.pawdub-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-15">October 15, 2026</time> · 3 min read</p>
+<h3>Pawdub: your dog finally has subtitles (and yes, it&#x27;s a joke app that really listens)</h3>
+<p>Pawdub puts funny movie subtitles on your dog or cat when it actually barks or meows. Real on-device sound and scene detection, 8 personas, 59 languages, no account and nothing uploaded. It is a joke app and says so. Coming soon to Google Play.</p>
+<p class="tags"><span>android</span><span>pets</span><span>on-device-ai</span><span>fun</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-15">October 15, 2026</time> · 3 min read</p>
+<h3>Upgrading to AGP 9: the Kotlin plugin you can delete</h3>
+<p>Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.</p>
+<p class="tags"><span>android</span><span>kotlin</span><span>jetpack compose</span><span>gradle</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>14 ebooks, $19 each, every one with a free sample. All 14 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=9" defer></script>
+</body>
+</html>
