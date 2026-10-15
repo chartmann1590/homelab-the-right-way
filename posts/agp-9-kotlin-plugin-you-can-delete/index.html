@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Upgrading to AGP 9: the Kotlin plugin you can delete — Homelab the Right Way</title>
+<meta name="description" content="Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Upgrading to AGP 9: the Kotlin plugin you can delete — Homelab the Right Way">
+<meta property="og:description" content="Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Upgrading to AGP 9: the Kotlin plugin you can delete — Homelab the Right Way">
+<meta name="twitter:description" content="Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=8" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=8">
+<meta property="article:published_time" content="2026-10-15">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="kotlin">
+<meta property="article:tag" content="jetpack compose">
+<meta property="article:tag" content="gradle">
+<meta property="article:tag" content="agp">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Upgrading to AGP 9: the Kotlin plugin you can delete", "description": "Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/", "datePublished": "2026-10-15T12:30:00-04:00", "dateModified": "2026-10-15T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, kotlin, jetpack compose, gradle, agp", "wordCount": 725, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Compose Without the Confusion", "url": "https://payhip.com/b/fNO53", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book8.jpg", "description": "Kotlin and Jetpack Compose that make sense: state and recomposition, layouts that behave, Material 3, Navigation 3, ViewModels with StateFlow, and Room.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/fNO53", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "Upgrading to AGP 9: the Kotlin plugin you can delete", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">Upgrading to AGP 9: the Kotlin plugin you can delete</h1>
+<p class="lead fade" style="--d:2">Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-15">October 15, 2026</time> · 3 min read · <span class="tags inline"><span>android</span><span>kotlin</span><span>jetpack compose</span><span>gradle</span><span>agp</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/og.jpg" width="1280" height="720" alt="Upgrading to AGP 9: the Kotlin plugin you can delete" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</a></li><li><a href="#the-fix-three-edits">The fix: three edits</a></li><li><a href="#the-second-trap-kapt">The second trap: kapt</a></li><li><a href="#the-third-trap-icons-that-stop-resolving">The third trap: icons that stop resolving</a></li><li><a href="#checklist-for-an-agp-9-upgrade">Checklist for an AGP 9 upgrade</a></li></ol></nav>
+<div class="prose">
+
+<p>You open an older Android project, bump the Android Gradle plugin to 9, and sync. The build stops with one of two messages: "Cannot add extension with name 'kotlin'" or "The 'org.jetbrains.kotlin.android' plugin is no longer required". Nothing in your code changed. The build files did not keep up with AGP.</p>
+<p>This post covers what changed in AGP 9, the small set of edits that fix it, and two related surprises: kapt and the Material icons. Everything here comes from Chapter 2 (Thinking in Composables) and Chapter 8 (Saving Data: Room and DataStore) of <em>Compose Without the Confusion</em>.</p>
+<h2 id="the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</h2>
+<p>Since Android Gradle plugin 9.0, Kotlin support is built into AGP itself. You no longer apply the separate <code>org.jetbrains.kotlin.android</code> plugin. Older projects apply it anyway, because that was the rule for years. With AGP 9 the plugin and AGP both try to set up Kotlin, and the sync fails with the messages above.</p>
+<p>There is a second leftover in most older modules: an <code>android { kotlinOptions { } }</code> block. That block belonged to the old plugin, so it has to move too.</p>
+<h2 id="the-fix-three-edits">The fix: three edits</h2>
+<p>Google documents the migration for built-in Kotlin. In short:</p>
+<ol><li>Remove the kotlin-android plugin from your build files.</li><li>Remove it from your version catalog as well, so nothing re-adds it.</li><li>Move any <code>android { kotlinOptions { } }</code> block to <code>kotlin { compilerOptions { } }</code>.</li></ol>
+<p>One plugin stays. You still apply the <strong>Compose compiler plugin</strong>. It ships with Kotlin and uses the same version number, so it points at the <code>kotlin</code> version in your catalog.</p>
+<h3 id="what-a-working-agp-9-setup-looks-like">What a working AGP 9 setup looks like</h3>
+<p>Here is the version catalog from the book's sample project, using the versions current at the time of writing (October 2026):</p>
+<pre><code># gradle/libs.versions.toml (excerpt)
+[versions]
+agp = "9.4.0"
+kotlin = "2.4.21"
+ksp = "2.3.12"
+composeBom = "2026.09.00"
+activity = "1.13.0"
+lifecycle = "2.11.0"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-icons-core = { module = "androidx.compose.material:material-icons-core" }
+
+[libraries.activity-compose]
+module = "androidx.activity:activity-compose"
+version.ref = "activity"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }</code></pre>
+<p>Notice what is missing from <code>[plugins]</code>: there is no <code>kotlin-android</code> entry. The only Kotlin-related plugin is <code>kotlin-compose</code>, and its version is the Kotlin version.</p>
+<p>The module build file is just as short:</p>
+<pre><code>// app/build.gradle.kts (excerpt)
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    namespace = "com.example.pantry"
+    compileSdk = 36   // use the newest stable API level your AGP supports
+    defaultConfig {
+        applicationId = "com.example.pantry"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildFeatures { compose = true }
+}</code></pre>
+<p>Two plugins. No <code>kotlinOptions</code> inside <code>android { }</code>. If your module still has compiler flags, they go in a top-level <code>kotlin { compilerOptions { } }</code> block instead.</p>
+<h2 id="the-second-trap-kapt">The second trap: kapt</h2>
+<p>If your project uses Room, Hilt or another annotation processor through kapt, the plugin cleanup is not the end. With AGP 9's built-in Kotlin, the old <code>kotlin-kapt</code> plugin is not compatible. Google's migration guide recommends moving to <strong>KSP</strong>, and offers <code>com.android.legacy-kapt</code> only as a stopgap. Room, Hilt and most annotation processors support KSP today.</p>
+<p>Moving Room to KSP is a few lines. The catalog gets the KSP and Room plugins (the <code>ksp</code> version is already in <code>[versions]</code> above):</p>
+<pre><code># gradle/libs.versions.toml (additions)
+[versions]
+room = "2.8.5"
+
+[libraries]
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+[plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }</code></pre>
+<p>And the module applies them, swapping <code>kapt(...)</code> for <code>ksp(...)</code> on the compiler:</p>
+<pre><code>// app/build.gradle.kts
+plugins {
+    // ...
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+}</code></pre>
+<p>The Room Gradle plugin's <code>schemaDirectory</code> writes a JSON description of every database version into your project. Commit those files. Room uses them for automatic migrations and for migration tests.</p>
+<p>Hilt works the same way. It is built on Dagger and processed with KSP. At the time of writing the Dagger and Hilt release is 2.60.1.</p>
+<h2 id="the-third-trap-icons-that-stop-resolving">The third trap: icons that stop resolving</h2>
+<p>This one is not AGP, but it tends to arrive in the same upgrade. Since Material 3 1.4.0, the library no longer pulls in <code>material-icons-core</code> for you. Its release notes say so. After the upgrade, <code>Icons.Default.Add</code> suddenly does not resolve, and the error looks unrelated to anything you touched.</p>
+<p>The fix is to add the artifact yourself. It is already in the catalog above as <code>compose-icons-core</code>, and the BOM still manages its version:</p>
+<pre><code>dependencies {
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.icons.core)   // Icons.Default.*
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.activity.compose)
+    debugImplementation(libs.compose.ui.tooling)
+}</code></pre>
+<p>The BOM line is the one that saves you the most pain. You declare one BOM version and leave the version off every individual Compose library. The BOM picks a set of versions that were tested together.</p>
+<h2 id="checklist-for-an-agp-9-upgrade">Checklist for an AGP 9 upgrade</h2>
+<ul><li>Remove <code>org.jetbrains.kotlin.android</code> from every module and from the version catalog.</li><li>Move <code>android { kotlinOptions { } }</code> to <code>kotlin { compilerOptions { } }</code>.</li><li>Keep the Compose compiler plugin (<code>org.jetbrains.kotlin.plugin.compose</code>) at your Kotlin version.</li><li>Replace kapt with KSP. Use <code>com.android.legacy-kapt</code> only as a stopgap.</li><li>For Room, add the Room Gradle plugin, set <code>schemaDirectory</code>, and commit the schema files.</li><li>If <code>Icons.Default</code> stops resolving, add <code>material-icons-core</code> and let the BOM version it.</li><li>Leave versions off individual Compose libraries and let one BOM version pick them.</li></ul>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book8-sm.webp" width="120" height="192" alt="Cover of Compose Without the Confusion" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Compose Without the Confusion</h3>
+<p>The Kotlin Compose leans on, an AGP 9 project setup, modifier order and layouts, state, remember vs rememberSaveable and state hoisting, Material 3 theming, Navigation 3 with typed keys, ViewModel + StateFlow one-way data flow, Room and DataStore, previews and tests. The free sample has the whole state chapter.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/fNO53" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/LsD1t" rel="noopener">Free sample</a></p></div>
+</aside><aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 11 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<p class="sc-offer"><b>Bundles:</b> <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 11 ebooks, $89</a> · <a href="https://payhip.com/b/yVteh" rel="noopener">Homelab Bundle: 6 ebooks, $59</a> · <a href="https://payhip.com/b/CFiT9" rel="noopener">Android Bundle: 5 ebooks, $49</a>. Use code <b>RIGHTWAY20</b> for 20% off any order through Oct 31.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/eHgh0" rel="noopener"><img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="90" height="144" alt="Cover of Automations That Just Work" loading="lazy"></a><div><b>Automations That Just Work</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/eHgh0" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Qdxgz" rel="noopener"><img src="/homelab-the-right-way/assets/img/book7-sm.webp" width="90" height="144" alt="Cover of Ship Your First Android App" loading="lazy"></a><div><b>Ship Your First Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Qdxgz" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/mIYh9" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/fNO53" rel="noopener"><img src="/homelab-the-right-way/assets/img/book8-sm.webp" width="90" height="144" alt="Cover of Compose Without the Confusion" loading="lazy"></a><div><b>Compose Without the Confusion</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/fNO53" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/LsD1t" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/YcoD4" rel="noopener"><img src="/homelab-the-right-way/assets/img/book9-sm.webp" width="90" height="144" alt="Cover of Pass Google Play Review" loading="lazy"></a><div><b>Pass Google Play Review</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/YcoD4" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/VcvYH" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/zRXe3" rel="noopener"><img src="/homelab-the-right-way/assets/img/book10-sm.webp" width="90" height="144" alt="Cover of Get Paid for Your Android App" loading="lazy"></a><div><b>Get Paid for Your Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/zRXe3" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/8lBGE" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/J9jlp" rel="noopener"><img src="/homelab-the-right-way/assets/img/book11-sm.webp" width="90" height="144" alt="Cover of On-Device AI for Android" loading="lazy"></a><div><b>On-Device AI for Android</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/J9jlp" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/Hz16R" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 11 ebooks for $89</a><a class="btn ghost" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/meshtalk-bluetooth-mesh-chat/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/app-com.charles.meshtalk.app-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Thu Nov 12</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-15">October 15, 2026</time> · 3 min read</p>
+<h3>MeshTalk: chat and talk over Bluetooth mesh with no signal</h3>
+<p>MeshTalk connects nearby phones over Bluetooth mesh for text, group chat and walkie-talkie voice. No internet, no accounts, no servers.</p>
+<p class="tags"><span>android</span><span>mesh-networking</span><span>offline</span><span>bluetooth</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-14">October 14, 2026</time> · 4 min read</p>
+<h3>The two decisions you can&#x27;t undo before your first Google Play upload</h3>
+<p>Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.</p>
+<p class="tags"><span>android</span><span>google play</span><span>kotlin</span><span>gradle</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/shape-and-shade-face-shape-app/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/app-com.charles.shapeshade-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-14">October 14, 2026</time> · 2 min read</p>
+<h3>Shape &amp; Shade: find your face shape on your phone, without uploading your selfie</h3>
+<p>Shape &amp; Shade estimates your face shape from your own measurements, on your phone, and gives you hairstyle, glasses, brow, beard and contour ideas for it. No upload, no account, no beauty scores. Coming soon to Google Play.</p>
+<p class="tags"><span>android</span><span>face-shape</span><span>on-device-ai</span><span>privacy</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>11 ebooks, $19 each, every one with a free sample. All 11 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=8" defer></script>
+</body>
+</html>

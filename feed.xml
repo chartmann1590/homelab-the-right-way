@@ -1,9 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 14 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 15 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>The two decisions you can&#x27;t undo before your first Google Play upload</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</guid>
+<item><title>Upgrading to AGP 9: the Kotlin plugin you can delete</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/</guid>
+<pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>kotlin</category><category>jetpack compose</category><category>gradle</category><category>agp</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>You open an older Android project, bump the Android Gradle plugin to 9, and sync. The build stops with one of two messages: "Cannot add extension with name 'kotlin'" or "The 'org.jetbrains.kotlin.android' plugin is no longer required". Nothing in your code changed. The build files did not keep up with AGP.</p>
+<p>This post covers what changed in AGP 9, the small set of edits that fix it, and two related surprises: kapt and the Material icons. Everything here comes from Chapter 2 (Thinking in Composables) and Chapter 8 (Saving Data: Room and DataStore) of <em>Compose Without the Confusion</em>.</p>
+<h2 id="the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</h2>
+<p>Since Android Gradle plugin 9.0, Kotlin support is built into AGP itself. You no longer apply the separate <code>org.jetbrains.kotlin.android</code> plugin. Older projects apply it anyway, because that was the rule for years. With AGP 9 the plugin and AGP both try to set up Kotlin, and the sync fails with the messages above.</p>
+<p>There is a second leftover in most older modules: an <code>android { kotlinOptions { } }</code> block. That block belonged to the old plugin, so it has to move too.</p>
+<h2 id="the-fix-three-edits">The fix: three edits</h2>
+<p>Google documents the migration for built-in Kotlin. In short:</p>
+<ol><li>Remove the kotlin-android plugin from your build files.</li><li>Remove it from your version catalog as well, so nothing re-adds it.</li><li>Move any <code>android { kotlinOptions { } }</code> block to <code>kotlin { compilerOptions { } }</code>.</li></ol>
+<p>One plugin stays. You still apply the <strong>Compose compiler plugin</strong>. It ships with Kotlin and uses the same version number, so it points at the <code>kotlin</code> version in your catalog.</p>
+<h3 id="what-a-working-agp-9-setup-looks-like">What a working AGP 9 setup looks like</h3>
+<p>Here is the version catalog from the book's sample project, using the versions current at the time of writing (October 2026):</p>
+<pre><code># gradle/libs.versions.toml (excerpt)
+[versions]
+agp = "9.4.0"
+kotlin = "2.4.21"
+ksp = "2.3.12"
+composeBom = "2026.09.00"
+activity = "1.13.0"
+lifecycle = "2.11.0"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-icons-core = { module = "androidx.compose.material:material-icons-core" }
+
+[libraries.activity-compose]
+module = "androidx.activity:activity-compose"
+version.ref = "activity"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }</code></pre>
+<p>Notice what is missing from <code>[plugins]</code>: there is no <code>kotlin-android</code> entry. The only Kotlin-related plugin is <code>kotlin-compose</code>, and its version is the Kotlin version.</p>
+<p>The module build file is just as short:</p>
+<pre><code>// app/build.gradle.kts (excerpt)
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    namespace = "com.example.pantry"
+    compileSdk = 36   // use the newest stable API level your AGP supports
+    defaultConfig {
+        applicationId = "com.example.pantry"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildFeatures { compose = true }
+}</code></pre>
+<p>Two plugins. No <code>kotlinOptions</code> inside <code>android { }</code>. If your module still has compiler flags, they go in a top-level <code>kotlin { compilerOptions { } }</code> block instead.</p>
+<h2 id="the-second-trap-kapt">The second trap: kapt</h2>
+<p>If your project uses Room, Hilt or another annotation processor through kapt, the plugin cleanup is not the end. With AGP 9's built-in Kotlin, the old <code>kotlin-kapt</code> plugin is not compatible. Google's migration guide recommends moving to <strong>KSP</strong>, and offers <code>com.android.legacy-kapt</code> only as a stopgap. Room, Hilt and most annotation processors support KSP today.</p>
+<p>Moving Room to KSP is a few lines. The catalog gets the KSP and Room plugins (the <code>ksp</code> version is already in <code>[versions]</code> above):</p>
+<pre><code># gradle/libs.versions.toml (additions)
+[versions]
+room = "2.8.5"
+
+[libraries]
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+[plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+room = { id = "androidx.room", version.ref = "room" }</code></pre>
+<p>And the module applies them, swapping <code>kapt(...)</code> for <code>ksp(...)</code> on the compiler:</p>
+<pre><code>// app/build.gradle.kts
+plugins {
+    // ...
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+}</code></pre>
+<p>The Room Gradle plugin's <code>schemaDirectory</code> writes a JSON description of every database version into your project. Commit those files. Room uses them for automatic migrations and for migration tests.</p>
+<p>Hilt works the same way. It is built on Dagger and processed with KSP. At the time of writing the Dagger and Hilt release is 2.60.1.</p>
+<h2 id="the-third-trap-icons-that-stop-resolving">The third trap: icons that stop resolving</h2>
+<p>This one is not AGP, but it tends to arrive in the same upgrade. Since Material 3 1.4.0, the library no longer pulls in <code>material-icons-core</code> for you. Its release notes say so. After the upgrade, <code>Icons.Default.Add</code> suddenly does not resolve, and the error looks unrelated to anything you touched.</p>
+<p>The fix is to add the artifact yourself. It is already in the catalog above as <code>compose-icons-core</code>, and the BOM still manages its version:</p>
+<pre><code>dependencies {
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.icons.core)   // Icons.Default.*
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.activity.compose)
+    debugImplementation(libs.compose.ui.tooling)
+}</code></pre>
+<p>The BOM line is the one that saves you the most pain. You declare one BOM version and leave the version off every individual Compose library. The BOM picks a set of versions that were tested together.</p>
+<h2 id="checklist-for-an-agp-9-upgrade">Checklist for an AGP 9 upgrade</h2>
+<ul><li>Remove <code>org.jetbrains.kotlin.android</code> from every module and from the version catalog.</li><li>Move <code>android { kotlinOptions { } }</code> to <code>kotlin { compilerOptions { } }</code>.</li><li>Keep the Compose compiler plugin (<code>org.jetbrains.kotlin.plugin.compose</code>) at your Kotlin version.</li><li>Replace kapt with KSP. Use <code>com.android.legacy-kapt</code> only as a stopgap.</li><li>For Room, add the Room Gradle plugin, set <code>schemaDirectory</code>, and commit the schema files.</li><li>If <code>Icons.Default</code> stops resolving, add <code>material-icons-core</code> and let the BOM version it.</li><li>Leave versions off individual Compose libraries and let one BOM version pick them.</li></ul><p><a href="https://payhip.com/b/fNO53">Go deeper: Compose Without the Confusion</a></p>]]></content:encoded></item><item><title>MeshTalk: chat and talk over Bluetooth mesh with no signal</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/meshtalk-bluetooth-mesh-chat/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/meshtalk-bluetooth-mesh-chat/</guid>
+<pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>MeshTalk connects nearby phones over Bluetooth mesh for text, group chat and walkie-talkie voice. No internet, no accounts, no servers.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.meshtalk.app.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>mesh-networking</category><category>offline</category><category>bluetooth</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.meshtalk.app.jpg" alt=""></p><p>Every messaging app you use depends on the same thing: a working connection to the internet. On a trail, at a crowded festival, or after a storm knocks out service, that dependency is exactly what fails. MeshTalk works without it. It uses Bluetooth mesh networking to connect phones directly to each other, with no internet, no cellular service, and no router or hotspot.</p>
+<h2 id="how-the-mesh-works">How the mesh works</h2>
+<p>In a mesh, each phone is both a client and a relay. MeshTalk connects to nearby devices automatically, and messages hop from device to device to reach their destination. The listing's point is that this works in areas with no signal at all, because nothing in the chain needs a tower or a server.</p>
+<p>The practical consequence is that the more people nearby are running the app, the more paths a message has to travel.</p>
+<h2 id="what-it-does">What it does</h2>
+<h3 id="text-chat">Text chat</h3>
+<ul><li>Send messages to anyone in range.</li><li>Group chats.</li><li>Message history.</li><li>Read receipts.</li></ul>
+<h3 id="voice">Voice</h3>
+<ul><li>Walkie-talkie style voice.</li><li>Full-duplex audio, so both sides can talk at once.</li><li>Multiple channels.</li><li>Low battery use, according to the listing.</li></ul>
+<h3 id="on-device-ai">On-device AI</h3>
+<ul><li>AI message suggestions.</li><li>Smart reply generation.</li><li>Translation between languages.</li><li>All AI features run locally on the phone.</li></ul>
+<p>The translation feature is a useful addition for an app like this. If you are at an event or travelling with people who speak another language, the translation still works when nobody has signal, because it does not depend on a server.</p>
+<h2 id="privacy">Privacy</h2>
+<p>MeshTalk has no accounts and no phone numbers. Messages stay on the devices, there is no cloud and there are no servers, and the listing describes it as end-to-end by design. Since there is no central server in the system, there is no central copy of your conversations to leak.</p>
+<h2 id="where-it-makes-sense">Where it makes sense</h2>
+<p>The listing names four situations:</p>
+<ol><li><strong>Hiking, camping and outdoor events</strong>, where coverage is weak or nonexistent.</li><li><strong>Disaster preparedness</strong>, for when normal networks are down.</li><li><strong>Crowds with poor signal</strong>, where the cell network is overloaded even though it technically exists.</li><li><strong>Privacy-conscious users</strong>, who want a messenger with no account and no server.</li></ol>
+<p>For the preparedness case, the thing to remember is that you set this up before you need it. Install the app on the phones of the people you would want to reach, and try it once while everything is working.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing; the Play listing also notes in-app purchases.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Range:</strong> messages reach people in range, extended by hops between other devices running the app.</li><li><strong>Everyone needs it:</strong> the mesh only includes phones running MeshTalk, so the people you want to talk to need it installed too.</li><li><strong>No sign-up:</strong> no account and no phone number are needed.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You hike, camp or go to events where your phone usually shows no bars.</li><li>You want a way to reach family or a group if networks go down.</li><li>You want walkie-talkie style voice between phones without extra hardware.</li><li>You want a messenger with no account, no phone number and no server.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.meshtalk.app">Get MeshTalk: Bluetooth Mesh Chat on Google Play</a></p>]]></content:encoded></item><item><title>The two decisions you can&#x27;t undo before your first Google Play upload</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/two-decisions-you-cant-undo-before-first-google-play-upload/</guid>
 <pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Your application ID and your signing setup are the two Android decisions that are expensive to change after the first upload. Here is how to get both right, plus the versionCode rule that catches people later.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>google play</category><category>kotlin</category><category>gradle</category><category>app signing</category>
