@@ -3,7 +3,63 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 16 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>The permission Play rejected isn&#x27;t in your manifest</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</guid>
+<item><title>Is Jellyfin really using your GPU? A six-rung ladder to prove it on Proxmox</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</guid>
+<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>A transcoding setting that says QSV proves nothing. Pass an Intel iGPU into an unprivileged Proxmox container the way the Jellyfin docs recommend, then climb six checks until intel_gpu_top shows the Video engine working.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>jellyfin</category><category>proxmox</category><category>transcoding</category><category>quick sync</category><category>lxc</category><category>media server</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most of the time a media server just sends the file. Sometimes the app on the other end cannot play it: a 4K HEVC film on an old TV, a high-bitrate file on a phone on mobile data, subtitles the app cannot draw itself. Then the server converts the video while you watch. That is transcoding, and on the CPU it is slow, hot and often not fast enough for real time. An Intel integrated GPU has dedicated video engines for exactly this, and the Jellyfin documentation recommends QSV (Intel Quick Sync Video) on mainstream Intel GPUs. Getting it to work inside a Proxmox container is a short list of steps. Knowing that it works is a separate job, and the one most guides skip.</p>
+<h2 id="the-trap-a-dropdown-that-says-qsv">The trap: a dropdown that says QSV</h2>
+<p>Set <em>Hardware acceleration</em> to Intel QuickSync in the Jellyfin dashboard and the page looks done. It is not. If the container cannot open the render device, or the group number is wrong, or the source codec is not ticked for hardware decoding, Jellyfin quietly falls back to software. The film still plays. The CPU does the work. Nothing in the player tells you.</p>
+<p>The fix is a ladder: six checks, each ruling out one failure, climbed in order. If a rung fails, fix it before climbing further.</p>
+<p>Two things first. Intel processors whose model ends in "F" have no integrated GPU, and the Jellyfin docs say not to use them for this. And the old recipe of a privileged container with <code>lxc.cgroup2.devices.allow</code> lines is kept in the Jellyfin docs only for Proxmox VE 7 and older. On Proxmox VE 8 and 9 the container stays unprivileged.</p>
+<h2 id="rung-1-the-host-has-a-render-device">Rung 1: the host has a render device</h2>
+<p>On the Proxmox host:</p>
+<pre><code>ls -l /dev/dri
+getent group render</code></pre>
+<p>You should see <code>renderD128</code> (and <code>card0</code> or similar) owned by the <code>render</code> or <code>video</code> group. If <code>/dev/dri</code> is missing, the host kernel has no driver for the GPU, and nothing below will work until it does.</p>
+<h2 id="rung-2-the-device-reaches-the-container-with-the-right-group">Rung 2: the device reaches the container with the right group</h2>
+<p>Proxmox VE 8 and newer can pass a device into a container through the web interface, and the Jellyfin documentation recommends exactly this route. The detail that matters is the group id, and it is the container's group id, not the host's. Inside the container:</p>
+<pre><code># inside the media container (CT 110)
+getent group render
+# render:x:993:      &lt;- your number may differ</code></pre>
+<p>On some systems the group is <code>video</code> or <code>input</code> instead of <code>render</code>; use whichever exists. Then on the host, in the container's Resources tab, choose Add &gt; Device Passthrough, enter <code>/dev/dri/renderD128</code> as the device path, and set the GID in the advanced options to the number you just found. The same thing from the command line, using the <code>dev[n]</code> option from the Proxmox documentation:</p>
+<pre><code># on the Proxmox host
+pct set 110 --dev0 /dev/dri/renderD128,gid=993
+pct reboot 110</code></pre>
+<p>After the restart, <code>ls -l /dev/dri</code> inside the container should show <code>renderD128</code> owned by the render group. The container is still unprivileged and the host keeps using the GPU. One catch from the Jellyfin docs: you must be logged in to Proxmox as root to add device passthrough; if the option is unavailable, that is why.</p>
+<p>If Jellyfin runs in a VM instead, the whole GPU moves into it with PCI passthrough, and the host, and every other guest, lose it.</p>
+<h2 id="rung-3-docker-hands-the-device-to-jellyfin">Rung 3: Docker hands the device to Jellyfin</h2>
+<p>The official Jellyfin image already contains Intel's user-mode media drivers and the OpenCL runtime, so nothing needs installing inside it. Docker only has to pass the device through and add the group that owns it, with the number from rung 2:</p>
+<pre><code># /opt/stacks/jellyfin/compose.yaml (GPU part)
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:12.2
+    user: 1000:1000
+    group_add:
+      - "993"          # gid of render inside the LXC
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128</code></pre>
+<p>If you have two GPUs, the second one is usually <code>renderD129</code>.</p>
+<h2 id="rung-4-the-drivers-open-the-gpu-from-inside">Rung 4: the drivers open the GPU from inside</h2>
+<p>Before touching any Jellyfin setting, confirm the container can actually use the device. Both commands come from the Jellyfin documentation:</p>
+<pre><code>docker exec -it jellyfin /usr/lib/jellyfin-ffmpeg/vainfo
+docker exec -it jellyfin /usr/lib/jellyfin-ffmpeg/ffmpeg -v verbose \
+  -init_hw_device vaapi=va -init_hw_device opencl@va</code></pre>
+<p><code>vainfo</code> should name the Intel iHD driver and list the supported profiles and entry points. The second command should list an Intel OpenCL device. If you get <em>failed to initialize display</em> or a permission error, the group in <code>group_add</code> does not match the group that owns <code>/dev/dri/renderD128</code> inside the container. Fix the number and recreate the container.</p>
+<h2 id="rung-5-the-dashboard-settings-match-your-gpu">Rung 5: the dashboard settings match your GPU</h2>
+<p>Now the transcoding settings in the Jellyfin dashboard:</p>
+<ul><li>Hardware acceleration: Intel QuickSync (QSV), or VA-API if you chose that.</li><li>Device: leave <code>/dev/dri/renderD128</code> unless you use a second GPU.</li><li>Hardware decoding: tick only the codecs your GPU supports, as the docs instruct. The <code>vainfo</code> output and the codec tables in the Jellyfin Intel guide tell you which. Older iGPUs cannot decode HEVC 10-bit or AV1 in hardware; AV1 decoding starts with Gen 12 (11th Gen Core) graphics.</li><li>Enable hardware encoding.</li><li>Turn on tone mapping, so HDR sources look right on SDR screens. Both tone-mapping methods need a GPU with HEVC 10-bit decoding.</li></ul>
+<h2 id="rung-6-watch-the-gpu-do-the-work">Rung 6: watch the GPU do the work</h2>
+<p>A setting that says "QSV" proves nothing. Make Jellyfin transcode and watch the GPU.</p>
+<ol><li>Play a film in the web client and force a transcode by picking a lower quality in the player settings.</li><li>In the dashboard, the active session should show that it is transcoding, not direct playing.</li><li>On the machine that owns the GPU (the Proxmox host for a container, the VM for a VM), install and run <code>intel_gpu_top</code>:</li></ol>
+<pre><code>apt update &amp;&amp; apt install -y intel-gpu-tools
+intel_gpu_top</code></pre>
+<p>The Jellyfin guide explains the engine rows: <em>Video</em> is the QSV decoder or encoder at work, <em>VideoEnhance</em> is QSV VPP processing, <em>Render/3D</em> covers OpenCL workloads such as tone mapping. During a hardware transcode the Video row should be busy. If every row sits at zero while the CPU climbs in <code>top</code>, the transcode is running in software: go back down the ladder.</p>
+<h2 id="when-it-still-uses-the-cpu">When it still uses the CPU</h2>
+<ul><li><strong>Subtitles burned in.</strong> Image-based subtitles force a burn-in. It is still a video transcode, so make sure it is accelerated, and prefer text subtitles the client can render itself.</li><li><strong>Codec not ticked.</strong> Jellyfin then decodes in software even when encoding on the GPU.</li><li><strong>Wrong device after a reboot.</strong> With more than one GPU, render node numbers can change. Pin the right one in both the passthrough and the compose file.</li></ul>
+<h2 id="checklist">Checklist</h2>
+<ul><li>CPU model does not end in "F"; Quick Sync confirmed on Intel's spec page.</li><li><code>/dev/dri/renderD128</code> exists on the host.</li><li>Render group gid read <em>inside</em> the container; device passed with that gid; container still unprivileged.</li><li>Jellyfin compose file has the device under <code>devices</code> and the gid under <code>group_add</code>.</li><li><code>vainfo</code> shows the iHD driver; the OpenCL check finds an Intel device.</li><li>QSV selected with only supported codecs ticked; hardware encoding and tone mapping on.</li><li>A forced transcode shows the Video engine busy in <code>intel_gpu_top</code>.</li><li>After a host kernel update, <code>vainfo</code> and a forced transcode checked again.</li></ul>
+<p>Once this works, most of your playback should not need it at all: direct play, where the server just sends the file, is the goal, and transcoding is the safety net underneath it.</p><p><a href="https://payhip.com/b/4uE86">Go deeper: Stream Your Own Library</a></p>]]></content:encoded></item><item><title>The permission Play rejected isn&#x27;t in your manifest</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</guid>
 <pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>Google Play reviews the merged manifest, not the one you wrote. Here is how to see what your release build really asks for, strip what a library added, and replace media permissions with the photo picker.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>google play</category><category>permissions</category><category>play console</category><category>photo picker</category>
@@ -78,7 +134,78 @@ fun AvatarPicker(onPicked: (Uri) -&gt; Unit) {
 <p>Kiss-cut vinyl in 3 x 3, 4 x 4 and 5.5 x 5.5 inches; Printful adds the white kiss-cut border. $4.50 to $5.50.</p>
 <h2 id="where-everything-lives">Where everything lives</h2>
 <p>The store now carries 29 designs across tees, hoodies, hats, mugs, stickers, desk mats, a poster and a tote. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
-<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>LiveCaptionN: live captions and translation over any Android app</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</guid>
+<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Ten quick edits should not queue ten syncs: unique work in WorkManager, done right</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/</guid>
+<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>workmanager</category><category>offline first</category><category>kotlin</category><category>room</category><category>sync</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The user saves a note on the subway and puts the phone in their pocket. Android may kill your process a minute later. The note still has to reach the server when the train comes up for air, maybe in an hour, maybe tomorrow. That is persistent work, and on Android persistent work means WorkManager. Google's offline-first guide says as much: draining an offline queue is persistent work that is often delegated to WorkManager.</p>
+<p>WorkManager 2.12.0 is the stable release at the time of writing (October 2026). It stores every request in its own database, so scheduled work survives process death and reboots. The scheduling part is easy. The part that goes wrong is how many syncs you schedule, and what the worker says when one fails.</p>
+<h2 id="the-trap-one-sync-per-save">The trap: one sync per save</h2>
+<p>The obvious design is to enqueue a <code>SyncWorker</code> from the repository every time a row is written. It works in the emulator. Then a user edits a note ten times in a minute, and ten syncs are queued. Each one pushes the same dirty rows, each one pulls the same pages, and two of them can run at the same time against the same database. Add a retry on a flaky connection and the queue grows faster than it drains.</p>
+<p>The fix is three decisions, all of them one line each: make the push unique work, pick the right policy for duplicates, and return <code>Result.retry()</code> only for errors that can actually clear up on their own.</p>
+<h2 id="fix-1-unique-work-with-the-right-policy">Fix 1: unique work with the right policy</h2>
+<p><code>enqueueUniqueWork</code> (one-time) and <code>enqueueUniquePeriodicWork</code> (periodic) take a name and a policy for what to do when unfinished work with that name already exists. For one-time work, <code>ExistingWorkPolicy</code> has four options:</p>
+<ul><li><strong>REPLACE</strong> cancels the existing work and enqueues the new request.</li><li><strong>KEEP</strong> ignores the new request and keeps the existing one.</li><li><strong>APPEND</strong> adds the new work to the end of the existing chain.</li><li><strong>APPEND_OR_REPLACE</strong> appends unless the existing chain has failed or been cancelled, in which case it starts fresh.</li></ul>
+<p>For a push, KEEP is the right one. If a sync is already queued, it will pick up every dirty row when it runs, including the one just saved, so the new request adds nothing.</p>
+<pre><code>object SyncScheduler {
+    private const val PUSH = "notes-push"
+    private const val PERIODIC = "notes-periodic"
+
+    fun requestPush(context: Context, wifiOnly: Boolean) {
+        val request = OneTimeWorkRequestBuilder&lt;SyncWorker&gt;()
+            .setConstraints(syncConstraints(wifiOnly))
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(PUSH, ExistingWorkPolicy.KEEP, request)
+    }
+
+    fun schedulePeriodic(context: Context, wifiOnly: Boolean) {
+        val request = PeriodicWorkRequestBuilder&lt;SyncWorker&gt;(6, TimeUnit.HOURS)
+            .setConstraints(syncConstraints(wifiOnly))
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniquePeriodicWork(PERIODIC, ExistingPeriodicWorkPolicy.KEEP, request)
+    }
+}</code></pre>
+<p>Call <code>schedulePeriodic</code> from <code>Application.onCreate()</code>; with KEEP it is harmless to call on every launch. Periodic work has a floor: the minimum repeat interval is 15 minutes, the same as JobScheduler. A flex interval lets it run within a window at the end of each period rather than at an exact moment.</p>
+<h2 id="fix-2-constraints-that-match-the-user-s-settings">Fix 2: constraints that match the user's settings</h2>
+<p>Constraints make WorkManager wait for the right conditions. For sync, a connected network is usually enough, plus the user's Wi-Fi-only setting:</p>
+<pre><code>fun syncConstraints(wifiOnly: Boolean) = Constraints.Builder()
+    .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
+    .setRequiresBatteryNotLow(true)
+    .build()</code></pre>
+<p>One consequence is easy to miss: if a constraint stops being met while the worker runs, WorkManager stops the worker and retries it later. Your <code>doWork</code> must be safe to stop at any suspension point, which is one more reason every sync step should be idempotent.</p>
+<h2 id="fix-3-retry-only-what-can-succeed-later">Fix 3: retry only what can succeed later</h2>
+<p>When a worker returns <code>Result.retry()</code>, WorkManager waits for the backoff delay and runs it again. <code>Result.failure()</code> stops it, and fails everything chained after it. Deciding which errors are transient (timeouts, HTTP 5xx, 429) and which are permanent (401 after a token refresh, 400 for a malformed payload) is the most important line of sync code you will write:</p>
+<pre><code>class SyncWorker(
+    context: Context,
+    params: WorkerParameters,
+    private val sync: SyncEngine,
+) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result = when (sync.syncOnce()) {
+        SyncOutcome.Done -&gt; Result.success()
+        SyncOutcome.Transient -&gt; if (runAttemptCount &lt; 5) Result.retry() else Result.failure()
+        SyncOutcome.Permanent -&gt; Result.failure()
+    }
+}</code></pre>
+<p>The backoff numbers come from the WorkManager guide: the delay can be no less than 10 seconds, the policy is LINEAR or EXPONENTIAL, and the default is EXPONENTIAL with a 30-second delay. That is the exponential backoff the offline-first guide recommends for network reads and queued writes, for free: your code only classifies the failure and returns <code>retry()</code>, with no sleep loop of its own. Cap attempts with <code>runAttemptCount</code>, as above, so a permanently broken request does not retry forever.</p>
+<p>A worker with constructor parameters beyond context and params needs a <code>WorkerFactory</code>. With Hilt, annotate it with <code>@HiltWorker</code> and use <code>HiltWorkerFactory</code>; without DI, register a custom factory through <code>Configuration.Provider</code> in your <code>Application</code> and disable the default initializer in the manifest.</p>
+<h2 id="chains-expedited-work-and-the-foreground-rules">Chains, expedited work and the foreground rules</h2>
+<p>Work can run in sequence, each step's output becoming the next step's input. A chain is the natural shape for "upload attachments, then push notes, then pull":</p>
+<pre><code>WorkManager.getInstance(context)
+    .beginUniqueWork("full-sync", ExistingWorkPolicy.KEEP, uploadAttachments)
+    .then(pushNotes)
+    .then(pullNotes)
+    .enqueue()</code></pre>
+<p>The chaining guide's failure rule: when a step fails or is cancelled, every dependent step is marked failed or cancelled too. Keep chains short and make each step meaningful on its own, so a failure tells you something.</p>
+<p>When the user is waiting (they tapped "Sync now"), mark the request expedited with <code>setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)</code>, so an exhausted quota degrades to normal work instead of dropping it. On Android versions before 12, WorkManager may run expedited work as a foreground service, so any worker used with <code>setExpedited</code> must implement <code>getForegroundInfo()</code>; leaving it out can crash on older platform versions.</p>
+<p>For a long first sync, a <code>CoroutineWorker</code> can call <code>setForeground()</code> to run as a foreground service with an ongoing notification. If your app targets Android 14 (API 34) or higher, you must specify a foreground service type for every long-running worker, declare it in the manifest by merging it into WorkManager's own service, and request the matching permission (<code>FOREGROUND_SERVICE_DATA_SYNC</code> for sync). Starting with Android 16, the guide notes, long-running workers can exhaust your app's job quota. For most apps the honest design is a sync that does a bounded amount of work per run and lets the next run continue, rather than one heroic foreground session.</p>
+<h2 id="show-the-state-from-the-repository-not-the-worker">Show the state from the repository, not the worker</h2>
+<p>To display "Syncing..." or "Last sync failed", observe the unique work's state as a Flow with <code>getWorkInfosForUniqueWorkFlow("notes-push")</code> and map <code>RUNNING</code>, <code>ENQUEUED</code> and <code>FAILED</code> to UI states. The worker itself never touches the UI.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>The push is unique work named once, enqueued with <code>ExistingWorkPolicy.KEEP</code>.</li><li>Periodic sync is unique too, scheduled from <code>Application.onCreate()</code>, interval 15 minutes or more.</li><li>Constraints read the user's Wi-Fi-only setting; <code>doWork</code> is safe to stop at any suspension point.</li><li><code>retry()</code> only for timeouts, 5xx and 429; <code>failure()</code> for 400 and 401 after a refresh.</li><li>Attempts capped with <code>runAttemptCount</code>; backoff left to WorkManager.</li><li>Chains short; a failed step fails its dependents, and that is intended.</li><li>Expedited workers implement <code>getForegroundInfo()</code>; long-running workers declare a foreground service type when targeting API 34+.</li><li>Every sync step is idempotent, because a stopped worker runs it again.</li></ul>
+<p>A sync that outlives the app is not the clever part. The clever part is making sure only one of them runs, and that it gives up at the right moment.</p><p><a href="https://payhip.com/b/TaqWf">Go deeper: Data That Survives</a></p>]]></content:encoded></item><item><title>LiveCaptionN: live captions and translation over any Android app</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</guid>
 <pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>LiveCaptionN floats real-time captions and translation over any app, offline on your phone or through your own Whisper server.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.livecaptionn.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>captions</category><category>accessibility</category><category>self-hosted</category><category>whisper</category>
@@ -1087,71 +1214,5 @@ pvesh set /nodes/pve1/storage/pbs01/content/$V --protected 1</code></pre>
 <p>For vzdump full copies, multiply the guest's used size by the number of copies you keep, then add a third for growth.</p>
 <h2 id="checklist-retention">Checklist: retention</h2>
 <ul><li>Keep-* numbers chosen per guest type from your inventory, not from free space</li><li>Checked in the prune simulator that a month of failed jobs cannot wipe your history</li><li>Retention set on the storage or the PBS prune job, with jobs on "use storage defaults"</li><li>PBS garbage collection scheduled daily</li><li>A protected backup taken before every risky change, and cleared a month later</li><li>Backup storage sized with room for a year of growth</li></ul>
-<p>Retention only keeps history if backups keep landing. A month of silent failures is exactly what turns <code>keep-daily=7</code> into a single copy, so pair these numbers with an alert for jobs that stop running.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Delete old Proxmox VMs without regret</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/delete-old-proxmox-vms-without-regret/</guid>
-<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>The backup, verify, then destroy-with-purge routine for clearing out stopped guests safely, including the linked-clone check that stops you deleting something a running VM depends on.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-12.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>cleanup</category><category>vzdump</category><category>backups</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-12.jpg" alt=""></p><p>Every homelab accumulates guests. The container you built to try something, the VM from a tutorial, the old version of a service you migrated away from. Eventually most of the guest list is grey stopped icons, and the nightly backup job is dutifully copying all of them.</p>
-<p>Cleaning house is easy to put off because deleting things is scary. The way to make it not scary is a routine where every single guest you delete is recoverable: <strong>back it up, verify the backup, then destroy with purge.</strong></p>
-<h2 id="the-trap-stopped-is-not-the-same-as-unused">The trap: stopped is not the same as unused</h2>
-<p>A template is always stopped. A container that was turned into the base of linked clones is always stopped. Delete the base and the clones keep running until the next reboot, and then they do not.</p>
-<p>So before you delete anything, find out what is actually unused.</p>
-<h2 id="step-0-check-for-linked-clones">Step 0: check for linked clones</h2>
-<p>For every stopped guest, check whether any config references its disks as a base:</p>
-<pre><code>for id in $(pct list | awk 'NR&gt;1 &amp;&amp; $2=="stopped"{print $1}') \
-          $(qm list | awk 'NR&gt;1 &amp;&amp; $3=="stopped"{print $1}'); do
-  if grep -lq "base-${id}-" /etc/pve/nodes/*/*/*.conf 2&gt;/dev/null; then
-    echo "KEEP $id: base for linked clones"
-  else
-    echo "candidate $id"
-  fi
-done</code></pre>
-<p>Tag anything marked KEEP as <code>keep</code> in the GUI and it is out of the discussion. Then walk the candidates with a human eye: the name, the notes, the last-modified date of its config. If you are not sure what a guest is, start it, look, stop it. Ten minutes per mystery guest is cheaper than one wrong destroy.</p>
-<h2 id="step-1-back-it-up-in-stop-mode">Step 1: back it up, in stop mode</h2>
-<p>A stopped guest does not need snapshot mode, and stop mode gives the most consistent archive. Write it to your backup storage with vzdump so the result is one portable file, and give it a note that will mean something in a year:</p>
-<pre><code>vzdump 212 --storage nas-backup --mode stop --compress zstd --bwlimit 60000 \
-  --notes-template 'DELETED {{guestname}} ({{vmid}}) cleanup 2026-10'</code></pre>
-<p>Watch the backup storage's free space as you go. Work in order of "would be saddest to lose", and if the share gets tight, prune old nightly backups to make room before carrying on. The bandwidth limit keeps your busy guests from lagging while the dumps run; it costs a few minutes per guest.</p>
-<h2 id="step-2-verify-the-archive">Step 2: verify the archive</h2>
-<p>A backup you have not at least integrity-checked is a rumour. For a container archive:</p>
-<pre><code>zstd -t /mnt/pve/nas-backup/dump/vzdump-lxc-212-2026_10_09-21_14_03.tar.zst</code></pre>
-<p>VM archives are <code>.vma.zst</code> files and the same <code>zstd -t</code> works. This proves the file is whole and decompresses. It does <strong>not</strong> prove the guest boots. For anything you would truly mourn, go further: restore it to a new ID and start it with the network unplugged.</p>
-<p>Then mark the archive protected, so the nightly prune cannot eat it:</p>
-<pre><code>F=vzdump-lxc-212-2026_10_09-21_14_03.tar.zst
-pvesh set /nodes/pve1/storage/nas-backup/content/nas-backup:backup/$F \
-  --protected 1</code></pre>
-<h2 id="step-3-destroy-with-purge">Step 3: destroy, with purge</h2>
-<pre><code>pct destroy 212 --purge
-# or
-qm destroy 212 --purge</code></pre>
-<p><code>--purge</code> removes the guest from every backup job, the replication config and HA. Without it, the nightly backup job keeps a reference to a guest that no longer exists and fails with an error about that ID every night until you edit the job by hand.</p>
-<h2 id="the-loop">The loop</h2>
-<p>For more than a handful of guests, put the IDs in a file (one per line, after the human pass) and let a script do the three steps:</p>
-<pre><code>#!/bin/bash
-set -u
-STORE=nas-backup
-DUMP=/mnt/pve/$STORE/dump
-NOTE="DELETED {{guestname}} ({{vmid}}) cleanup $(date +%Y-%m)"
-while read -r id; do
-  if pct config "$id" &gt;/dev/null 2&gt;&amp;1; then kind=lxc; cmd=pct
-  else kind=qemu; cmd=qm; fi
-  echo "== $id ($kind)"
-  vzdump "$id" --storage $STORE --mode stop --compress zstd \
-    --bwlimit 60000 --notes-template "$NOTE" \
-    || { echo "backup FAILED $id"; continue; }
-  f=$(ls -t $DUMP/vzdump-$kind-$id-*.zst | head -1)
-  zstd -t "$f" || { echo "verify FAILED $id"; continue; }
-  vol="$STORE:backup/$(basename "$f")"
-  pvesh set /nodes/$(hostname)/storage/$STORE/content/$vol --protected 1
-  $cmd destroy "$id" --purge || echo "destroy FAILED $id (retry later)"
-done &lt; /root/cleanup-ids.txt</code></pre>
-<p>Every <code>continue</code> means a failure leaves the guest in place. <strong>Nothing is ever destroyed without a verified archive ahead of it.</strong></p>
-<h2 id="two-gotchas">Two gotchas</h2>
-<p><strong>Cluster quorum.</strong> On a two-node cluster, if one node drops off, destroys on the cluster fail with a quorum error while it is out. Re-run the failed IDs once the cluster is quorate again. The proper fix is a QDevice, so the cluster has a third vote.</p>
-<p><strong>Leftover locks.</strong> Proxmox will not back up or destroy a guest while a lock from an earlier interrupted job is set. <code>pct unlock 212</code> or <code>qm unlock 212</code> clears it, once you have checked nothing is actually running against the guest.</p>
-<h2 id="afterwards-the-orphans">Afterwards: the orphans</h2>
-<p>With the guests gone, there is a second layer of junk:</p>
-<ul><li><strong>Orphan disks:</strong> entries in <code>pvesm list local-zfs</code> that no config references. Compare against <code>grep -h 'local-zfs:' /etc/pve/nodes/*/*/*.conf</code>. Back each one up as a raw image before removing it, same rule.</li><li><strong>Old ISOs and container templates</strong> in <code>local</code>. They download again in minutes.</li><li><strong>Year-old snapshots</strong> on running guests (<code>qm listsnapshot &lt;id&gt;</code>, <code>pct listsnapshot &lt;id&gt;</code>). A snapshot that old is a backup you forgot, on the same disk as the data, slowing every write.</li></ul>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Every stopped guest checked for linked clones (<code>base-&lt;id&gt;-</code> in any config); templates tagged keep</li><li>A stop-mode vzdump of each candidate with a "DELETED" note, bandwidth-limited</li><li><code>zstd -t</code> on every archive, and the archive marked protected</li><li><code>destroy --purge</code>, never plain destroy</li><li>Failed steps leave the guest in place</li><li>Orphan disks, old ISOs and year-old snapshots cleaned in a second pass</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+<p>Retention only keeps history if backups keep landing. A month of silent failures is exactly what turns <code>keep-daily=7</code> into a single copy, so pair these numbers with an alert for jobs that stop running.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
 </channel></rss>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ten quick edits should not queue ten syncs: unique work in WorkManager, done right — Homelab the Right Way</title>
+<meta name="description" content="Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Ten quick edits should not queue ten syncs: unique work in WorkManager, done right — Homelab the Right Way">
+<meta property="og:description" content="Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ten quick edits should not queue ten syncs: unique work in WorkManager, done right — Homelab the Right Way">
+<meta name="twitter:description" content="Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s"><meta name="p:domain_verify" content="1d759906fad752c78978c6793547e68a"/>
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=10" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=10">
+<meta property="article:published_time" content="2026-10-16">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="workmanager">
+<meta property="article:tag" content="offline first">
+<meta property="article:tag" content="kotlin">
+<meta property="article:tag" content="room">
+<meta property="article:tag" content="sync">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Ten quick edits should not queue ten syncs: unique work in WorkManager, done right", "description": "Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager's unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/", "datePublished": "2026-10-16T12:30:00-04:00", "dateModified": "2026-10-16T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, workmanager, offline first, kotlin, room, sync", "wordCount": 1113, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "Book", "name": "Data That Survives", "url": "https://payhip.com/b/TaqWf", "image": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/book16.jpg", "description": "The data layer that keeps an Android app working on the subway: Room 3, DataStore, WorkManager and an offline-first sync engine with ETags, conflict rules and idempotent uploads, plus Paging 3, backup rules and fast tests.", "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "bookFormat": "https://schema.org/EBook", "inLanguage": "en", "offers": {"@type": "Offer", "url": "https://payhip.com/b/TaqWf", "price": "19", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "seller": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}}}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "Ten quick edits should not queue ten syncs: unique work in WorkManager, done right", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">Ten quick edits should not queue ten syncs: unique work in WorkManager, done right</h1>
+<p class="lead fade" style="--d:2">Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-16">October 16, 2026</time> · 5 min read · <span class="tags inline"><span>android</span><span>workmanager</span><span>offline first</span><span>kotlin</span><span>room</span><span>sync</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/og.jpg" width="1280" height="720" alt="Ten quick edits should not queue ten syncs: unique work in WorkManager, done right" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-one-sync-per-save">The trap: one sync per save</a></li><li><a href="#fix-1-unique-work-with-the-right-policy">Fix 1: unique work with the right policy</a></li><li><a href="#fix-2-constraints-that-match-the-user-s-settings">Fix 2: constraints that match the user&#x27;s settings</a></li><li><a href="#fix-3-retry-only-what-can-succeed-later">Fix 3: retry only what can succeed later</a></li><li><a href="#chains-expedited-work-and-the-foreground-rules">Chains, expedited work and the foreground rules</a></li><li><a href="#show-the-state-from-the-repository-not-the-worker">Show the state from the repository, not the worker</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
+<div class="prose">
+
+<p>The user saves a note on the subway and puts the phone in their pocket. Android may kill your process a minute later. The note still has to reach the server when the train comes up for air, maybe in an hour, maybe tomorrow. That is persistent work, and on Android persistent work means WorkManager. Google's offline-first guide says as much: draining an offline queue is persistent work that is often delegated to WorkManager.</p>
+<p>WorkManager 2.12.0 is the stable release at the time of writing (October 2026). It stores every request in its own database, so scheduled work survives process death and reboots. The scheduling part is easy. The part that goes wrong is how many syncs you schedule, and what the worker says when one fails.</p>
+<h2 id="the-trap-one-sync-per-save">The trap: one sync per save</h2>
+<p>The obvious design is to enqueue a <code>SyncWorker</code> from the repository every time a row is written. It works in the emulator. Then a user edits a note ten times in a minute, and ten syncs are queued. Each one pushes the same dirty rows, each one pulls the same pages, and two of them can run at the same time against the same database. Add a retry on a flaky connection and the queue grows faster than it drains.</p>
+<p>The fix is three decisions, all of them one line each: make the push unique work, pick the right policy for duplicates, and return <code>Result.retry()</code> only for errors that can actually clear up on their own.</p>
+<h2 id="fix-1-unique-work-with-the-right-policy">Fix 1: unique work with the right policy</h2>
+<p><code>enqueueUniqueWork</code> (one-time) and <code>enqueueUniquePeriodicWork</code> (periodic) take a name and a policy for what to do when unfinished work with that name already exists. For one-time work, <code>ExistingWorkPolicy</code> has four options:</p>
+<ul><li><strong>REPLACE</strong> cancels the existing work and enqueues the new request.</li><li><strong>KEEP</strong> ignores the new request and keeps the existing one.</li><li><strong>APPEND</strong> adds the new work to the end of the existing chain.</li><li><strong>APPEND_OR_REPLACE</strong> appends unless the existing chain has failed or been cancelled, in which case it starts fresh.</li></ul>
+<p>For a push, KEEP is the right one. If a sync is already queued, it will pick up every dirty row when it runs, including the one just saved, so the new request adds nothing.</p>
+<pre><code>object SyncScheduler {
+    private const val PUSH = "notes-push"
+    private const val PERIODIC = "notes-periodic"
+
+    fun requestPush(context: Context, wifiOnly: Boolean) {
+        val request = OneTimeWorkRequestBuilder&lt;SyncWorker&gt;()
+            .setConstraints(syncConstraints(wifiOnly))
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(PUSH, ExistingWorkPolicy.KEEP, request)
+    }
+
+    fun schedulePeriodic(context: Context, wifiOnly: Boolean) {
+        val request = PeriodicWorkRequestBuilder&lt;SyncWorker&gt;(6, TimeUnit.HOURS)
+            .setConstraints(syncConstraints(wifiOnly))
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniquePeriodicWork(PERIODIC, ExistingPeriodicWorkPolicy.KEEP, request)
+    }
+}</code></pre>
+<p>Call <code>schedulePeriodic</code> from <code>Application.onCreate()</code>; with KEEP it is harmless to call on every launch. Periodic work has a floor: the minimum repeat interval is 15 minutes, the same as JobScheduler. A flex interval lets it run within a window at the end of each period rather than at an exact moment.</p>
+<h2 id="fix-2-constraints-that-match-the-user-s-settings">Fix 2: constraints that match the user's settings</h2>
+<p>Constraints make WorkManager wait for the right conditions. For sync, a connected network is usually enough, plus the user's Wi-Fi-only setting:</p>
+<pre><code>fun syncConstraints(wifiOnly: Boolean) = Constraints.Builder()
+    .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
+    .setRequiresBatteryNotLow(true)
+    .build()</code></pre>
+<p>One consequence is easy to miss: if a constraint stops being met while the worker runs, WorkManager stops the worker and retries it later. Your <code>doWork</code> must be safe to stop at any suspension point, which is one more reason every sync step should be idempotent.</p>
+<h2 id="fix-3-retry-only-what-can-succeed-later">Fix 3: retry only what can succeed later</h2>
+<p>When a worker returns <code>Result.retry()</code>, WorkManager waits for the backoff delay and runs it again. <code>Result.failure()</code> stops it, and fails everything chained after it. Deciding which errors are transient (timeouts, HTTP 5xx, 429) and which are permanent (401 after a token refresh, 400 for a malformed payload) is the most important line of sync code you will write:</p>
+<pre><code>class SyncWorker(
+    context: Context,
+    params: WorkerParameters,
+    private val sync: SyncEngine,
+) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result = when (sync.syncOnce()) {
+        SyncOutcome.Done -&gt; Result.success()
+        SyncOutcome.Transient -&gt; if (runAttemptCount &lt; 5) Result.retry() else Result.failure()
+        SyncOutcome.Permanent -&gt; Result.failure()
+    }
+}</code></pre>
+<p>The backoff numbers come from the WorkManager guide: the delay can be no less than 10 seconds, the policy is LINEAR or EXPONENTIAL, and the default is EXPONENTIAL with a 30-second delay. That is the exponential backoff the offline-first guide recommends for network reads and queued writes, for free: your code only classifies the failure and returns <code>retry()</code>, with no sleep loop of its own. Cap attempts with <code>runAttemptCount</code>, as above, so a permanently broken request does not retry forever.</p>
+<p>A worker with constructor parameters beyond context and params needs a <code>WorkerFactory</code>. With Hilt, annotate it with <code>@HiltWorker</code> and use <code>HiltWorkerFactory</code>; without DI, register a custom factory through <code>Configuration.Provider</code> in your <code>Application</code> and disable the default initializer in the manifest.</p>
+<h2 id="chains-expedited-work-and-the-foreground-rules">Chains, expedited work and the foreground rules</h2>
+<p>Work can run in sequence, each step's output becoming the next step's input. A chain is the natural shape for "upload attachments, then push notes, then pull":</p>
+<pre><code>WorkManager.getInstance(context)
+    .beginUniqueWork("full-sync", ExistingWorkPolicy.KEEP, uploadAttachments)
+    .then(pushNotes)
+    .then(pullNotes)
+    .enqueue()</code></pre>
+<p>The chaining guide's failure rule: when a step fails or is cancelled, every dependent step is marked failed or cancelled too. Keep chains short and make each step meaningful on its own, so a failure tells you something.</p>
+<p>When the user is waiting (they tapped "Sync now"), mark the request expedited with <code>setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)</code>, so an exhausted quota degrades to normal work instead of dropping it. On Android versions before 12, WorkManager may run expedited work as a foreground service, so any worker used with <code>setExpedited</code> must implement <code>getForegroundInfo()</code>; leaving it out can crash on older platform versions.</p>
+<p>For a long first sync, a <code>CoroutineWorker</code> can call <code>setForeground()</code> to run as a foreground service with an ongoing notification. If your app targets Android 14 (API 34) or higher, you must specify a foreground service type for every long-running worker, declare it in the manifest by merging it into WorkManager's own service, and request the matching permission (<code>FOREGROUND_SERVICE_DATA_SYNC</code> for sync). Starting with Android 16, the guide notes, long-running workers can exhaust your app's job quota. For most apps the honest design is a sync that does a bounded amount of work per run and lets the next run continue, rather than one heroic foreground session.</p>
+<h2 id="show-the-state-from-the-repository-not-the-worker">Show the state from the repository, not the worker</h2>
+<p>To display "Syncing..." or "Last sync failed", observe the unique work's state as a Flow with <code>getWorkInfosForUniqueWorkFlow("notes-push")</code> and map <code>RUNNING</code>, <code>ENQUEUED</code> and <code>FAILED</code> to UI states. The worker itself never touches the UI.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>The push is unique work named once, enqueued with <code>ExistingWorkPolicy.KEEP</code>.</li><li>Periodic sync is unique too, scheduled from <code>Application.onCreate()</code>, interval 15 minutes or more.</li><li>Constraints read the user's Wi-Fi-only setting; <code>doWork</code> is safe to stop at any suspension point.</li><li><code>retry()</code> only for timeouts, 5xx and 429; <code>failure()</code> for 400 and 401 after a refresh.</li><li>Attempts capped with <code>runAttemptCount</code>; backoff left to WorkManager.</li><li>Chains short; a failed step fails its dependents, and that is intended.</li><li>Expedited workers implement <code>getForegroundInfo()</code>; long-running workers declare a foreground service type when targeting API 34+.</li><li>Every sync step is idempotent, because a stopped worker runs it again.</li></ul>
+<p>A sync that outlives the app is not the clever part. The clever part is making sure only one of them runs, and that it gives up at the right moment.</p>
+<aside class="cta reveal">
+<img src="/homelab-the-right-way/assets/img/book16-sm.webp" width="120" height="192" alt="Cover of Data That Survives" loading="lazy">
+<div><p class="eyebrow">Go deeper</p>
+<h3>Data That Survives</h3>
+<p>The offline-first contract from Google&#x27;s architecture guide, Room 3 entities, Flow DAOs, relations and tested migrations, DataStore for settings only, WorkManager unique work with constraints and backoff, a pull-then-push sync engine with ETags and conflict rules, Paging 3 with a RemoteMediator, what replaces the deprecated Jetpack Security, Auto Backup rules, and the whole Field Notes data module file by file. The free sample has the whole WorkManager chapter.</p>
+<p class="btns"><a class="btn" href="https://payhip.com/b/TaqWf" rel="noopener">Get the book · $19</a><a class="btn ghost" href="https://payhip.com/b/Bo5hI" rel="noopener">Free sample</a></p></div>
+</aside><aside class="store-cta reveal" id="store">
+<p class="eyebrow">The ebook store</p>
+<h3>All 16 Homelab the Right Way ebooks</h3>
+<p class="muted">Sold on Payhip, $19 each, and every book has a free sample you can read first.</p>
+<p class="sc-offer"><b>Bundles:</b> <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 16 ebooks, $89</a> · <a href="https://payhip.com/b/yVteh" rel="noopener">Homelab Bundle: 10 ebooks, $59</a> · <a href="https://payhip.com/b/CFiT9" rel="noopener">Android Bundle: 6 ebooks, $49</a>. Use code <b>RIGHTWAY20</b> for 20% off any order through Oct 31.</p>
+<ul class="sc-grid"><li><a class="sc-cover" href="https://payhip.com/b/mJKnI" rel="noopener"><img src="/homelab-the-right-way/assets/img/book1-sm.webp" width="90" height="144" alt="Cover of Homelab the Right Way" loading="lazy"></a><div><b>Homelab the Right Way</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/mJKnI" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qon0W" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Ut72a" rel="noopener"><img src="/homelab-the-right-way/assets/img/book2-sm.webp" width="90" height="144" alt="Cover of Self-Host Your Life" loading="lazy"></a><div><b>Self-Host Your Life</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Ut72a" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/bzuSs" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/1iHXQ" rel="noopener"><img src="/homelab-the-right-way/assets/img/book3-sm.webp" width="90" height="144" alt="Cover of Never Lose Your Data" loading="lazy"></a><div><b>Never Lose Your Data</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/1iHXQ" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/qbkVG" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k0nzS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book4-sm.webp" width="90" height="144" alt="Cover of Smart Turtle Tank" loading="lazy"></a><div><b>Smart Turtle Tank</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k0nzS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/2FNPO" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/k6WMS" rel="noopener"><img src="/homelab-the-right-way/assets/img/book5-sm.webp" width="90" height="144" alt="Cover of Lock Down Your Home Network" loading="lazy"></a><div><b>Lock Down Your Home Network</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/k6WMS" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/eQtOF" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/eHgh0" rel="noopener"><img src="/homelab-the-right-way/assets/img/book6-sm.webp" width="90" height="144" alt="Cover of Automations That Just Work" loading="lazy"></a><div><b>Automations That Just Work</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/eHgh0" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/7lmoP" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Qdxgz" rel="noopener"><img src="/homelab-the-right-way/assets/img/book7-sm.webp" width="90" height="144" alt="Cover of Ship Your First Android App" loading="lazy"></a><div><b>Ship Your First Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Qdxgz" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/mIYh9" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/fNO53" rel="noopener"><img src="/homelab-the-right-way/assets/img/book8-sm.webp" width="90" height="144" alt="Cover of Compose Without the Confusion" loading="lazy"></a><div><b>Compose Without the Confusion</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/fNO53" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/LsD1t" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/YcoD4" rel="noopener"><img src="/homelab-the-right-way/assets/img/book9-sm.webp" width="90" height="144" alt="Cover of Pass Google Play Review" loading="lazy"></a><div><b>Pass Google Play Review</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/YcoD4" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/VcvYH" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/zRXe3" rel="noopener"><img src="/homelab-the-right-way/assets/img/book10-sm.webp" width="90" height="144" alt="Cover of Get Paid for Your Android App" loading="lazy"></a><div><b>Get Paid for Your Android App</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/zRXe3" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/8lBGE" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/J9jlp" rel="noopener"><img src="/homelab-the-right-way/assets/img/book11-sm.webp" width="90" height="144" alt="Cover of On-Device AI for Android" loading="lazy"></a><div><b>On-Device AI for Android</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/J9jlp" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/Hz16R" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/An62R" rel="noopener"><img src="/homelab-the-right-way/assets/img/book12-sm.webp" width="90" height="144" alt="Cover of Watch Your Homelab" loading="lazy"></a><div><b>Watch Your Homelab</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/An62R" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/cIY8z" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/Lmhcb" rel="noopener"><img src="/homelab-the-right-way/assets/img/book13-sm.webp" width="90" height="144" alt="Cover of Containers Without the Chaos" loading="lazy"></a><div><b>Containers Without the Chaos</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/Lmhcb" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/1qoiW" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/ZcsXi" rel="noopener"><img src="/homelab-the-right-way/assets/img/book14-sm.webp" width="90" height="144" alt="Cover of Automate Your Homelab" loading="lazy"></a><div><b>Automate Your Homelab</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/ZcsXi" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/yql34" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/4uE86" rel="noopener"><img src="/homelab-the-right-way/assets/img/book15-sm.webp" width="90" height="144" alt="Cover of Stream Your Own Library" loading="lazy"></a><div><b>Stream Your Own Library</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/4uE86" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/5XGgh" rel="noopener">Free sample</a></span></div></li><li><a class="sc-cover" href="https://payhip.com/b/TaqWf" rel="noopener"><img src="/homelab-the-right-way/assets/img/book16-sm.webp" width="90" height="144" alt="Cover of Data That Survives" loading="lazy"></a><div><b>Data That Survives</b><span class="sc-btns"><a class="mini" href="https://payhip.com/b/TaqWf" rel="noopener">Get it · $19</a><a class="mini ghost" href="https://payhip.com/b/Bo5hI" rel="noopener">Free sample</a></span></div></li></ul>
+<p class="btns"><a class="btn" href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle: all 16 ebooks for $89</a><a class="btn ghost" href="https://payhip.com/HomelabtheRightWay" rel="noopener">See the whole store</a></p>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-16">October 16, 2026</time> · 5 min read</p>
+<h3>Is Jellyfin really using your GPU? A six-rung ladder to prove it on Proxmox</h3>
+<p>A transcoding setting that says QSV proves nothing. Pass an Intel iGPU into an unprivileged Proxmox container the way the Jellyfin docs recommend, then climb six checks until intel_gpu_top shows the Video engine working.</p>
+<p class="tags"><span>jellyfin</span><span>proxmox</span><span>transcoding</span><span>quick sync</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-16">October 16, 2026</time> · 4 min read</p>
+<h3>The permission Play rejected isn&#x27;t in your manifest</h3>
+<p>Google Play reviews the merged manifest, not the one you wrote. Here is how to see what your release build really asks for, strip what a library added, and replace media permissions with the photo picker.</p>
+<p class="tags"><span>android</span><span>google play</span><span>permissions</span><span>play console</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/merch-drop-3/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/merch/drop3-hero.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-16">October 16, 2026</time> · 2 min read</p>
+<h3>Merch drop 3: a new tee, hoodie, mug and sticker in the Homelab the Right Way store</h3>
+<p>Four new items in the Homelab the Right Way merch store: the It&#x27;s Not a Hobby, It&#x27;s Infrastructure tee, the Backups: Tested, Not Hoped hoodie, the Rebooting: Human, Please Wait mug and the Homelab Certified sticker.</p>
+<p class="tags"><span>merch</span><span>homelab</span><span>selfhosted</span><span>store</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>16 ebooks, $19 each, every one with a free sample. All 16 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">38 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=10" defer></script>
+</body>
+</html>
