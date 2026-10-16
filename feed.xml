@@ -1,9 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 15 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 16 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Three new Homelab the Right Way ebooks: monitoring, containers and automation</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/three-new-homelab-ebooks-monitoring-containers-automation/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/three-new-homelab-ebooks-monitoring-containers-automation/</guid>
+<item><title>The permission Play rejected isn&#x27;t in your manifest</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/permission-play-rejected-not-in-your-manifest/</guid>
+<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>Google Play reviews the merged manifest, not the one you wrote. Here is how to see what your release build really asks for, strip what a library added, and replace media permissions with the photo picker.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>google play</category><category>permissions</category><category>play console</category><category>photo picker</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Play Console flags a restricted permission on your update. You open <code>AndroidManifest.xml</code>, search for it, and find nothing. You never added it. It is still in the build.</p>
+<p>That is the most common way a permission problem catches people. This post walks through why it happens and how to fix it for good, using Chapter 4 (Sensitive Permissions) of <em>Pass Google Play Review</em>.</p>
+<h2 id="the-trap-you-are-reading-the-wrong-manifest">The trap: you are reading the wrong manifest</h2>
+<p>Google Play treats some permissions as restricted. You may only ship them when a simpler, narrower option cannot do the job, and several need a declaration in Play Console before an update can be sent.</p>
+<p>The surprise is rarely a permission you added. It is one a library merged in. The final manifest is a merge of yours and every dependency's. Libraries contribute permissions, services and receivers. The merged result is what ships, and it is what Play reviews. So searching your own source file and finding nothing alarming proves very little.</p>
+<h2 id="step-1-look-at-what-you-actually-ship">Step 1: look at what you actually ship</h2>
+<p>Check the permissions in the built release, not the source:</p>
+<pre><code># APK: list permissions from the merged manifest
+apkanalyzer manifest permissions app/build/outputs/apk/release/app-release.apk</code></pre>
+<p>In Android Studio you can also open your manifest and switch to the <strong>Merged Manifest</strong> tab. It shows each entry and which library contributed it. That tells you whether a permission is yours or came along with a dependency.</p>
+<h2 id="step-2-remove-what-a-library-added-and-you-don-t-need">Step 2: remove what a library added and you don't need</h2>
+<p><code>tools:node="remove"</code> takes an unwanted entry out of the merged result:</p>
+<pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"&gt;
+    &lt;uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" /&gt;
+&lt;/manifest&gt;</code></pre>
+<p>Run <code>apkanalyzer</code> on the new release build afterwards and confirm the permission is gone from the list.</p>
+<h2 id="step-3-pick-the-narrower-option-first">Step 3: pick the narrower option first</h2>
+<p>For every restricted permission, the book's rule is to ask in a fixed order. Most features have a narrower option that needs no permission and no declaration.</p>
+<div class="table"><table><thead><tr><th>Permission</th><th>Narrower option first</th><th>If you really need it</th></tr></thead><tbody><tr><td>READ_MEDIA_IMAGES, READ_MEDIA_VIDEO</td><td>Photo picker</td><td>Core broad-access use only (gallery-type apps), declaration</td></tr><tr><td>MANAGE_EXTERNAL_STORAGE</td><td>Storage Access Framework, MediaStore</td><td>Declaration; core need only</td></tr><tr><td>ACCESS_BACKGROUND_LOCATION</td><td>Foreground location while in use</td><td>Declaration form, video, prominent disclosure, privacy policy</td></tr><tr><td>USE_EXACT_ALARM</td><td>Inexact alarms, WorkManager, SCHEDULE_EXACT_ALARM</td><td>Calendar and alarm clock apps only</td></tr></tbody></table></div>
+<h2 id="photos-and-videos-the-picker-needs-no-permission">Photos and videos: the picker needs no permission</h2>
+<p>Play Console Help ("Understanding Restricted Permissions with minimum scope alternatives", checked October 2026) says apps targeting Android 13 or later may only request <code>READ_MEDIA_IMAGES</code> and <code>READ_MEDIA_VIDEO</code> if system pickers like the Android Photo Picker are not sufficient for core functionality. Full compliance became mandatory on May 28, 2025.</p>
+<p>Gallery-type apps that manage all of a user's photos qualify. An app that lets the user choose a picture to edit, attach or upload does not. A custom picker does not automatically qualify either.</p>
+<p>The photo picker needs no permission at all. With androidx.activity 1.7.0 or higher, in Compose:</p>
+<pre><code>@Composable
+fun AvatarPicker(onPicked: (Uri) -&gt; Unit) {
+    val pickMedia = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -&gt;
+        if (uri != null) onPicked(uri)   // null when the user backs out
+    }
+    Button(onClick = {
+        pickMedia.launch(
+            PickVisualMediaRequest(
+                ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
+        )
+    }) { Text("Choose photo") }
+}</code></pre>
+<p>A few details from the chapter:</p>
+<ul><li>On devices without the picker, the library falls back to <code>ACTION_OPEN_DOCUMENT</code> on its own.</li><li>Use <code>PickMultipleVisualMedia(maxItems)</code> for several items.</li><li>By default, access to a picked item lasts until the device restarts or the app stops. If you upload in the background, persist it:</li></ul>
+<pre><code>context.contentResolver.takePersistableUriPermission(
+    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+)</code></pre>
+<p>The picker grants access to exactly what the user selects and nothing else. There is no permission prompt, no declaration, and nothing to justify in Play Console.</p>
+<h2 id="a-case-note-from-a-real-app">A case note from a real app</h2>
+<p>The book includes a case note from the author's own app, CaptionBurn (com.charlesh.captionburn). Play Console refused to send a CaptionBurn update with the issue "Use alternative system pickers for photos / videos". The live bundle requested <code>READ_MEDIA_VIDEO</code>.</p>
+<p>The app already chose videos with <code>PickVisualMedia</code>, so the permission had no job. The fix removed it from the build. The current manifest in chartmann1590/captionburn strips every media and storage permission a library might merge in, with <code>tools:node="remove"</code>:</p>
+<ul><li><code>READ_MEDIA_IMAGES</code></li><li><code>READ_MEDIA_VIDEO</code></li><li><code>READ_MEDIA_VISUAL_USER_SELECTED</code></li><li><code>READ_EXTERNAL_STORAGE</code></li><li><code>WRITE_EXTERNAL_STORAGE</code></li></ul>
+<p>One more detail worth knowing: the Photo and video permissions declaration page kept listing the old permission from the live bundle until the new release went live. Seeing it there after the fix does not mean the fix failed.</p>
+<h2 id="checklist-before-you-send-an-update">Checklist before you send an update</h2>
+<ul><li>Read the permission list from the release build with <code>apkanalyzer manifest permissions</code>, not from your source manifest.</li><li>Check the Merged Manifest tab to see which library added each entry.</li><li>Remove unused library permissions with <code>tools:node="remove"</code>.</li><li>Choose media with the photo picker. No <code>READ_MEDIA_*</code> unless the app is gallery-type.</li><li>Persist picked URIs with <code>takePersistableUriPermission</code> if you upload in the background.</li><li>For every other restricted permission, try the narrower option in the table first.</li><li>After the fix ships, expect the declaration page to show the old permission until the new release is live.</li></ul><p><a href="https://payhip.com/b/YcoD4">Go deeper: Pass Google Play Review</a></p>]]></content:encoded></item><item><title>LiveCaptionN: live captions and translation over any Android app</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/livecaptionn-live-captions-translation/</guid>
+<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>LiveCaptionN floats real-time captions and translation over any app, offline on your phone or through your own Whisper server.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.livecaptionn.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>captions</category><category>accessibility</category><category>self-hosted</category><category>whisper</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.livecaptionn.jpg" alt=""></p><p>Captions help in more situations than people expect. A video in another language, a noisy room, a call where the audio keeps dropping, a lecture you want to review later, or simply hearing difficulties. LiveCaptionN puts real-time captions in a floating window over whatever app you are using, and it can translate them as they appear.</p>
+<p>What makes it interesting for a homelab audience is that it gives you two ways to process speech: fully on the phone, or on a server you run yourself.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Floating overlay.</strong> A resizable, draggable caption window sits over any app. You can pause, minimize or restyle it.</li><li><strong>Two audio sources.</strong> Capture from the microphone, or capture internal system audio directly on Android 10 and later.</li><li><strong>Streaming transcription.</strong> Low-latency speech-to-text from the streaming Vosk engine.</li><li><strong>Live translation</strong> into 59+ languages using Google ML Kit or a self-hosted LibreTranslate instance.</li><li><strong>Transcript history.</strong> Search, review and export timestamped caption logs.</li><li><strong>Customization.</strong> Font size, text color, background opacity and position.</li><li><strong>Localized interface</strong> in 59 languages.</li></ul>
+<h2 id="two-processing-modes">Two processing modes</h2>
+<h3 id="on-device">On-device</h3>
+<p>Everything runs on the phone, without internet access. You download a Vosk speech model and the ML Kit language packs you want, and after that your audio and captions never leave the device. There is no account sign-up and no tracking.</p>
+<h3 id="self-hosted">Self-hosted</h3>
+<p>You run OpenAI Whisper ASR and LibreTranslate on your own computer or home server, which the listing describes as Docker-ready. You start the container on the PC or server, then enter its local network address in the app settings. The listing's example is a LAN address such as <code>192.168.1.50</code> on port <code>9000</code>.</p>
+<p>The trade is clear. The heavy processing moves from the phone to your machine, which saves battery and CPU on the phone and gives you Whisper's accuracy. The app includes an interactive tutorial for this mode with video and audio guidance.</p>
+<h2 id="hardware-check">Hardware check</h2>
+<p>The app checks your hardware at startup and recommends a mode.</p>
+<div class="table"><table><thead><tr><th>Mode</th><th>Minimum</th><th>Recommended</th></tr></thead><tbody><tr><td>On-device</td><td>2.5 GB RAM, 4 CPU cores, 350 MB free storage</td><td>4 GB+ RAM, 64-bit multi-core CPU, 1.5 GB free for large models</td></tr><tr><td>Self-hosted</td><td>1.5 GB RAM, Android 9.0 (API 28), on your home Wi-Fi or LAN</td><td></td></tr></tbody></table></div>
+<p>Devices under 2.5 GB of RAM or 4 cores are routed to self-hosted mode automatically, and devices with 2.5 to 3.8 GB get performance recommendations and lighter models. Self-hosted mode is how an older or budget phone can still get good captions.</p>
+<h2 id="privacy-and-permissions">Privacy and permissions</h2>
+<p>The listing states that audio streams and transcripts never leave your device or your local network. The permissions it asks for:</p>
+<ul><li><strong>Microphone</strong>, to capture live speech.</li><li><strong>Display over other apps</strong>, for the floating captions.</li><li><strong>Foreground service</strong>, to keep captions running while you multitask.</li><li><strong>System audio</strong> (optional, Android 10+), to caption what other apps are playing.</li></ul>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Core features are free:</strong> unlimited captions from mic and internal audio, on-device Vosk, ML Kit translation, the floating window, history export and self-hosted mode.</li><li><strong>Ads:</strong> the free version shows banner and interstitial ads.</li><li><strong>Ad-Free ($1.99/mo per the listing):</strong> removes all ads.</li><li><strong>Pro ($4.99/mo per the listing):</strong> ad-free, plus higher-accuracy Vosk models, premium overlay themes, custom vocabulary and glossary replacements, and extended offline language packs.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want captions on videos, calls or podcasts in any app.</li><li>You need hearing accessibility support that works offline.</li><li>You are learning a language and want live translation as people speak.</li><li>You already run Docker at home and want Whisper-quality captions on your phone.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.livecaptionn">Get LiveCaptionN - Live Captions on Google Play</a></p>]]></content:encoded></item><item><title>Three new Homelab the Right Way ebooks: monitoring, containers and automation</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/three-new-homelab-ebooks-monitoring-containers-automation/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/three-new-homelab-ebooks-monitoring-containers-automation/</guid>
 <pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>Homelab the Right Way Books 7, 8 and 9 are out: Watch Your Homelab (monitoring and alerts), Containers Without the Chaos (Docker Compose, Caddy, HTTPS and single sign-on) and Automate Your Homelab (Git, cloud-init, OpenTofu and Ansible). Each has a free sample chapter.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>homelab</category><category>monitoring</category><category>docker</category><category>ansible</category><category>ebook</category>
