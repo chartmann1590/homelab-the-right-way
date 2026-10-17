@@ -3,7 +3,112 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 17 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Merch drop 4: a /24 tee, a snapshot hoodie, the first crewneck and a port cheat sheet mouse pad</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-4/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-4/</guid>
+<item><title>Snapshots on a schedule, replicas on another box: sanoid and syncoid pull replication for ZFS</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</guid>
+<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>ZFS snapshots undo deletions and bad upgrades, but they die with the pool. A sanoid retention policy, syncoid pull replication run from the backup box, and a monthly checksum restore turn snapshots into something you can actually recover from.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>zfs</category><category>truenas</category><category>nas</category><category>snapshots</category><category>sanoid</category><category>syncoid</category><category>backups</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A ZFS snapshot is a read-only picture of a dataset at one instant. It takes about a second to create and costs no space at first. Snapshots on a schedule, thinned automatically and copied to a second machine, are the single biggest upgrade most homelab storage can get. This post builds exactly that with two tools from the same project: sanoid takes and prunes snapshots, syncoid replicates them.</p>
+<h2 id="the-trap">The trap</h2>
+<p>Homelab storage usually fails in one of two opposite ways. The first lab has no snapshots at all, so an accidental <code>rm -rf</code> on a share is permanent. The second takes snapshots every fifteen minutes and never prunes them: ten thousand of them, a pool that is mysteriously full, and a <code>zfs list -t snapshot</code> that takes a minute to answer.</p>
+<p>Both labs also believe the snapshots are their backup. They are not. A snapshot lives in the same pool as the data. If the pool dies (two disks in a RAIDZ1, a controller that writes garbage, a mistaken <code>zpool destroy</code>), the snapshots die with it. Snapshots protect against changes: deletions, overwrites, bad upgrades, ransomware on a share. Backups protect against loss. You need both, and replication to a second box gets you most of the way.</p>
+<h2 id="why-snapshots-are-cheap">Why snapshots are cheap</h2>
+<p>ZFS never overwrites data in place. When a block changes, the new version goes to a new location and the dataset's pointers move to it. A snapshot simply keeps the old pointers, so until something changes the snapshot and the live dataset share every block.</p>
+<p>That also tells you where snapshot space goes. A snapshot grows as the live data moves away from it: delete a 20 GB folder and the space is not freed until every snapshot that still references those blocks is destroyed. When a pool fills up unexpectedly, this command sorts snapshots by the space only they hold, and the culprit is usually at the bottom:</p>
+<pre><code>zfs list -t snapshot -o name,used -s used</code></pre>
+<h2 id="step-1-a-retention-policy-with-sanoid">Step 1: a retention policy with sanoid</h2>
+<p>Debian and Proxmox VE package sanoid, and the package ships a systemd timer that runs it every 15 minutes:</p>
+<pre><code>apt install sanoid
+systemctl enable --now sanoid.timer
+systemctl list-timers | grep sanoid</code></pre>
+<p>The policy lives in <code>/etc/sanoid/sanoid.conf</code>: datasets at the top, templates at the bottom. A trimmed version:</p>
+<pre><code>[tank/documents]
+	use_template = important
+[tank/shares]
+	use_template = standard
+	recursive = yes
+[tank/media]
+	use_template = light
+
+[template_important]
+	frequently = 0
+	hourly = 48
+	daily = 30
+	weekly = 8
+	monthly = 12
+	yearly = 0
+	autosnap = yes
+	autoprune = yes
+
+[template_standard]
+	hourly = 24
+	daily = 14
+	weekly = 4
+	monthly = 3
+	autosnap = yes
+	autoprune = yes
+
+[template_light]
+	hourly = 0
+	daily = 7
+	weekly = 0
+	monthly = 0
+	autosnap = yes
+	autoprune = yes</code></pre>
+<p>Each dataset section names a template, and <code>recursive = yes</code> applies it to every child dataset. The numbers are how many snapshots of each kind to keep. Recent history is dense (48 hourlies) and older history is sparse (12 monthlies), so about a hundred snapshots cover a full year, and sanoid deletes each one when it falls off the end of its rung.</p>
+<p>Anything you leave out comes from <code>/etc/sanoid/sanoid.defaults.conf</code>, which you should not edit, so set every interval explicitly in your own templates.</p>
+<p>Test the policy without touching anything, then take a round of snapshots and look:</p>
+<pre><code>sanoid --cron --readonly --verbose      # simulate
+sanoid --take-snapshots --verbose       # take snapshots now
+zfs list -t snapshot -o name,used -s creation tank/documents | tail -5</code></pre>
+<p>One rule if the box also runs Proxmox guests: pick one snapshot owner per dataset. Proxmox's own VM snapshots and storage replication create and delete snapshots on the same zvols. If Proxmox replication or vzdump with PBS already covers your guests, leave <code>tank/vm</code> out of sanoid, or keep its policy very light.</p>
+<h2 id="step-2-how-incremental-replication-works">Step 2: how incremental replication works</h2>
+<p><code>zfs send</code> turns a snapshot into a stream of bytes; <code>zfs receive</code> turns that stream back into a dataset on another pool. The first send is full. Every later send is incremental: only the blocks that changed between two snapshots travel. Both sides must keep the last common snapshot, or the next incremental has nothing to build on.</p>
+<p>By hand it looks like this, with <code>nas</code> and <code>backup</code> as SSH host aliases with key-based login:</p>
+<pre><code>zfs snapshot tank/documents@rep-1
+zfs send tank/documents@rep-1 | ssh backup zfs receive -u backup/documents
+zfs snapshot tank/documents@rep-2
+zfs send -i @rep-1 tank/documents@rep-2 | ssh backup zfs receive -u backup/documents</code></pre>
+<p><code>zfs receive -u</code> does not mount the received dataset, which avoids mountpoint clashes on the target. Tracking the last common snapshot for every dataset, every night, is the part nobody keeps up with. syncoid does it for you: it finds the newest common snapshot, sends the incremental, resumes interrupted transfers when both sides support it, and cleans up its own snapshots.</p>
+<h2 id="step-3-pull-do-not-push">Step 3: pull, do not push</h2>
+<p>A backup box that pulls from the NAS is safer than a NAS that pushes to the backup box. If the NAS is compromised, an attacker holding its SSH key can delete everything on a push target. With pull replication, the NAS has no credentials for the backup box at all.</p>
+<p>On the backup box, a small script run by cron at 01:30:</p>
+<pre><code>cat &gt; /usr/local/sbin/pull-replicas &lt;&lt;'EOF'
+#!/bin/sh
+S="/usr/sbin/syncoid --recursive --no-sync-snap --quiet"
+$S nas:tank/photos    backup/photos
+$S nas:tank/documents backup/documents
+EOF
+chmod +x /usr/local/sbin/pull-replicas
+echo '30 1 * * * root /usr/local/sbin/pull-replicas' &gt; /etc/cron.d/pull-replicas</code></pre>
+<p>By default syncoid creates its own short-lived <code>syncoid_</code> snapshot for each run. <code>--no-sync-snap</code> tells it to use the snapshots sanoid already took, which keeps the target's history identical to the source. <code>--recursive</code> includes child datasets. For an encrypted dataset, add <code>--sendoptions=w</code> for a raw send: the blocks travel and are stored still encrypted, and the backup box never needs the key. Keep every passphrase somewhere that does not depend on the pool it unlocks.</p>
+<p>The received datasets still need pruning. On the backup box, give them a template that never takes snapshots and only prunes what replication brings in:</p>
+<pre><code>[backup/photos]
+	use_template = backup
+	recursive = yes
+[backup/documents]
+	use_template = backup
+	recursive = yes
+
+[template_backup]
+	autosnap = no
+	autoprune = yes
+	hourly = 48
+	daily = 30
+	weekly = 8
+	monthly = 12</code></pre>
+<p>For tighter security, replicate as a non-root user with ZFS permission delegation: on the NAS, <code>zfs allow -u replicator send,hold,snapshot tank</code>, and run syncoid on the backup box with <code>--no-privilege-elevation</code>. The receiving user needs <code>create,mount,receive</code> on the target dataset. Test the delegation once by hand before relying on it.</p>
+<p>A TrueNAS box works as the target too. It speaks standard ZFS over SSH, so the same syncoid commands work; create the destination parent dataset in the TrueNAS UI first and let TrueNAS own the retention for those datasets.</p>
+<h2 id="step-4-prove-it">Step 4: prove it</h2>
+<p>Replication you have never restored from is a hope, not a plan. Once a month, restore one real file from the replica and compare checksums from both machines:</p>
+<pre><code># On the backup box
+zfs clone backup/documents@autosnap_2026-10-16_00:00:02_daily backup/restore-test
+zfs set mountpoint=/mnt/restore-test backup/restore-test
+sha256sum /mnt/restore-test/taxes/2025.pdf
+ssh nas sha256sum /tank/documents/taxes/2025.pdf
+zfs destroy backup/restore-test</code></pre>
+<p>Matching checksums are the proof.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Every dataset that matters has a sanoid template, and <code>tank/vm</code> has exactly one snapshot owner.</li><li><code>sanoid.timer</code> is enabled and <code>zfs list -t snapshot</code> shows recent autosnaps.</li><li>A second box receives incremental replication, ideally by pulling.</li><li>Encrypted datasets replicate raw, and the keys are stored off the pool.</li><li>The backup box prunes with a <code>backup</code> template (<code>autosnap = no</code>).</li><li>You have restored one file from the replica and compared checksums.</li></ul><p><a href="https://payhip.com/b/d2XuW">Go deeper: Store It Right</a></p>]]></content:encoded></item><item><title>Merch drop 4: a /24 tee, a snapshot hoodie, the first crewneck and a port cheat sheet mouse pad</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-4/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-4/</guid>
 <pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>Six new items in the Homelab the Right Way merch store: the Home Is Where the /24 Is tee, the Snapshot First, Ask Questions Later hoodie, the Powered by Coffee &amp; Containers crewneck, the Decaf Is a Single Point of Failure mug, the Production: Do Not Touch sticker and a Port Cheat Sheet mouse pad.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop4-hero.jpg" type="image/jpeg" length="0"/>
 <category>merch</category><category>homelab</category><category>selfhosted</category><category>store</category>
@@ -28,7 +133,109 @@
 <p>9 x 7.5 inch mouse pad with a non-slip rubber base. $20.50.</p>
 <h2 id="where-everything-lives">Where everything lives</h2>
 <p>The store now carries 35 designs across tees, hoodies, a crewneck, hats, mugs, stickers, desk mats, a mouse pad, a poster and a tote. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
-<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Ads that don&#x27;t get your app flagged: AdMob&#x27;s interstitial rules in plain English</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</guid>
+<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Your app starts slow after every update: generate a Baseline Profile and prove it is applied</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/baseline-profile-generate-and-verify-android/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/baseline-profile-generate-and-verify-android/</guid>
+<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>After every install and update, Android runs your code interpreted and JIT-compiled until the device compiles it in the background. A Baseline Profile generated with the androidx.baselineprofile plugin makes your critical journeys fast from the first launch, and three checks prove it actually reached the device.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>performance</category><category>baseline profiles</category><category>jetpack compose</category><category>macrobenchmark</category><category>kotlin</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A Baseline Profile is the single change most likely to make an existing Compose app start faster and scroll more smoothly without touching its logic. It is a list of the classes and methods your app needs on its most important paths, shipped inside the app, so the runtime can compile them ahead of time on install instead of discovering them slowly on the user's phone. This post generates one with the Baseline Profile Gradle plugin and then proves, three ways, that it is applied.</p>
+<h2 id="the-trap">The trap</h2>
+<p>Your Kotlin compiles to DEX bytecode. The Android Runtime (ART) can interpret it, JIT-compile hot methods while the app runs, or run machine code compiled ahead of time (AOT). ART does not AOT-compile your whole app on install. It records which methods were used into a profile and compiles them later, when the device is idle and charging.</p>
+<p>That works eventually, and "eventually" is the problem. After every install and every update, users start in the slow path until the device has recorded enough and found a quiet moment to compile it. Google Play's Cloud Profiles help later installs of a release, but they need time and users to build up, so they do nothing for the first users of each new version.</p>
+<p>Jetpack libraries, Compose included, ship their own profiles, which is why a plain Compose app already benefits a little. Library profiles only cover library code, though. Your screens, ViewModels and repositories are in nobody's profile but yours. Google's documentation states that Baseline Profiles improve code execution speed by about 30% from the first launch for the code paths they include; your own gain depends on your app, and Macrobenchmark tells you what it is.</p>
+<h2 id="step-1-the-generator-module">Step 1: the generator module</h2>
+<p>The Baseline Profile Gradle plugin (<code>androidx.baselineprofile</code>, 1.5.0) does the plumbing. Android Studio's Baseline Profile Generator module template (File &gt; New &gt; New Module, Android Studio Iguana or newer, AGP 8.2 or newer) writes this for you. The generator is a <code>com.android.test</code> module that points at the app:</p>
+<pre><code>// baselineprofile/build.gradle.kts
+plugins {
+    id("com.android.test")
+    id("org.jetbrains.kotlin.android")
+    id("androidx.baselineprofile")
+}
+android {
+    namespace = "com.example.fieldnotes.baselineprofile"
+    compileSdk = 36
+    defaultConfig {
+        minSdk = 28
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    targetProjectPath = ":app"
+}
+dependencies {
+    implementation("androidx.benchmark:benchmark-macro-junit4:1.5.0")
+    implementation("androidx.test.uiautomator:uiautomator:2.4.0")
+}</code></pre>
+<p>Generation needs root on the device, except on Android 13 (API 33) and newer, where Macrobenchmark can collect profiles without root. A Gradle-managed device with <code>systemImageSource = "aosp"</code> works everywhere because AOSP images allow root.</p>
+<p>The app module applies the same plugin, depends on the generator, and includes ProfileInstaller:</p>
+<pre><code>// app/build.gradle.kts
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("androidx.baselineprofile")
+}
+dependencies {
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
+    baselineProfile(project(":baselineprofile"))
+}
+baselineProfile {
+    saveInSrc = true      // commit the generated profile
+    mergeIntoMain = true  // one profile for all variants
+}</code></pre>
+<p>ProfileInstaller matters for installs that do not come from Google Play: sideloaded builds, internal testing installs and other stores. There, Play is not around to hand the profile to ART, so ProfileInstaller writes it on the app's first launch.</p>
+<h2 id="step-2-write-the-journeys">Step 2: write the journeys</h2>
+<p>The generator is an instrumented test with <code>BaselineProfileRule</code>. It drives the app through the paths users take every day, and the rule records every class and method that ran:</p>
+<pre><code>@RunWith(AndroidJUnit4::class)
+@LargeTest
+class BaselineProfileGenerator {
+    @get:Rule val rule = BaselineProfileRule()
+
+    @Test fun generate() = rule.collect(
+        packageName = "com.example.fieldnotes",
+        includeInStartupProfile = true,
+    ) {
+        pressHome()
+        startActivityAndWait()
+        device.wait(Until.hasObject(By.res("notes_list")), 5_000)
+
+        val list = device.findObject(By.res("notes_list"))
+        list.setGestureMargin(device.displayWidth / 5)
+        list.fling(Direction.DOWN)
+        device.waitForIdle()
+
+        device.findObject(By.res("note_row")).click()
+        device.wait(Until.hasObject(By.res("editor_body")), 5_000)
+        device.pressBack()
+    }
+}</code></pre>
+<p>The test finds elements by resource id, so in Compose expose test tags as resource ids once near the root with <code>Modifier.semantics { testTagsAsResourceId = true }</code> and tag the elements the generator needs with <code>Modifier.testTag("notes_list")</code>.</p>
+<p>Good journeys follow a few rules. Cover what users actually do, most common first. Wait for content, because if the journey moves on before the list loads, the list's code is not in the profile. Keep it deterministic with local or seeded data rather than a live server. And never sign in to real accounts from a generator.</p>
+<h2 id="step-3-generate-and-commit">Step 3: generate and commit</h2>
+<p>Run the plugin's task, not the test directly:</p>
+<pre><code>./gradlew :app:generateBaselineProfile</code></pre>
+<p>The plugin builds the app, runs the generator and copies the result into your sources:</p>
+<pre><code>app/src/main/generated/baselineProfiles/baseline-prof.txt
+app/src/main/generated/baselineProfiles/startup-prof.txt</code></pre>
+<p>Commit both. Every release build compiles them into the app, and you will find the binary form under <code>assets/dexopt/baseline.prof</code> in the AAB or APK. The rules inside are plain text: <code>HSPLcom/example/fieldnotes/ui/NotesViewModel;-&gt;loadNotes()V</code>, where H means hot, S startup and P post-startup.</p>
+<p>The second file is a Startup Profile, produced because of <code>includeInStartupProfile = true</code>. It tells R8 to put every class needed at startup into the primary DEX file. It needs R8 enabled for release (<code>isMinifyEnabled = true</code>) and DEX layout optimization, which is on by default from AGP 8.3.</p>
+<h2 id="step-4-prove-it-is-applied">Step 4: prove it is applied</h2>
+<p>A profile that does not reach the device is just a file in a repository.</p>
+<p>Benchmark it. Compare a fresh install with no ahead-of-time compilation against one that requires your profile and fails loudly if the app has none:</p>
+<pre><code>@Test fun startupNoCompilation() = startup(CompilationMode.None())
+
+@Test fun startupBaselineProfile() = startup(
+    CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))</code></pre>
+<p>Run both on the same physical device and compare the median <code>timeToInitialDisplayMs</code>.</p>
+<p>Check the device by hand:</p>
+<pre><code>PKG=com.example.fieldnotes
+adb install app-release.apk
+adb shell am broadcast \
+  -a androidx.profileinstaller.action.INSTALL_PROFILE \
+  $PKG/androidx.profileinstaller.ProfileInstallReceiver
+adb shell am force-stop $PKG
+adb shell cmd package compile -f -m speed-profile $PKG
+adb shell dumpsys package dexopt | grep -A 1 $PKG</code></pre>
+<p>The broadcast prints "1" on success, and the dexopt status should read <code>speed-profile</code>.</p>
+<p>Ask from inside the app. <code>ProfileVerifier.getCompilationStatusAsync()</code> reports whether the profile was installed and compiled (<code>isCompiledWithProfile</code>, <code>hasProfileEnqueuedForCompilation()</code>). Log it in internal builds; "enqueued" is normal right after an install from outside Play.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>The generator module applies <code>androidx.baselineprofile</code> and targets <code>:app</code>.</li><li>The app depends on ProfileInstaller and on the generator through <code>baselineProfile(...)</code>.</li><li>Journeys cover launch, the main list, opening an item, and wait for content.</li><li><code>baseline-prof.txt</code> and <code>startup-prof.txt</code> are committed.</li><li><code>None</code> versus <code>Partial(Require)</code> shows a measured gap on a real device.</li><li><code>dumpsys package dexopt</code> reads <code>speed-profile</code>.</li><li>The profile is regenerated after screen redesigns, major Compose upgrades and before releases.</li></ul><p><a href="https://payhip.com/b/4nGE6">Go deeper: Fast by Default</a></p>]]></content:encoded></item><item><title>Ads that don&#x27;t get your app flagged: AdMob&#x27;s interstitial rules in plain English</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</guid>
 <pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>AdMob&#x27;s &quot;Disallowed interstitial implementations&quot; page in short, plus a real frequency cap from a shipping app and the two-flag check every ad call should make.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>admob</category><category>monetization</category><category>ads</category><category>kotlin</category>
@@ -1182,42 +1389,5 @@ pct clone 205 405 --full 1 --hostname app-ct</code></pre>
 <h2 id="good-to-know">Good to know</h2>
 <ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Category:</strong> Travel and Local, rated Everyone.</li><li><strong>Battery:</strong> the app is described as battery-efficient, which matters on a long day of navigation.</li><li><strong>Prepare before you go:</strong> offline maps have to be downloaded before you lose service, so do that at home or at your last stop with a connection.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You take road trips through areas where cell coverage is patchy or missing.</li><li>You want to learn something about the places you are driving past, without reading a screen.</li><li>You prefer an app that works without an account and keeps your routes on your phone.</li><li>You already plan routes elsewhere and want to bring them in as GPX files.</li><li>You want a night mode and large buttons for use in the car.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.trailsage">Get TrailSage: AI Road Trip Guide on Google Play</a></p>]]></content:encoded></item><item><title>Ollama AI Chat: use your Ollama server or offline models on Android</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/ollama-ai-chat-android-client/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/ollama-ai-chat-android-client/</guid>
-<pubDate>Sun, 11 Oct 2026 12:30:00 -0400</pubDate><description>Ollama AI Chat connects Android to your own Ollama server or runs models like Gemma and Qwen fully on the phone, with optional browser sync.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.ollama.client.play.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>ollama</category><category>self-hosted</category><category>local-llm</category><category>privacy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.ollama.client.play.jpg" alt=""></p><p>Running a language model at home is a common homelab project now. Ollama makes it straightforward to host models on your own machine, but you still need a decent way to talk to that server when you are not sitting at your desk. Ollama AI Chat is an Android client for exactly that, and it adds a second mode: running smaller models directly on the phone, with no server at all.</p>
-<h2 id="two-ways-to-run-a-model">Two ways to run a model</h2>
-<p><strong>Remote Ollama.</strong> Point the app at your home or work Ollama server and you get access to whatever models it hosts. You can add multiple servers, switch models per conversation, and watch responses stream in real time.</p>
-<p><strong>On-device.</strong> The app can also run models locally through Google's LiteRT-LM runtime. The listing names Gemma 4, Gemma 3, Qwen 3, Qwen 2.5, DeepSeek R1 Distill and Phi-4 Mini, ranging from about 300 MB to about 4 GB depending on capability. You download a model once, and after that chatting works fully offline, with zero network traffic for chat content.</p>
-<p>That split is practical. When you are on your home network, the big models on your server are available. When you are somewhere without a connection, a smaller model on the phone still works.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Streaming chat</strong> for both remote and on-device models, with history saved locally.</li><li><strong>Thread organization:</strong> pin, archive and label conversations; export or share a whole thread as Markdown.</li><li><strong>Message tools:</strong> copy, share, delete, edit and resend, regenerate, and stop a response mid-stream while keeping what was already written.</li><li><strong>Search</strong> inside a conversation or across all of them, jumping straight to the message.</li><li><strong>Images</strong> for vision-capable remote models, compressed automatically before upload.</li><li><strong>Voice:</strong> speech-to-text input and read-aloud replies.</li><li><strong>Model control</strong> per thread: temperature, top_p, top_k, context window and seed, plus token speed and response time under each reply and full model details (parameters, quantization, template, license).</li></ul>
-<h2 id="web-chat-sync">Web Chat Sync</h2>
-<p>The newest feature lets you keep chatting from a computer without installing anything on it. You turn on Web Sync in the app's settings and sign in with Google or an email and password. Then you open the web chat page in any desktop or mobile browser, sign in with the same account, and your threads appear.</p>
-<p>The interesting part is where the work happens. When you type in the browser, your Android phone receives the message, runs the inference (against your Ollama server or on-device), and streams the answer back to the browser. If the phone is offline, messages queue in the browser and are sent once it reconnects. A presence indicator shows when the phone is online, and the model selector only lists models you have actually installed.</p>
-<h2 id="privacy">Privacy</h2>
-<p>Conversation history is stored locally on the device in a Room database. On-device inference sends no chat content over the network. If you turn on Web Sync, threads and messages sync to Firebase Realtime Database under your own account, secured by Firebase Auth, so that part does go through a cloud service. The listing also states there is no third-party advertising data collection for chat content.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li><strong>Price:</strong> free to download. The app contains ads, and the Play listing notes in-app purchases.</li><li><strong>Requirements:</strong> Android 7.0 (API 24) or higher.</li><li><strong>Connection:</strong> remote Ollama and Web Chat Sync need an internet connection; on-device models work offline after the download.</li><li><strong>Storage:</strong> on-device models take roughly 300 MB to 4 GB each, so check your free space first.</li><li><strong>Open source:</strong> released under the MIT license.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You run an Ollama server and want a proper phone client for it.</li><li>You want a model that still works on the phone with no connection.</li><li>You compare models and care about settings like temperature, context window and token speed.</li><li>You want to continue phone conversations from a browser without installing a desktop app.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.ollama.client.play">Get Ollama AI Chat on Google Play</a></p>]]></content:encoded></item><item><title>OctoPulse: watch and control OctoPrint from your Android phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/octopulse-octoprint-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/octopulse-octoprint-android-app/</guid>
-<pubDate>Sun, 11 Oct 2026 12:30:00 -0400</pubDate><description>OctoPulse finds OctoPrint on your Wi-Fi, pairs in one tap, and puts progress, camera, temps and controls on your phone. Free, no account.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.octopulse.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>3d-printing</category><category>octoprint</category><category>raspberry-pi</category><category>self-hosted</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.octopulse.jpg" alt=""></p><p>If you run OctoPrint, you know the routine: a print is going, you have walked away, and now you want to know whether the first layer stuck. Opening the web interface on a phone works, but it was not designed for a small screen. OctoPulse is a native Android companion for OctoPrint that puts the things you check most often (progress, temperatures, the camera) one tap away.</p>
-<p>OctoPrint is the open-source web interface many people use to run a 3D printer from a Raspberry Pi or another small computer. OctoPulse talks to it over your network. It works with any printer running OctoPrint, including OctoPi on a Raspberry Pi, and the listing names Ender 3, Prusa and Bambu (with OctoPrint) as examples. The rule of thumb it gives is simple: if you can open OctoPrint in your browser, OctoPulse can connect.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Finds your printer for you.</strong> It scans your Wi-Fi using mDNS/Bonjour, SSDP and a subnet scan, so you do not type IP addresses. It also verifies that what it found is really OctoPrint.</li><li><strong>Pairs without copying API keys.</strong> It uses OctoPrint's official Application Keys: tap the printer, approve the request in OctoPrint, and it is connected.</li><li><strong>Shows every printer on one dashboard.</strong> Status, progress percentage, time remaining, and nozzle and bed temperatures, with pull to refresh.</li><li><strong>Streams the camera.</strong> MJPEG or snapshot streaming, with flip, rotate and automatic reconnect.</li><li><strong>Gives you real control.</strong> Jog X, Y and Z, home the axes, extrude and retract, set temperatures, run the fan, hit emergency stop, or send G-code from a terminal.</li><li><strong>Previews G-code.</strong> A 2D and 3D layer viewer with pinch-zoom and orbit.</li><li><strong>Manages files.</strong> Browse what is on OctoPrint, see details, start a print or delete a file.</li><li><strong>Sends alerts.</strong> Notifications when a print finishes or fails, and at 25, 50, 75 and 90 percent, with per-printer toggles and background polling. It respects Do Not Disturb.</li></ul>
-<h2 id="getting-started">Getting started</h2>
-<p>The setup the listing describes is three steps:</p>
-<ol><li>Install OctoPulse and join the same Wi-Fi network as your OctoPrint server.</li><li>Tap <strong>Discover Printers on Wi-Fi</strong>, choose your printer, tap <strong>Pair</strong>, and approve the request inside OctoPrint.</li><li>From there you can monitor progress, watch the camera, pause or stop if needed, and start the next print.</li></ol>
-<p>For access away from home, OctoPulse does not provide its own cloud relay. Instead you point it at your VPN or reverse proxy URL, and OctoPrint has to be reachable that way.</p>
-<h2 id="privacy-and-permissions">Privacy and permissions</h2>
-<p>This is where OctoPulse fits a self-hosted setup well. There is no account and no sign-up. Print files, G-code and camera feeds do not go to the developer's servers; the data stays between your phone and your printer. Hosts, API keys and camera URLs are encrypted on the device, with the keys stored using the Android Keystore.</p>
-<p>The permissions are limited to what the features need: network and Wi-Fi state, multicast for mDNS discovery, notifications for print alerts, starting at boot to reschedule alerts, vibration, and the advertising ID for ads. It does not request location, camera or contacts. Discovery scans your local subnet only.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li><strong>Price:</strong> free, with no subscription.</li><li><strong>Ads:</strong> it contains ads, a small banner plus an occasional full-screen ad after setup steps. The listing says ads are never shown during a print.</li><li><strong>Open source:</strong> the app is released under the MIT license.</li><li><strong>Look and feel:</strong> dark theme, haptics and offline handling.</li><li><strong>Not official:</strong> OctoPulse is not affiliated with the OctoPrint project.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You already run OctoPrint, on a Raspberry Pi or another machine.</li><li>You want progress, temps and the camera on your phone without opening a browser.</li><li>You run more than one printer and want them on a single dashboard.</li><li>You would rather keep printer data on your own network than in someone's cloud.</li><li>You already have a VPN or reverse proxy if you want to check prints remotely.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.octopulse">Get OctoPulse: OctoPrint Companion on Google Play</a></p>]]></content:encoded></item>
+<ul><li>You take road trips through areas where cell coverage is patchy or missing.</li><li>You want to learn something about the places you are driving past, without reading a screen.</li><li>You prefer an app that works without an account and keeps your routes on your phone.</li><li>You already plan routes elsewhere and want to bring them in as GPX files.</li><li>You want a night mode and large buttons for use in the car.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.trailsage">Get TrailSage: AI Road Trip Guide on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
