@@ -1,9 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 16 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 17 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Is Jellyfin really using your GPU? A six-rung ladder to prove it on Proxmox</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</guid>
+<item><title>Ads that don&#x27;t get your app flagged: AdMob&#x27;s interstitial rules in plain English</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</guid>
+<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>AdMob&#x27;s &quot;Disallowed interstitial implementations&quot; page in short, plus a real frequency cap from a shipping app and the two-flag check every ad call should make.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>admob</category><category>monetization</category><category>ads</category><category>kotlin</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>An interstitial fires on app launch. Another fires when the user taps Back. A banner sits one finger-width from the main button. Each one looks harmless on its own. Together they produce accidental clicks, which AdMob treats as invalid traffic, and reviews that mention nothing but the ads.</p>
+<p>This post covers what AdMob actually forbids for interstitials, how a small app turns that into a frequency cap in code, and the one check every ad call should make. It is drawn from Chapter 4 (Ad Placements That Don't Annoy) of <em>Get Paid for Your Android App</em>.</p>
+<h2 id="what-admob-forbids">What AdMob forbids</h2>
+<p>AdMob's help page "Disallowed interstitial implementations" lists the patterns that get apps flagged. In short:</p>
+<ul><li><strong>Not on app load or exit.</strong> Interstitials belong between pages of app content. For loading or returning to the app, Google recommends an app open ad instead.</li><li><strong>Not after every action.</strong> The page says you should place no more than one interstitial ad after every two user actions, and that this includes tapping the Back button. No interstitial immediately after another one was closed.</li><li><strong>Not in the way</strong> of navigation or the app's core content.</li><li><strong>Not unexpectedly.</strong> An interstitial that appears while the user is focused on a task (playing, filling a form, reading) leads to accidental clicks. Show them only at logical breaks, and preload them so they do not pop up late, after the next screen has already appeared.</li></ul>
+<h2 id="a-real-frequency-cap">A real frequency cap</h2>
+<p>The book uses the author's TipsyBuddy app (a drink-logging app) as a worked example. Its <code>InterstitialAdManager.kt</code> keeps two caps and skips ads entirely for subscribers:</p>
+<pre><code>// From TipsyBuddy, ads/InterstitialAdManager.kt (Legacy SDK)
+/** Minimum drinks logged between interstitial attempts. */
+private const val MIN_ACTIONS_BETWEEN_SHOWS = 3
+/** Minimum wall-clock gap between successful shows. */
+private const val MIN_INTERVAL_MS = 90_000L</code></pre>
+<p>So an interstitial needs at least 3 logged actions and at least 90 seconds since the last one. Three actions is stricter than AdMob's two-action floor.</p>
+<p>The file's header comment states the rule that matters most: it "fails silently if an ad cannot load" and "never blocks drink logging". An ad that is not ready is skipped, not waited for. The core action of the app always wins.</p>
+<h2 id="the-same-idea-with-the-next-gen-sdk">The same idea with the Next-Gen SDK</h2>
+<p>Here is the pattern written against the Next-Gen API from Google's "Load a single interstitial ad" guide. Imports from <code>com.google.android.libraries.ads.mobile.sdk.*</code> are omitted; Android Studio adds them.</p>
+<pre><code>class InterstitialController(
+    private val adUnitId: String,
+    private val isAdFree: () -&gt; Boolean,
+) {
+    @Volatile private var ad: InterstitialAd? = null
+    @Volatile private var loading = false
+    private var actions = 0
+    private var lastShownAt = 0L
+
+    fun preload() {
+        if (isAdFree() || ad != null || loading) return
+        loading = true
+        InterstitialAd.load(
+            AdRequest.Builder(adUnitId).build(),
+            object : AdLoadCallback&lt;InterstitialAd&gt; {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    this@InterstitialController.ad = ad; loading = false
+                }
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    loading = false   // try again at the next natural break
+                }
+            },
+        )
+    }
+
+    /** Call at a natural break, e.g. after an item is saved. Main thread. */
+    fun onNaturalBreak(activity: Activity) {
+        if (isAdFree()) return
+        actions++
+        val ready = ad
+        val now = SystemClock.elapsedRealtime()
+        val allowed = actions &gt;= MIN_ACTIONS &amp;&amp;
+            now - lastShownAt &gt;= MIN_INTERVAL_MS
+        if (ready == null || !allowed) { preload(); return }
+        ready.adEventCallback = object : InterstitialAdEventCallback {
+            override fun onAdDismissedFullScreenContent() { preload() }
+            override fun onAdFailedToShowFullScreenContent(
+                fullScreenContentError: FullScreenContentError
+            ) { preload() }
+        }
+        ad = null
+        actions = 0
+        lastShownAt = now
+        ready.show(activity)
+    }
+
+    companion object {
+        const val MIN_ACTIONS = 3   // stricter than AdMob's two-action floor
+        const val MIN_INTERVAL_MS = 90_000L
+    }
+}</code></pre>
+<p>What this gets right:</p>
+<ol><li><strong>It preloads.</strong> The ad is fetched ahead of time, so it is ready at the break instead of arriving late.</li><li><strong>It only shows at a natural break.</strong> You call <code>onNaturalBreak()</code> from the place in your UI where a unit of work ends, such as after an item is saved. Never on launch, never on exit.</li><li><strong>It counts actions and time.</strong> Both caps must pass.</li><li><strong>It never waits.</strong> If no ad is loaded, the moment passes and a new one is preloaded for next time.</li><li><strong>It respects paying users.</strong> <code>isAdFree()</code> short-circuits both loading and showing.</li></ol>
+<p>Call <code>preload()</code> once ads are ready, which in the book means after consent has been gathered and the SDK is initialized. Next-Gen also offers an ad preloading API (<code>InterstitialAdPreloader</code>) that keeps a cache filled for you. At the time of writing Google's guide labels it beta.</p>
+<h2 id="every-ad-call-checks-the-same-two-flags">Every ad call checks the same two flags</h2>
+<p>Two rules sit above every placement decision. A user who paid to remove ads must never see one again. An app without consent must never request one. The book puts both checks in one place:</p>
+<pre><code>val showAds: Boolean get() = adsReady.value &amp;&amp; !entitlements.adFree.value</code></pre>
+<p><code>adsReady</code> covers consent and SDK setup. <code>entitlements.adFree</code> covers the remove-ads purchase. Every banner, interstitial and native ad reads <code>showAds</code> instead of making its own judgment. When one of those two facts changes, every ad in the app follows.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>No interstitial on app load or exit. App open ads are the format designed for cold start and returning to the app.</li><li>No more than one interstitial per two user actions, and Back counts as an action.</li><li>Never show one interstitial right after another was closed.</li><li>Show interstitials only at a natural break, never mid-task.</li><li>Preload, and skip silently when no ad is ready. Never block the core action.</li><li>Cap by actions and by time (TipsyBuddy uses 3 actions and 90 seconds).</li><li>Route every ad through one flag that checks consent and the remove-ads entitlement.</li></ul><p><a href="https://payhip.com/b/zRXe3">Go deeper: Get Paid for Your Android App</a></p>]]></content:encoded></item><item><title>3 numbers your turtle tank has to get right</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/3-numbers-your-turtle-tank-has-to-get-right/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/3-numbers-your-turtle-tank-has-to-get-right/</guid>
+<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>Water at 76-82 °F, a basking spot of 90-95 °F, and a UVB bulb that is replaced on a schedule. The three numbers an aquatic turtle tank lives or dies by, why the UVB one is the one new keepers skip, and how a cheap sensor fits around them.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-23.jpg" type="image/jpeg" length="0"/>
+<category>turtle tank</category><category>turtle care</category><category>uvb</category><category>esp32</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-23.jpg" alt=""></p><p>A turtle tank can look perfect and still be wrong. The water is clear, the dock floats, the turtle swims around, and nothing on the outside tells you that the water is too cold to digest food or that the light over the dock has stopped doing its job months ago.</p>
+<p>Before any electronics go near a tank, three numbers have to be right: the water temperature, the basking temperature, and UVB. No sensor fixes a tank that is set up wrong. This post walks through all three, the mistake that quietly breaks the third one, and where a water sensor actually helps.</p>
+<p>One caveat first, straight from the book: this is general guidance for aquatic turtles such as sliders. Your species may want different numbers, so check a care sheet written for it, and ask a reptile vet if anything looks off.</p>
+<h2 id="number-1-the-water-76-to-82-f">Number 1: the water, 76 to 82 °F</h2>
+<p>Sliders want water in the mid to high 70s Fahrenheit, with hatchlings at the warmer end. The band the book treats as "fine" is <strong>76 to 82 °F (about 24.5 to 28 °C)</strong>.</p>
+<p>Outside that band, things go wrong in two directions:</p>
+<ul><li>Below the low 70s, a turtle gets sluggish and stops eating.</li><li>Above 85 °F, he is being cooked slowly.</li></ul>
+<p>The tool for this is a submersible aquarium heater with its own thermostat. Add a cheap stick-on thermometer as a second opinion, because it tells you whether the heater is lying.</p>
+<h3 id="the-trap-a-heater-that-fails-on">The trap: a heater that fails on</h3>
+<p>A heater that fails off is a slow problem you notice in a day. A heater that fails <em>on</em> is an emergency. That difference is the whole reason the water sensor in the book exists: temperature is the one reading from the build that is a real alarm.</p>
+<p>The alert bands the book uses look like this:</p>
+<div class="table"><table><thead><tr><th>Water temperature</th><th>State</th></tr></thead><tbody><tr><td>76–82 °F</td><td>Fine</td></tr><tr><td>73–76 °F or 82–85 °F</td><td>Warning, after two bad readings in a row</td></tr><tr><td>Under 73 °F or over 85 °F</td><td>Alert, at once</td></tr></tbody></table></div>
+<p>Why bands and not a single number? A turtle does not care about 79.4 versus 80.1 °F, and a sensor that pages you every time the heater cycles is a sensor you switch off. The bands turn a wobbling line into three states, and the two-readings rule keeps one odd reading from becoming a notification.</p>
+<p>If you run Home Assistant instead, the book describes the same alert as an ordinary automation: a numeric state trigger below 73 or above 85 °F, with a <code>for:</code> of 10 minutes so one odd reading does not page you, sending a notification to your phone. If the heater is on a smart plug, the same automation can turn it off above 85 °F.</p>
+<h2 id="number-2-the-basking-spot-90-to-95-f">Number 2: the basking spot, 90 to 95 °F</h2>
+<p>An aquatic turtle has to get fully out of the water and dry off under a warm light every day. The basking spot should be around <strong>90 to 95 °F at the surface of the dock</strong>, with the air above the water in the low 80s. That is the heat bulb's job.</p>
+<p>Layout matters here. Heat and light go at one end of the tank so the turtle can choose between warm-and-bright and cool-and-dim, which is how he regulates his own temperature. The heater and filter go at the other end, where the filter's current spreads the heater's warmth.</p>
+<p>Note that the basking number is separate from the water number. It lives on the dock, not in the water, and the water sensor does not measure it.</p>
+<p><strong>Watch out:</strong> keep any camera and electronics box out of the basking lamp's heat and direct beam. The lamp can hit 90 °F plus at a few inches, and bright light straight into a turbidity probe makes its reading drift.</p>
+<h2 id="number-3-uvb-10-to-12-hours-a-day">Number 3: UVB, 10 to 12 hours a day</h2>
+<p>The second bulb is UVB, and it is the one new keepers skip because the tank looks fine without it.</p>
+<p>It is not fine. Without UVB a turtle cannot make vitamin D3, cannot use the calcium in his food, and over months his shell softens and deforms. Nothing about the water or the dock warns you; the damage shows up slowly in the shell.</p>
+<p>What the book recommends:</p>
+<ul><li>Use a reptile UVB bulb. The 5.0 and 10.0 ratings are the common ones for turtles.</li><li>Mount it so nothing is between the bulb and the turtle. Glass and most plastics block UVB.</li><li>Run both lights on a timer, 10 to 12 hours a day.</li><li>Write the UVB bulb's install date on it with a marker.</li><li>Replace it every 6 to 12 months depending on the bulb.</li></ul>
+<h3 id="the-trap-a-bulb-that-still-glows">The trap: a bulb that still glows</h3>
+<p>UVB bulbs keep glowing long after they stop producing UVB. A bulb that looks fine can be doing nothing, which is why it gets replaced on a schedule, not when it burns out. The marker on the bulb is the schedule.</p>
+<p>The other common mistake is mounting the UVB bulb above a glass or acrylic lid. The lid blocks most of the UVB, so the bulb is doing nothing. Mount it over an open section, at the distance the bulb's own packaging gives.</p>
+<h2 id="what-a-sensor-can-and-cannot-tell-you">What a sensor can and cannot tell you</h2>
+<p>The book's water sensor uses three cheap probes, and it is honest about their limits:</p>
+<div class="table"><table><thead><tr><th>Probe</th><th>What it tells you</th></tr></thead><tbody><tr><td>DS18B20 (±0.5 °C)</td><td>Whether the heater is doing its job; the real alarm</td></tr><tr><td>TDS</td><td>How much has built up since the last water change. A trend meter, not an ammonia test</td></tr><tr><td>Turbidity</td><td>Cloudiness: a clogged filter, a bacterial bloom, a messy feeding. Also a trend meter</td></tr></tbody></table></div>
+<p>UVB is not sensed at all; it is a note on the bulb. The basking surface is not sensed either. And a liquid test kit is still the real instrument for water safety: ammonia 0, nitrite 0, nitrate under about 40 ppm. The sensor answers "is the water warm enough, is it time for a water change, did something go cloudy". The test kit answers "is the water safe". Both together is the setup.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Water held at 76–82 °F by a thermostatic submersible heater, with a stick-on thermometer as a cross-check.</li><li>An alert for under 73 °F or over 85 °F, and warnings in the bands next to those.</li><li>A basking dock the turtle can fully climb out on, 90–95 °F at its surface, air above the water in the low 80s.</li><li>Heat and light at one end, heater and filter at the other.</li><li>A reptile UVB bulb (5.0 or 10.0) with nothing between it and the turtle, no glass or acrylic lid in the way.</li><li>Both lights on a timer, 10–12 hours a day.</li><li>Install date written on the UVB bulb; replaced every 6–12 months, not when it dies.</li><li>Electronics and probes kept out of the basking lamp's heat and beam.</li><li>A liquid test kit for ammonia, nitrite and nitrate, because no cheap probe replaces it.</li></ul><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>ScamRadar: check suspicious texts, emails and links on your phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/scamradar-ai-scam-detector/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/scamradar-ai-scam-detector/</guid>
+<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>ScamRadar uses on-device AI to judge whether a text, email, voicemail or link looks like a scam, and explains the red flags.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.scamradar.app.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>security</category><category>scams</category><category>privacy</category><category>on-device-ai</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.scamradar.app.jpg" alt=""></p><p>A text says your package is held, a voicemail sounds like a relative in trouble, an email wants you to confirm a payment. Most people know to be suspicious; the hard part is deciding in the moment, before you click or reply. ScamRadar is built to give you a quick second opinion. You paste or share the suspicious thing, an AI model on your phone analyzes it, and you get a verdict with the reasons spelled out.</p>
+<p>It is a second opinion, not a guarantee. A verdict helps you slow down and look at the red flags; the decision to trust a message is still yours.</p>
+<h2 id="what-it-checks">What it checks</h2>
+<ul><li><strong>Text Scan.</strong> Paste a message and get one of three verdicts (Looks Safe, Suspicious, Likely Scam) with a confidence score and the red flags highlighted.</li><li><strong>Email screenshots.</strong> Share a screenshot of a questionable email; text recognition runs it through the same classifier.</li><li><strong>Voicemails.</strong> Import or record one, and on-device speech recognition looks for signs of AI voice cloning.</li><li><strong>Links.</strong> The URL scanner opens a suspicious link in a hardened view and runs text recognition plus Safe Browsing. The Pre-Click Guard can intercept link taps and show the verdict before your browser opens.</li><li><strong>Clipboard heads-up.</strong> Copy a sketchy link or a money phrase like "gift card", and a one-tap "Check this?" prompt appears.</li></ul>
+<h3 id="live-shield">Live Shield</h3>
+<p>Live Shield scans incoming notifications on the device from apps including Messages, WhatsApp, Signal, Telegram, Gmail, Outlook, Instagram and Messenger, and shows a discreet alert when it flags a scam. It is off by default, and you choose which apps it watches.</p>
+<h2 id="if-you-already-clicked-or-paid">If you already clicked or paid</h2>
+<p>This is where ScamRadar goes beyond detection:</p>
+<ol><li><strong>Recovery Wizard.</strong> A step-by-step checklist matched to the scam type, which you can leave and resume later.</li><li><strong>Authority reports.</strong> Pre-filled links to the right place to report it for your region, such as the FTC, IC3, BBB, Action Fraud in the UK, Scamwatch in Australia, CAFC in Canada, and 7726.</li><li><strong>Evidence (Premium).</strong> An incident report PDF and an evidence ZIP for bank disputes, police reports and insurance claims.</li></ol>
+<h2 id="for-family-members">For family members</h2>
+<p><strong>Care Mode</strong> is designed for someone who needs a simpler phone experience: text of 24 point or larger, a single-button flow, spoken verdicts and a "Call my family" button. With the <strong>Family</strong> plan, Trusted Contact Verification lets relatives send signed "It's really me" links to prove a message is genuine, aimed at voice-cloning impersonation, and a weekly digest summarizes the week's scans without sending message content off the devices. Anyone can share a verdict card to warn friends by SMS, WhatsApp or group chat.</p>
+<h2 id="privacy">Privacy</h2>
+<p>Analysis runs on the device using the Gemma 4 model, and the listing states that scanned content is never sent anywhere. No account is needed to scan. Scan history holds your last 50 scans, stays on the device, can be deleted, and is never synced. Analytics are anonymous button taps, with no message content.</p>
+<p>Permissions are scoped: notifications for alerts, notification access only for Live Shield, the microphone only for recording voicemails, storage only when you pick a file, and internet for the optional AI model and family features. The listing says it never requests SMS, contacts, call log or accessibility permissions.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Free core:</strong> text, screenshot, voicemail and URL scanning, Live Shield, the Scam Library, and Care Mode are free.</li><li><strong>Premium (in-app purchase):</strong> adds the incident PDF, Evidence Locker, unlimited Shield coverage and no ads.</li><li><strong>Family (subscription):</strong> extends Premium to up to 8 members, plus the weekly digest and Trusted Contact Verification.</li><li><strong>Ads:</strong> the free version contains ads.</li><li><strong>Not a guarantee:</strong> treat every verdict as advice, and verify through a channel you trust when money or accounts are involved.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You get texts, emails or calls and are not always sure they are real.</li><li>You help an older relative stay safe on their phone.</li><li>You want scam checks that do not send your messages to a server.</li><li>You want a clear checklist if something already went wrong.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.scamradar.app">Get ScamRadar: AI Scam Detector on Google Play</a></p>]]></content:encoded></item><item><title>Is Jellyfin really using your GPU? A six-rung ladder to prove it on Proxmox</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/stream-your-own-library-prove-jellyfin-uses-the-gpu/</guid>
 <pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>A transcoding setting that says QSV proves nothing. Pass an Intel iGPU into an unprivileged Proxmox container the way the Jellyfin docs recommend, then climb six checks until intel_gpu_top shows the Video engine working.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>jellyfin</category><category>proxmox</category><category>transcoding</category><category>quick sync</category><category>lxc</category><category>media server</category>
@@ -1089,131 +1225,5 @@ pct clone 205 405 --full 1 --hostname app-ct</code></pre>
 <p>Everything <strong>not</strong> on that list gets backed up by default. "By default" is the important phrase: a backup job that protects new guests automatically, rather than a hand-picked list, is what makes it true.</p>
 <h2 id="checklist">Checklist</h2>
 <ul><li>Inventory written: one row per thing, with how it is backed up, how far back, and the restore path</li><li>Every row has a copy on a second kind of storage and one off-site</li><li>RAID, snapshots and sync folders are not counted as backups anywhere in the table</li><li>A short list of what you deliberately do not back up, and why</li><li>The table lives somewhere that survives the homelab</li></ul>
-<p>RAID keeps you running. Backups get you back. You want both, and you want to know which one you are looking at.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Proxmox backups that actually work: 3-2-1, step by step</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/</guid>
-<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>The whole backup playbook in one walk-through: the 3-2-1 plan, vzdump, Proxmox Backup Server, retention, an off-site copy, restore drills and the alert for jobs that quietly stop.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-14.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>backups</category><category>pbs</category><category>3-2-1</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-14.jpg" alt=""></p><p>Your Proxmox backup job has a schedule, a storage target and a little green check. That check proves one thing: the job wrote some bytes somewhere. It does not prove every guest is covered, that the copy survives a dead host, or that anything actually restores.</p>
-<p>This post walks through a complete homelab backup setup in the order you would build it, one layer at a time. Each layer closes a hole the previous one leaves open.</p>
-<h2 id="1-the-plan-3-2-1-honestly">1. The plan: 3-2-1, honestly</h2>
-<p>Three copies of anything you care about, on two different kinds of storage, with one of them somewhere else.</p>
-<p>A copy only counts if it <strong>survives the loss of the thing it was copied from</strong>. That rules out RAID and ZFS mirrors (one copy on resilient disks), snapshots (same pool as the data), a second copy on the same host, and sync folders (delete at home, delete in the cloud). The NAS is a real second copy, but it is still in the same house. Off-site means a different building.</p>
-<p>Before touching any job, write a one-page inventory: each thing you run, how it is backed up, how far back you can go, and how you would restore it. The restore column is the one that exposes the gaps.</p>
-<h2 id="2-vzdump-the-backup-you-already-have">2. vzdump: the backup you already have</h2>
-<p>Every Proxmox install ships with vzdump. Point it at storage that is <strong>not</strong> the host's own disk, such as an NFS share on the NAS:</p>
-<pre><code>pvesm add nfs nas-backup --server 192.168.10.40 --export /volume1/proxmox \
-  --content backup --options vers=4.1</code></pre>
-<p>Then create one job under <strong>Datacenter → Backup → Add</strong> with <strong>Selection mode: All</strong> and your scratch guests under Exclude, so every new guest is protected the day it is created. Snapshot mode, ZSTD compression, a nightly schedule and a notes template like <code>{{guestname}} on {{node}}</code>.</p>
-<p>Install the QEMU guest agent in every VM and enable it in the VM's Options. With it, snapshot mode asks the guest to flush its filesystems first, which is the difference between a consistent backup and one that needs fsck on restore.</p>
-<h2 id="3-proxmox-backup-server-when-vzdump-isn-t-enough">3. Proxmox Backup Server: when vzdump isn't enough</h2>
-<p>PBS adds deduplication, incremental backups, verify jobs and client-side encryption. The trap is running it on the same host, or in a VM on the same host with its datastore on the same pool. It works beautifully until the host dies, and then the backups die with it. Give PBS its own hardware, however modest: an old office PC with one large disk and 4 GB of RAM is plenty for a home datastore.</p>
-<p>Connect it with a dedicated <code>backup@pbs</code> user rather than root, and turn on client-side encryption:</p>
-<pre><code>pvesm set pbs01 --encryption-key autogen</code></pre>
-<p>Every chunk is then encrypted before it leaves the node. <strong>Download that key immediately</strong> and store it somewhere that is not the cluster, such as a password manager or a printed QR code. Without the key, every encrypted backup is unrecoverable. Losing it is the one mistake with no undo.</p>
-<p>Running both is a sensible shape: PBS nightly for everything, plus vzdump to the NAS for the few guests you want as single portable files.</p>
-<h2 id="4-retention-that-lets-you-sleep">4. Retention that lets you sleep</h2>
-<p><code>keep-daily=7</code> does <strong>not</strong> mean "keep seven days". It means "keep the last backup from each of the last seven days that have a backup". If the job failed for a month and then ran once, that one run can satisfy every keep rule at once, and pruning deletes the older history. The rules keep the newest backup per calendar bucket; they never promise coverage of time.</p>
-<p>Retention also does not protect you from a bad backup: if the guest was already corrupted, you just have seven copies of the corruption. That is why weekly and monthly buckets matter. Set retention on the storage or the PBS prune job, not per job, check it in the prune simulator, and take a <strong>protected</strong> backup before every risky change so pruning cannot touch it.</p>
-<h2 id="5-off-site-the-copy-that-survives-the-house">5. Off-site: the copy that survives the house</h2>
-<p>Three realistic options: an encrypted copy in Backblaze B2 via rclone, a PBS sync job to a friend's box over Tailscale, or a USB disk rotated to work. The USB disk is cheap and fast to restore from, but it is not automatic, and that is its problem.</p>
-<p>For B2, put an rclone <strong>crypt</strong> remote on top of the bucket with a key scoped to that bucket, sync the dump directory nightly with a bandwidth limit during the day, add a lifecycle rule so hidden versions expire, and run <code>rclone check</code> monthly. Store the two crypt passwords with your PBS key, outside the homelab. And read the current B2 price from Backblaze's own pricing page rather than from any guide, including this one.</p>
-<p>The trap here is the off-site copy that was set up once and never checked: an expired app key, a friend's box that was powered off, a bucket that filled up. Off-site is where "no news is good news" does the most damage.</p>
-<h2 id="6-restore-testing-the-only-proof">6. Restore testing: the only proof</h2>
-<p>"Verified" means different things at each layer. A job reporting OK means it finished writing. <code>zstd -t</code> means the archive is complete and decompresses. A PBS verify job means the chunks still match their hashes. None of them means the guest boots.</p>
-<p>Once a quarter, run four drills, each restored to a <strong>new ID with the network unplugged</strong>, then destroyed:</p>
-<ol><li>A VM from PBS. Does it boot, and is last night's data there?</li><li>A container from a vzdump archive on the NAS (second tool, second storage).</li><li>A single file from PBS using File Restore. This is the restore you will do most often.</li><li>Something from off-site. This is the only drill that proves the copy that survives the house.</li></ol>
-<pre><code>qmrestore pbs01:backup/vm/101/2026-10-08T01:30:00Z 9101 \
-  --storage local-zfs --unique 1
-qm set 9101 --net0 virtio,bridge=vmbr0,link_down=1
-qm start 9101</code></pre>
-<p>Write each drill down: date, what, from where, result. A drill nobody wrote down did not happen.</p>
-<h2 id="7-alerts-for-the-jobs-that-quietly-stop">7. Alerts for the jobs that quietly stop</h2>
-<p>Alerting only on failure has a blind spot: <strong>a job that never runs never fails.</strong> The alert you need is "nothing succeeded recently".</p>
-<p>Use the Proxmox notification system (VE 8.1+) for warnings and errors, then add a dead-man's switch: a check URL, from a service like healthchecks.io or a self-hosted Uptime Kuma push monitor, that your job pings on success. vzdump's hook script makes it a few lines in <code>/etc/vzdump.conf</code>. Set the check's period to a day with a grace of a few hours, and a night the job does not run becomes a phone notification by breakfast. Do the same for the rclone sync.</p>
-<p>Finally, a weekly backup-age report that lists the newest backup of every guest and flags any older than two days, or any guest with no backup at all. That catches the "selected VMs" trap no matter how it sneaks back in.</p>
-<h2 id="the-short-version">The short version</h2>
-<ul><li>An inventory with a tested restore path per row</li><li>One vzdump or PBS job in Selection mode <strong>All</strong>, on storage that is not the host</li><li>PBS on its own hardware, encrypted, key saved outside the cluster</li><li>Retention you have actually checked in the simulator</li><li>An off-site copy that is automatic and monitored</li><li>Quarterly restore drills, written down</li><li>A dead-man's switch, so silence becomes an alert</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Your Proxmox backup job is probably skipping your new VMs</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/</guid>
-<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>A backup job built for a hand-picked list of guests silently misses every VM you create afterwards. Here is how to switch to &quot;All&quot; with excludes, and the other checks that make the green tick mean something.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>backups</category><category>vzdump</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-10.jpg" alt=""></p><p>Open your Proxmox web UI, click your backup storage and sort by date. Is there a backup of every guest you care about from the last 48 hours? For a lot of homelabs the honest answer is "most of them", and "most" is how data gets lost.</p>
-<p>A backup job in the Datacenter view looks reassuring. It has a schedule, a storage target and a little green check. That check proves one thing: the job wrote some bytes somewhere. It does not prove that every guest you care about is in there.</p>
-<h2 id="the-trap-a-job-built-for-selected-vms">The trap: a job built for "selected VMs"</h2>
-<p>The most common way this goes wrong is the selection mode. Somebody (often past you) created the job for "selected VMs" when the homelab had five guests. Every guest built after that day is unprotected, and the job keeps reporting success every night, because the guests it knows about are fine.</p>
-<p>Nothing errors. Nothing emails you. The list of protected guests and the list of running guests just drift apart, one new container at a time.</p>
-<h2 id="the-fix-one-job-that-covers-everything">The fix: one job that covers everything</h2>
-<p>Make your main job cover all guests, and exclude the few you truly do not want. New guests are protected the day they are created. If you only make one change after reading this, make this one.</p>
-<p>In the UI: <strong>Datacenter → Backup → Add</strong>, then:</p>
-<ul><li><strong>Selection mode:</strong> All, with scratch and test guests under Exclude.</li><li><strong>Mode:</strong> Snapshot for running guests. The guest keeps running. Stopped guests are backed up too; Proxmox just reads their disks, and the forgotten stopped VM is often the one you will want back.</li><li><strong>Compression:</strong> ZSTD. Fast and small.</li><li><strong>Schedule:</strong> nightly, at a time nobody is using anything, for example 02:30.</li><li><strong>Retention:</strong> "use storage defaults", so the numbers live in one place.</li><li><strong>Notes template:</strong> <code>{{guestname}} on {{node}}</code>, so the backup list is readable when a VM ID means nothing to you at 2 AM.</li></ul>
-<p>The same job from the command line, if you like to keep config in version control:</p>
-<pre><code>pvesh create /cluster/backup \
-  --schedule "02:30" \
-  --all 1 \
-  --storage nas-backup \
-  --mode snapshot \
-  --compress zstd \
-  --notes-template "{{guestname}} on {{node}}"</code></pre>
-<p>Need to leave out a scratch VM? Use <code>--exclude 9001,9002</code> instead of switching back to selected guests. <strong>An exclude list fails safe; an include list fails dangerous.</strong> If you forget to update an exclude list, you back up one guest too many. If you forget to update an include list, you lose a guest.</p>
-<h2 id="three-other-things-hiding-behind-the-green-check">Three other things hiding behind the green check</h2>
-<p>The selection mode is the big one, but it is not the only way a "working" job quietly stops protecting you.</p>
-<h3 id="1-the-storage-silently-isn-t-there">1. The storage silently isn't there</h3>
-<p>If your NAS is added as a plain Directory storage on a path you mounted yourself, and that mount fails at boot, Proxmox will happily write backups into the empty folder on your root disk. A night or two later the host's root filesystem is full and things break in confusing ways.</p>
-<p>Either use the native NFS storage type, which lets Proxmox manage the mount and mark the storage offline if it fails, or tell Proxmox the path must be a mountpoint:</p>
-<pre><code>pvesm set nas-backup --is_mountpoint yes</code></pre>
-<p>And check before you trust it:</p>
-<pre><code>pvesm status                 # every storage should say "active"
-df -h /mnt/pve/nas-backup    # should show the NAS size, not the root disk</code></pre>
-<h3 id="2-nobody-gets-told">2. Nobody gets told</h3>
-<p>By default, failures go to the root mailbox on the host, which nobody reads. Proxmox VE 8.1 and later has a proper notification system under <strong>Datacenter → Notifications</strong>. Add a target you actually read, point backup events at it, and set the job's notification mode to use it. Then test it on purpose:</p>
-<pre><code>vzdump 101 --storage does-not-exist</code></pre>
-<p>If no alert arrives, fix that before anything else. A weekly "all good" message is worth having too: silence is ambiguous, and a success message that suddenly stops arriving is a signal.</p>
-<h3 id="3-nothing-gets-pruned">3. Nothing gets pruned</h3>
-<p>Without retention, the backup share fills up and every job after that fails. Set retention on the storage itself so every job that writes there inherits it:</p>
-<pre><code>pvesm set nas-backup \
-  --prune-backups keep-last=2,keep-daily=7,keep-weekly=4,keep-monthly=3</code></pre>
-<p>Those numbers do not mean what most people think they mean. That is a post of its own.</p>
-<h2 id="prove-it-a-backup-you-haven-t-restored-is-a-rumor">Prove it: a backup you haven't restored is a rumor</h2>
-<p>A green check says the job finished writing. A quick integrity check says the archive is readable end to end:</p>
-<pre><code>zstd -t /mnt/pve/nas-backup/dump/vzdump-qemu-101-*.vma.zst</code></pre>
-<p>Only a restore proves the guest actually comes back. Restore to a spare ID, with the network disconnected so it does not fight the original for an IP, boot it, look around, then destroy the test copy:</p>
-<pre><code>qmrestore /mnt/pve/nas-backup/dump/vzdump-qemu-101-&lt;date&gt;.vma.zst 9101 \
-  --storage local-zfs --unique 1</code></pre>
-<p><code>--unique</code> gives the restored VM fresh MAC addresses so it can sit next to the original.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>One backup job set to <strong>All</strong> guests (with excludes), not a hand-picked list</li><li>Backup storage is native NFS or PBS, or has <code>is_mountpoint</code> set</li><li>Retention set on the storage</li><li>Failure notifications reach somewhere you actually read, and you have tested them</li><li>The newest backup of every guest is less than 48 hours old</li><li>One test restore done, to a new ID, and written down with the date</li></ul>
-<p>Five minutes in the Datacenter view now is a lot cheaper than finding out during a restore that the VM you need was never in the job.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>The one wire that can fry your ESP32 tank monitor</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/</guid>
-<pubDate>Sat, 10 Oct 2026 12:30:00 -0400</pubDate><description>A turbidity sensor runs on 5 V and outputs up to about 4.5 V, but an ESP32-C3&#x27;s pins only take 3.3 V. Here is why it needs a voltage divider, how to wire it, and the checks to do before you plug in USB.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-13.jpg" type="image/jpeg" length="0"/>
-<category>esp32</category><category>turtle tank</category><category>sensors</category><category>diy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-13.jpg" alt=""></p><p>A water-quality monitor for an aquarium or turtle tank is a great first ESP32 project: a temperature probe, a TDS probe and a turbidity (water clarity) sensor, all reporting into Home Assistant. Two of those three sensors are easy. The third one has a wire that can kill the board if it goes in the wrong place.</p>
-<p>This walkthrough uses the Seeed XIAO ESP32-C3, the board used in the Smart Turtle Tank build, but the rule applies to any 3.3 V microcontroller.</p>
-<h2 id="the-rule-that-keeps-the-board-alive">The rule that keeps the board alive</h2>
-<p>Two voltages come out of the XIAO:</p>
-<ul><li><strong>5V</strong> is the USB supply passed straight through.</li><li><strong>3V3</strong> is regulated down for the chip.</li></ul>
-<p>The chip's pins can only take <strong>3.3 V on their inputs</strong>. So the rule is simple: a sensor's <em>power</em> can come from 5V if it needs it, but anything that goes back <em>into</em> a D pin must be at or under 3.3 V.</p>
-<p>The DS18B20 temperature probe and the TDS board both run happily on 3.3 V and produce signals under 3.3 V. The turbidity board is the odd one out: it needs 5 V to run and its output can reach about <strong>4.5 V</strong>. That is the wire that can fry your board, and it is why the turbidity sensor is the one with a voltage divider between it and the XIAO.</p>
-<p>A common mistake is plugging a sensor into 5V "because it is more power". The TDS board and the temperature adapter are powered from 3.3 V precisely so their signal pins stay under the XIAO's limit. More volts in means more volts out.</p>
-<h2 id="what-the-divider-does">What the divider does</h2>
-<p>A voltage divider is two resistors in series. The output is taken from across the smaller one, so the voltage is split in a fixed ratio. The divider module used in this build divides by 5, so a 4.5 V signal comes out at 0.9 V: safe for the pin.</p>
-<p>The trade-off is detail. The XIAO reads analog accurately only up to about 2.5 V, and 0.9 V uses about a third of that range. For more resolution you can swap in two 10 kΩ resistors as a ÷2 divider, which keeps the output under 2.25 V. Either way, you multiply the reading by the ratio (5 or 2) in code.</p>
-<p>The divider module's labels confuse almost everyone the first time:</p>
-<div class="table"><table><thead><tr><th>Label on the module</th><th>What it actually is</th></tr></thead><tbody><tr><td>VCC screw terminal</td><td>The input (IN+)</td></tr><tr><td>GND screw terminal</td><td>IN−</td></tr><tr><td>S pin</td><td>The divided output</td></tr><tr><td>− pin</td><td>Ground</td></tr></tbody></table></div>
-<h2 id="wiring-the-turbidity-sensor">Wiring the turbidity sensor</h2>
-<p>Keep the USB-C cable <strong>unplugged</strong> the whole time you wire. It goes in last.</p>
-<p><strong>Part 1: power the sensor and feed its signal into the divider</strong></p>
-<ol><li>Slide the switch on the turbidity board to <strong>A</strong> (analog), not D.</li><li>Plug the included 3-wire cable into the board, and connect the probe.</li><li>Red jumper from the XIAO's <strong>5V</strong> pin to the cable's <strong>V</strong> pin. This is the only 5V wire in the build, and it skips the breadboard power strip.</li><li>Cable's <strong>G</strong> wire into the ground (−) rail.</li><li>Cable's <strong>S</strong> wire into the divider's <strong>VCC</strong> screw terminal (the input). Tighten it and give it a gentle tug.</li></ol>
-<p><strong>Part 2: ground the divider and send its safe signal to D2</strong></p>
-<ol><li>Ground jumper from the − rail to the divider's <strong>GND</strong> terminal.</li><li>Ground jumper from the − rail to the divider's <strong>−</strong> pin.</li><li>Signal jumper from the divider's <strong>S</strong> pin to the XIAO's <strong>D2</strong>.</li><li>Leave the divider's <strong>+</strong> pin empty.</li></ol>
-<p>Only the clear lower part of the probe goes in the water. The top of the probe and every board stay dry.</p>
-<p><strong>Never plug the turbidity S pin straight into the XIAO.</strong></p>
-<h2 id="check-everything-before-you-power-up">Check everything before you power up</h2>
-<p>With the USB still unplugged, go through this list:</p>
-<ul><li>The turbidity switch is on <strong>A</strong>.</li><li>The 3V3 (+) rail has three wires: XIAO 3V3, temperature adapter VCC, TDS +. <strong>Nothing from 5V.</strong></li><li>Only <strong>one</strong> wire on 5V, going to the turbidity board's V.</li><li>Turbidity S goes to the divider, not to the XIAO. D2 connects to the divider's S pin.</li><li>Signals: D4 to the temperature adapter's DAT, D1 to the TDS board's A, D2 to the divider's S.</li><li>No bare metal touching anything it should not. Every board is dry and above the water line.</li><li>Each cable hangs in a small U-shaped drip loop below the electronics, so water runs off the bottom of the loop instead of into the boards.</li></ul>
-<p>Then plug in USB. Nothing should get warm and nothing should smell; if it does, unplug right away and recheck the 5V and GND wires.</p>
-<p>Another common mistake: plugging the USB in "just to see the light" halfway through wiring. Every wire you add after that goes onto a live board, and a jumper that brushes 5V against a signal pin on its way in can take out the whole board. USB last, every time.</p>
-<h2 id="two-readings-that-tell-you-something-is-wrong">Two readings that tell you something is wrong</h2>
-<p>Once firmware is loaded, temperature should show a sensible number, TDS reads near zero in air and a steady number in the tank, and turbidity reads higher in clear water and drops when the water gets cloudy.</p>
-<p>Two problems catch almost everyone:</p>
-<ul><li><strong>The temperature reads 85 °C.</strong> That is the DS18B20's power-on value, which means it never got a successful read. It is usually a loose DAT wire.</li><li><strong>Turbidity is flat no matter what the water does.</strong> The board's switch was left on D (digital) instead of A.</li></ul>
-<p>Get the one 5V wire right, put the divider in the turbidity signal path, and plug in USB last. The rest of the build is forgiving.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item>
+<p>RAID keeps you running. Backups get you back. You want both, and you want to know which one you are looking at.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
 </channel></rss>
