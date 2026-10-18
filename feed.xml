@@ -99,7 +99,44 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <h2 id="what-it-does-not-do">What it does not do</h2>
 <p>One drive is not a backup strategy on its own. If it is your only copy, it is a single point of failure like any other disk. Keep at least one more copy somewhere else, and test a restore now and then. The book <a href="https://payhip.com/b/1iHXQ">Never Lose Your Data</a> walks through the whole 3-2-1 setup.</p>
 <p>More picks like this one are in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
-<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B08HN37XC1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SanDisk 2TB Extreme Portable SSD</a></p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Kasa Smart Plug Ultra Mini: reboot a frozen server from the couch</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/kasa-smart-plug-ultra-mini-ep10/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/kasa-smart-plug-ultra-mini-ep10/</guid>
+<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B08HN37XC1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SanDisk 2TB Extreme Portable SSD</a></p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Merch drop 5: ten new designs, from a label-maker tee to the Homelab Hierarchy of Needs poster</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-5/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-5/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Ten new items in the Homelab the Right Way merch store: two tees, a hoodie, a crewneck, an embroidered uptime dad hat, a days-since-last-reboot mug, an if-it-blinks-it-works sticker, a terminal cheat sheet mouse pad, the Homelab Hierarchy of Needs poster and a groceries-to-switch tote.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop5-hero.jpg" type="image/jpeg" length="0"/>
+<category>merch</category><category>homelab</category><category>selfhosted</category><category>store</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop5-hero.jpg" alt=""></p><p>Ten new designs landed in the <a href="https://homelab-the-right-way.printful.me/">Homelab the Right Way merch store</a> today, the biggest drop so far. Same rules as the first four: every item is built around a line a homelabber has actually said, printed, embroidered or cut to order by Printful and shipped from their facilities, so nothing sits in a warehouse. Here is what each one is, and the joke behind it.</p>
+<h2 id="trust-me-i-have-a-label-maker-tee">Trust Me, I Have a Label Maker (tee)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/trust-me-i-have-a-label-maker-tee">Trust Me, I Have a Label Maker Tee</a>: a label maker with the tape still coming out of it (it reads RACK-01), the slogan in three lines, and the pill underneath says "Every cable. Every port. Every shelf." If the rack is the most organized thing in the house, this is the tee. The cabling chapter in <em>Homelab the Right Way</em> says it more politely: label both ends, then label the switch port too.</p>
+<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
+<h2 id="i-spent-2-000-to-save-10-a-month-tee">I Spent $2,000 to Save $10 a Month (tee)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/i-spent-2000-to-save-10-a-month-tee">I Spent $2,000 to Save $10 a Month Tee</a>: a four-bay NAS, the math every self-hoster has done at least once, "on cloud storage" in small type, and a rotated stamp that says "WORTH IT." Which it is, for reasons the storage chapters go into: the data is yours, the drives are yours, and the bill does not go up when the plan changes.</p>
+<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
+<h2 id="self-hosted-everything-including-my-anxiety-hoodie">Self-Hosted Everything (Including My Anxiety) (hoodie)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/self-hosted-everything-including-my-anxiety-hoodie">Self-Hosted Everything (Including My Anxiety) Hoodie</a>: a house with a heartbeat line running straight through it, the slogan in big type, and the fine print "Uptime: fine. Me: also fine." For anyone who checks the dashboard before checking the weather.</p>
+<p>Gildan 18500 heavy blend hoodie in Black, Navy, Dark Heather and Forest Green. $47.50 to $64 depending on size.</p>
+<h2 id="cable-management-is-self-care-crewneck">Cable Management Is Self-Care (crewneck)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/cable-management-is-self-care-crewneck">Cable Management Is Self-Care Crewneck</a>: six cables gathered into one neat bundle by a velcro strap, the slogan in block letters, and the footnote "Zip ties optional. Velcro preferred." (Velcro comes off when you move a cable; a zip tie comes off with a knife and takes a cable with it.) The second crewneck in the store.</p>
+<p>Gildan 18000 crewneck sweatshirt in Black, Navy, Dark Heather and Forest Green. $40 to $57 depending on size.</p>
+<h2 id="uptime-dad-hat">uptime (dad hat)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/uptime-dad-hat">uptime Dad Hat</a>: the one command you run to brag, embroidered in white with a teal heartbeat line under it. Two threads, so it embroiders cleanly. The fourth dad-hat design in the store.</p>
+<p>Yupoong 6245CM classic dad hat in Black, Navy, Dark Grey and Spruce. $28.</p>
+<h2 id="0-days-since-last-reboot-mug">0 Days Since Last Reboot (mug)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/0-days-since-last-reboot-mug">0 Days Since Last Reboot Mug</a>: a flip counter stuck on zero, "Days since last reboot" above it, and an amber plate underneath that says "Record: 847" (the number is decorative; your record is your own). The art is printed twice, once on each side of the handle, so it reads in either hand. For the morning after the kernel update.</p>
+<p>White glossy mug in 11, 15 and 20 oz. $17 to $27.50.</p>
+<h2 id="if-it-blinks-it-works-sticker">If It Blinks, It Works (sticker)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/if-it-blinks-it-works-sticker">If It Blinks, It Works Sticker</a>: a round navy badge with a row of six status LEDs across the top, the slogan in the middle, and "Do not unplug" in mono underneath. The only diagnostic that matters at 2 AM.</p>
+<p>Kiss-cut vinyl in 3 x 3, 4 x 4 and 5.5 x 5.5 inches; Printful adds the white kiss-cut border. $4.50 to $5.50.</p>
+<h2 id="terminal-cheat-sheet-mouse-pad">Terminal Cheat Sheet (mouse pad)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/terminal-cheat-sheet-mouse-pad">Terminal Cheat Sheet Mouse Pad</a>: the 24 commands you type every day, each with a one-line reminder of what it does: ls -la, cd -, pwd, cat, less, grep -rn, find, tail -f, df -h, du -sh, free -h, htop, ps aux, kill, chmod, chown, tar in both directions, scp, rsync, ssh, systemctl status, journalctl -u and ip a. The footer says "man &lt;cmd&gt; when in doubt." A companion to the Port Cheat Sheet pad from drop 4.</p>
+<p>9 x 7.5 inch mouse pad with a non-slip rubber base. $20.50.</p>
+<h2 id="the-homelab-hierarchy-of-needs-poster">The Homelab Hierarchy of Needs (poster)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/the-homelab-hierarchy-of-needs-poster-18x24">The Homelab Hierarchy of Needs Poster</a>: a six-tier pyramid of what has to work before the next thing can. From the bottom: Power (a UPS, surge protection, a real outlet), Network (switch, firewall, VLANs, DNS), Storage (NAS, RAID, lots of TB), Backups (3-2-1, tested, not hoped), Compute (VMs and containers, the fun bit) and, at the very top, Dashboards (the part you screenshot). The caption under it: "You can't self-actualize a dashboard on a dead UPS." It is the order the books are written in, for the same reason.</p>
+<p>Enhanced matte paper poster, 18 x 24 inches. $26.50.</p>
+<h2 id="came-for-groceries-left-with-a-switch-tote">Came for Groceries, Left With a Switch (tote)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/came-for-groceries-left-with-a-switch-tote">Came for Groceries, Left With a Switch Tote</a>: a shopping bag with an eight-port switch sticking out of the top, the slogan in four lines, and the receipt at the bottom: "24 ports, 0 vegetables." The second tote in the store, printed on an organic cotton Econscious bag that will in fact carry groceries.</p>
+<p>Econscious EC8000 organic cotton tote in Oyster. $27.</p>
+<h2 id="where-everything-lives">Where everything lives</h2>
+<p>The store now carries 45 designs across tees, hoodies, crewnecks, hats, mugs, stickers, desk mats, mouse pads, posters and totes. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
+<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Kasa Smart Plug Ultra Mini: reboot a frozen server from the couch</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/kasa-smart-plug-ultra-mini-ep10/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/kasa-smart-plug-ultra-mini-ep10/</guid>
 <pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>What the Kasa Smart Plug Ultra Mini (EP10, 2-pack) does for a homelab: remote hard reboots, schedules, Home Assistant. And what not to put on it. With the short video and the Amazon link.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>amazon finds</category><category>smart plug</category><category>home assistant</category><category>smart home</category><category>homelab</category><category>gear</category>
@@ -1241,82 +1278,5 @@ android {
     versionName = "1.0.0"  // major.minor.patch, for humans
 }</code></pre>
 <h2 id="checklist-before-the-first-upload">Checklist before the first upload</h2>
-<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul><p><a href="https://payhip.com/b/Qdxgz">Go deeper: Ship Your First Android App</a></p>]]></content:encoded></item><item><title>A backup job that never runs never fails</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</guid>
-<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Failure alerts can&#x27;t warn you about a backup job that stopped running. A vzdump hook that pings a dead-man&#x27;s switch, plus a weekly backup-age report, turns that silence into a phone notification.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-20.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>backups</category><category>vzdump</category><category>monitoring</category><category>alerts</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-20.jpg" alt=""></p><p>Backups fail in two ways. Loudly, when a job runs and reports an error. And quietly, when a job stops running at all: the timer was disabled during an upgrade, the node was off, the cron line was lost in a rebuild, the API key expired.</p>
-<p>Loud failures are easy, because every backup tool can email you. Quiet failures need a different shape of alert, and they are the ones that catch people out.</p>
-<h2 id="the-trap-alerting-only-on-failure">The trap: alerting only on failure</h2>
-<p><strong>A job that never runs never fails.</strong> An off-site rclone sync that stopped in February will not send a single error between then and the day you need it. Your inbox stays clean the whole time, and a clean inbox looks exactly like a healthy backup.</p>
-<p>So the alert you need is not "something failed". It is "nothing succeeded recently". That takes three pieces: notifications for the loud failures, a dead-man's switch for the quiet ones, and a report that checks every guest is actually covered.</p>
-<h2 id="step-1-route-the-loud-failures-to-your-phone">Step 1: route the loud failures to your phone</h2>
-<p>Since Proxmox VE 8.1 there is a proper notification system under <strong>Datacenter → Notifications</strong>. It has two parts.</p>
-<ul><li><strong>Targets</strong> are where notifications go: SMTP (your own mail account), Gotify, a generic webhook, or the local sendmail. A webhook to a self-hosted ntfy server pushes straight to your phone, which matters because email from a homelab tends to land in spam exactly when it counts.</li><li><strong>Matchers</strong> decide which events go to which target. The default matcher sends everything to the mail-to-root target. Add one for backups: match field <code>type</code> equals <code>vzdump</code>, severity error and warning, target: your phone. A second matcher can send info events to email if you like a morning receipt.</li></ul>
-<p>One setting is easy to miss: every backup job's <strong>Notification mode</strong> has to be set to the notification system, or the matchers never see it. On the command line that is:</p>
-<pre><code>vzdump --all 1 --exclude 900,901 --mode snapshot --compress zstd \
-  --notification-mode notification-system</code></pre>
-<p>The older <code>--mailto</code> option still works, but it is deprecated; the notification system replaces it.</p>
-<p>Proxmox Backup Server has the same system under <strong>Configuration → Notifications</strong> for its own verify, prune, GC and sync jobs. Wire the sync job's failures to the same phone target, because the sync job is your off-site copy.</p>
-<h2 id="step-2-a-dead-man-s-switch-for-the-quiet-failures">Step 2: a dead-man's switch for the quiet failures</h2>
-<p>For "nothing succeeded recently", use a check that <em>expects</em> a ping. A dead-man's switch service such as healthchecks.io, or a self-hosted Uptime Kuma push monitor, gives you a URL. Your job pings it on success. If the pings stop, you get a message.</p>
-<p>vzdump has hook scripts for exactly this. Add one line to <code>/etc/vzdump.conf</code>:</p>
-<pre><code>script: /usr/local/bin/vzdump-hook.sh</code></pre>
-<p>Then the hook itself:</p>
-<pre><code>#!/bin/bash
-# vzdump calls this with the phase as $1
-URL=https://hc-ping.com/your-uuid-here
-case "$1" in
-  job-end)   curl -fsS -m 10 --retry 3 "$URL" &gt;/dev/null ;;
-  job-abort) curl -fsS -m 10 --retry 3 "$URL/fail" &gt;/dev/null ;;
-esac
-exit 0</code></pre>
-<p>A clean finish pings the check; an aborted job pings its <code>/fail</code> URL so you hear about it straight away.</p>
-<p>Set the check's period to a day and its grace to a few hours. A night the job does not run, for any reason, becomes a phone notification by breakfast.</p>
-<p>Do the same for everything else on a timer: the rclone sync (a <code>&amp;&amp; curl</code> at the end of the cron line) and the database dump timer.</p>
-<h2 id="step-3-a-weekly-report-of-each-guest-s-newest-backup">Step 3: a weekly report of each guest's newest backup</h2>
-<p>Hooks tell you a job ran. They do not tell you it covered every guest. A job built for a hand-picked list of guests keeps pinging happily while every VM you created after it goes unprotected.</p>
-<p>So once a week, a script on the node lists the newest backup of every guest and complains about any older than two days:</p>
-<pre><code>#!/bin/bash
-# newest backup per guest on a storage; flag any older than MAXAGE days
-STORE=pbs01; MAXAGE=2; now=$(date +%s)
-API=/nodes/$(hostname)/storage/$STORE/content
-pvesh get $API --content backup --output-format json \
- | jq -r '.[] | "\(.vmid) \(.ctime)"' | sort -k1,1n -k2,2nr | sort -u -k1,1n \
- | while read -r vmid ctime; do
-     age=$(( (now - ctime) / 86400 ))
-     [ "$age" -gt "$MAXAGE" ] &amp;&amp; echo "STALE: guest $vmid, last backup ${age}d"
-   done
-ids="$(qm list | awk 'NR&gt;1{print $1}') $(pct list | awk 'NR&gt;1{print $1}')"
-for id in $ids; do
-  pvesh get $API --content backup --vmid "$id" --output-format json \
-    | jq -e 'length &gt; 0' &gt;/dev/null || echo "NONE: guest $id has no backup"
-done</code></pre>
-<p>Change <code>STORE</code> to your backup storage's name. Send the output to ntfy or email only when it is not empty, so a quiet week stays quiet.</p>
-<p>The second loop is the important one. It catches a guest that has never been backed up at all, which is exactly the gap a hand-picked job list leaves.</p>
-<h2 id="step-4-let-home-assistant-watch-its-own-backups">Step 4: let Home Assistant watch its own backups</h2>
-<p>Home Assistant's Backup integration exposes sensors for the backup manager's state and the last successful automatic backup. An automation that fires when the last success is more than two days old closes the loop for the one system in the house that already knows how to notify your phone:</p>
-<pre><code>alias: Backup is stale
-triggers:
-  - trigger: time
-    at: "09:00:00"
-conditions:
-  - condition: template
-    value_template: &gt;
-      {% set last = states('sensor.backup_last_successful_automatic_backup') %}
-      {{ (now() - last | as_datetime) &gt; timedelta(days=2) }}
-actions:
-  - action: notify.mobile_app_your_phone
-    data:
-      message: "Home Assistant has not completed a backup in over two days."</code></pre>
-<p>Check the sensor's exact entity ID in <strong>Developer Tools → States</strong>. The Backup integration creates it once automatic backups are configured.</p>
-<h2 id="step-5-watch-the-disk-before-it-fails-the-job">Step 5: watch the disk before it fails the job</h2>
-<p>Backup storage filling up is a backup failure in waiting, and a common cause of failed jobs. Proxmox shows storage usage on the Datacenter summary; PBS shows datastore usage and has its own notification for it.</p>
-<p>A simple rule: when the backup target passes <strong>80 percent</strong>, either prune harder or add a disk, and do it that week.</p>
-<h2 id="step-6-break-something-on-purpose">Step 6: break something on purpose</h2>
-<p>An alert you have never seen fire is in the same category as a backup you have never restored. Test every path once:</p>
-<ul><li>Disable the backup job for a day and confirm the dead-man's switch fires.</li><li>Point rclone at a bucket name that does not exist and confirm you hear about it.</li></ul>
-<p>If nothing arrives, fix the alert before you trust anything else in this post.</p>
-<h2 id="checklist-monitoring">Checklist: monitoring</h2>
-<ul><li>Notification targets set up (phone push plus email), with a matcher for vzdump warnings and errors</li><li>Every backup job on the notification system, on Proxmox and on PBS</li><li>A dead-man's switch pinged by the vzdump hook, the rclone sync and the database dump timer</li><li>A weekly backup-age report that also lists guests with no backup at all</li><li>A Home Assistant automation that complains when its own backup is stale</li><li>Backup storage usage watched, with 80 percent as the act-now line</li><li>Every alert path deliberately triggered once</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul><p><a href="https://payhip.com/b/Qdxgz">Go deeper: Ship Your First Android App</a></p>]]></content:encoded></item>
 </channel></rss>
