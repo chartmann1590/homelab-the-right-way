@@ -30,7 +30,24 @@
 <h2 id="10-anker-2100j-surge-protector-power-strip">10. Anker 2100J surge-protector power strip</h2>
 <p>A flat-plug surge protector with a 2100-joule rating, multiple outlets and USB ports: the strip to put under a desk full of chargers and small boxes. <a href="https://www.amazon.com/dp/B09SG2Q23M?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
 <h2 id="how-we-pick">How we pick</h2>
-<p>A product makes this list when it sits near the top of its Amazon Best Sellers category, has a long record of reviews over several years, and is the kind of thing people in the homelab and desk-setup corners of YouTube, TikTok and Reddit keep making videos about. The list is refreshed as new videos go up; the newest picks are at the top of the channel's Shorts.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
+<p>A product makes this list when it sits near the top of its Amazon Best Sellers category, has a long record of reviews over several years, and is the kind of thing people in the homelab and desk-setup corners of YouTube, TikTok and Reddit keep making videos about. The list is refreshed as new videos go up; the newest picks are at the top of the channel's Shorts.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>TP-Link TL-SG105: the 5-port gigabit switch most homelabs start with</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/tp-link-tl-sg105-5-port-gigabit-switch/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/tp-link-tl-sg105-5-port-gigabit-switch/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>What the TP-Link TL-SG105 unmanaged 5-port gigabit switch does, where it fits in a homelab, and what it does not do. With the short video and the Amazon link.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>amazon finds</category><category>networking</category><category>switch</category><category>homelab</category><category>gear</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>As an Amazon Associate I earn from qualifying purchases. The Amazon link on this page supports the blog at no extra cost to you.</p>
+<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-Port Gigabit Switch</a></p>
+<p>The short video on this page uses a fictional AI-generated presenter (AI face, voice and lip-sync). We have not personally tested this switch; the details below come from TP-Link's own product information. No price or rating is quoted because both change; check the listing.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>Most home routers have four Ethernet ports on the back. A homelab fills them fast: a server or mini PC, a NAS, a Raspberry Pi, a desktop. A small unmanaged switch fixes that with one cable: plug one of its ports into the router and the other four become extra wired ports on the same network.</p>
+<h2 id="what-it-is">What it is</h2>
+<ul><li>5 gigabit Ethernet ports (10/100/1000 Mbps, auto-negotiation on every port)</li><li>Metal case, no fan, so it is silent</li><li>Unmanaged and plug-and-play: no app, no web page, nothing to configure</li><li>Energy-efficient design, which matters for a box that runs 24/7 on a shelf</li><li>Sits on a desk or mounts on a wall</li><li>Works behind any router, including an OPNsense or pfSense box</li></ul>
+<h2 id="where-it-fits-in-a-homelab">Where it fits in a homelab</h2>
+<ul><li><strong>Under the desk:</strong> one cable from the router, four wired devices next to you.</li><li><strong>Next to the server shelf:</strong> the mini PC running Proxmox, the NAS and the Pi all get wired gigabit links instead of Wi-Fi.</li><li><strong>Behind the TV:</strong> a console, a streaming box and a smart TV on one wall jack.</li></ul>
+<h2 id="what-it-does-not-do">What it does not do</h2>
+<p>It is unmanaged, so there are no VLANs, no port settings and no traffic graphs. If you want to split IoT devices onto their own VLAN, you need a managed or "easy smart" switch instead (TP-Link sells those under other model numbers). If you only need more ports, unmanaged is simpler and there is nothing to misconfigure. There is also an 8-port version if five is not enough.</p>
+<h2 id="watch-the-49-second-version">Watch the 49-second version</h2>
+<p>The Short above covers the same ground. More picks like this one are in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
+<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-Port Gigabit Switch</a></p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
 <pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Gemini Nano only runs on some phones. Here is how to check its status before every call, what each of the four states means, and the surprises that trip people up once.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>gemini nano</category><category>ml kit</category><category>on-device ai</category><category>kotlin</category>
@@ -1343,64 +1360,5 @@ sensor:
 <h2 id="good-to-know">Good to know</h2>
 <ul><li><strong>Price:</strong> free to download, with optional ads and an optional ad-free upgrade (an in-app purchase).</li><li><strong>Content filtering:</strong> the on-device checks try to steer prompts and results away from harmful content, but the listing states plainly that no filter is perfect. Use it responsibly and report anything that slips through.</li><li><strong>Problems:</strong> bugs can be reported from Settings, then Report a Problem.</li><li><strong>Setup download:</strong> plan for a 4.1 GB download on Wi-Fi before first use.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You want to make AI images without an account or a subscription service.</li><li>You want your prompts and images to stay on your own phone.</li><li>You want something that works on a plane or with no signal.</li><li>Your phone meets the RAM, storage and processor requirements above.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.hartmann.pixeldream">Get PixelDream: Offline AI Images on Google Play</a></p>]]></content:encoded></item><item><title>Why your 2-node Proxmox cluster freezes</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/why-your-2-node-proxmox-cluster-freezes/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/why-your-2-node-proxmox-cluster-freezes/</guid>
-<pubDate>Mon, 12 Oct 2026 12:30:00 -0400</pubDate><description>With two Proxmox nodes, losing either one leaves the survivor with one vote out of two, so it loses quorum and /etc/pve goes read-only. Here is how a QDevice adds a third vote without a third server, plus the Wi-Fi trap and the emergency lever.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-17.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>cluster</category><category>quorum</category><category>qdevice</category><category>corosync</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-17.jpg" alt=""></p><p>Two Proxmox nodes feel like redundancy. One box dies, the other carries on. That is the picture most people have when they join a second machine to the cluster.</p>
-<p>Out of the box, it is the opposite: two machines that can each stop the other from working. This post covers why that happens, the small fix that solves it, and the two related traps that make a cluster look haunted.</p>
-<h2 id="how-quorum-works-in-one-paragraph">How quorum works, in one paragraph</h2>
-<p>A Proxmox cluster uses Corosync to agree on who is alive. Each node gets one vote, and the cluster is <strong>quorate</strong> when more than half the votes are present. Without quorum, the cluster filesystem at <code>/etc/pve</code> goes read-only. You can't start guests, change configs or create backups, and nothing in the UI saves.</p>
-<h2 id="the-trap-1-vote-out-of-2-is-not-a-majority">The trap: 1 vote out of 2 is not a majority</h2>
-<p>Now do the arithmetic for two nodes. Lose either one, and the survivor holds 1 vote out of 2. That is exactly half, and half is not <em>more</em> than half. So the survivor freezes.</p>
-<p>That is the part that catches people. The node that is still up, still powered and still on the network is the one that stops working, because it has no way to know whether the other node is dead or just unreachable. Refusing to write is the safe choice for the cluster, and it is a very annoying choice for you.</p>
-<p>You can see the vote count at any time:</p>
-<pre><code>pvecm status</code></pre>
-<h2 id="the-fix-a-third-vote-that-isn-t-a-third-server">The fix: a third vote that isn't a third server</h2>
-<p>A <strong>QDevice</strong> is a tiny external voter. It can run on a Raspberry Pi, a NAS container or any always-on Linux box that isn't one of the cluster nodes. It gives the cluster a third vote without a third hypervisor.</p>
-<p>With three votes, losing one node leaves 2 out of 3. That is more than half, so the survivor stays quorate and keeps working.</p>
-<p>The setup is three installs and one command:</p>
-<pre><code># On the external box (Debian/Ubuntu/Raspberry Pi OS):
-apt install corosync-qnetd
-
-# On EVERY cluster node:
-apt install corosync-qdevice
-
-# On ONE cluster node (root SSH to the QDevice box must work):
-pvecm qdevice setup 192.168.10.5
-
-# Check: you should see 3 total votes and "Qdevice" listed
-pvecm status</code></pre>
-<p>Replace <code>192.168.10.5</code> with the address of your own external box.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=Raspberry+Pi+5+kit&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Raspberry Pi</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
-<h3 id="where-the-qdevice-must-not-live">Where the QDevice must not live</h3>
-<p>Don't run the QDevice as a VM or container on one of the cluster nodes. It is tempting, because the hardware is already there. But if that node goes down, it takes its own vote <strong>and</strong> the QDevice's vote with it, and you are back to 1 vote out of 3 on the survivor. Separate hardware is the whole point.</p>
-<div class="table"><table><thead><tr><th>QDevice placement</th><th>One node dies</th></tr></thead><tbody><tr><td>VM or container on a cluster node</td><td>That node takes two votes with it; no quorum</td></tr><tr><td>Separate always-on box</td><td>The third vote survives; the other node keeps quorum</td></tr></tbody></table></div>
-<h2 id="the-related-trap-a-node-on-wi-fi-that-keeps-flapping">The related trap: a node on Wi-Fi that keeps flapping</h2>
-<p>Even with enough votes, a cluster can look broken if one member keeps dropping in and out. The usual cause is Wi-Fi.</p>
-<p>Corosync is extremely sensitive to latency and jitter. It wants a stable, low-latency link: single-digit milliseconds, consistently. Wi-Fi delivers great average speeds and terrible consistency. A microwave, a neighbor's channel change or a roaming decision adds 50 to 300 ms of jitter for a few seconds. Corosync sees missed tokens, decides the node is gone, and the cluster reshuffles. A few seconds later it is back. Then it is gone again.</p>
-<p>The symptoms look random:</p>
-<ul><li>The node shows a red X, then turns green again</li><li><code>/etc/pve</code> is briefly read-only</li><li>Backup jobs fail with "cluster not ready"</li><li>The logs fill with lines like <code>[TOTEM] A processor failed, forming new configuration</code></li></ul>
-<p>Check for it:</p>
-<pre><code>journalctl -u corosync --since "24 hours ago" | \
-  grep -Ei "failed|new membership|retransmit"
-corosync-cfgtool -s        # link status per node
-ping -c 100 -i 0.2 &lt;other-node&gt; | tail -2   # look at mdev/max, not avg</code></pre>
-<p>Look at the <code>mdev</code> and <code>max</code> numbers from the ping, not the average. A good average with a big max is exactly the jitter Corosync hates.</p>
-<p>The fix isn't a Corosync tuning trick. It's a cable. If the node physically can't be wired, use a powerline or MoCA adapter (still better than Wi-Fi), or take it out of the cluster and run it standalone. A standalone node you manage separately is far less trouble than a cluster member that drops out twice an hour.</p>
-<p>If your nodes have two network ports, give Corosync a second link (<code>link1</code>) on a separate network or a direct cable between the nodes. Corosync fails over between links automatically.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=MoCA+2.5+ethernet+adapter&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Powerline or MoCA Ethernet adapter</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
-<h2 id="when-you-re-stuck-without-quorum-right-now">When you're stuck without quorum right now</h2>
-<p>If one node of two is dead and you need the survivor working immediately, there is an emergency lever:</p>
-<pre><code>pvecm expected 1</code></pre>
-<p>This tells the survivor to accept being alone. It is an emergency lever, not a fix. Only use it when you are sure the other node is truly off, because two nodes that each think they are the whole cluster can write conflicting configs. Once the crisis is over, the real fix is still the QDevice.</p>
-<h2 id="scripts-wait-for-quorum-instead-of-failing-halfway">Scripts: wait for quorum instead of failing halfway</h2>
-<p>If you script changes on a cluster with a flaky member, check quorum before each write and retry, instead of letting the script die partway through a batch:</p>
-<pre><code>until pvecm status | grep -q "Quorate:.*Yes"; do
-  echo "waiting for quorum..."; sleep 10
-done
-pct destroy 123 --purge</code></pre>
-<p>The loop waits until <code>pvecm status</code> reports the cluster as quorate, then runs the write. Wrap each destructive or config-changing step this way and a brief membership blip costs you a pause, not a half-finished job.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Every cluster node is wired, ideally on the same switch</li><li>Two-node clusters have a QDevice on separate hardware, never on a cluster node</li><li><code>pvecm status</code> shows the expected vote count (3 for two nodes plus a QDevice)</li><li>Corosync logs show no membership changes over the past day</li><li>Nodes with two ports give Corosync a second link (<code>link1</code>)</li><li>Scripts check for quorum before each write</li><li>You know the <code>pvecm expected 1</code> lever, and when not to pull it</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item>
+<ul><li>You want to make AI images without an account or a subscription service.</li><li>You want your prompts and images to stay on your own phone.</li><li>You want something that works on a plane or with no signal.</li><li>Your phone meets the RAM, storage and processor requirements above.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.hartmann.pixeldream">Get PixelDream: Offline AI Images on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
