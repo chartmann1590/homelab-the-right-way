@@ -3,7 +3,34 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 18 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
+<item><title>Viral Amazon tech finds that are actually worth it (homelab, desk and smart-home picks)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>The Amazon tech products that keep going viral and keep selling for years: network switches, portable SSDs, power banks, smart plugs, cable management, mini PCs and more, picked for a homelab and home-office audience. Updated as new product videos go up.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>amazon finds</category><category>gear</category><category>homelab</category><category>desk setup</category><category>smart home</category><category>tech</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>As an Amazon Associate I earn from qualifying purchases. The links on this page go to Amazon; buying through them supports the blog at no extra cost to you.</p>
+<p>This is the running list behind our product Shorts and TikToks: tech that keeps going viral AND has kept selling well for years, filtered for a homelab, desk-setup and smart-home audience. Each one got its own short video with a fictional AI presenter (the presenter is AI-generated; we do not claim to have personally tested these). No prices or ratings here because they change weekly; check the listing.</p>
+<h2 id="1-tp-link-tl-sg105-5-port-gigabit-switch">1. TP-Link TL-SG105 5-port gigabit switch</h2>
+<p>The first upgrade almost every homelab makes: one cable from the router gives you four more full-speed gigabit ports for the server, NAS, Pi and desktop. Metal case, fanless, nothing to configure. <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="2-sandisk-2tb-extreme-portable-ssd">2. SanDisk 2TB Extreme Portable SSD</h2>
+<p>A pocket solid-state drive with no moving parts, USB-C, rated for drops and splashes, fast enough that a full laptop or VM backup takes minutes. <a href="https://www.amazon.com/dp/B08HN37XC1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="3-iniu-10-000-mah-45w-power-bank">3. INIU 10,000 mAh 45W power bank</h2>
+<p>Jacket-pocket size, 45 W over USB-C (enough for a USB-C laptop, tablet or Steam Deck), a short built-in detachable cable plus a USB-A port, flight-safe capacity. <a href="https://www.amazon.com/dp/B0CB1FW5FC?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="4-kasa-smart-plug-ultra-mini-ep10-2-pack">4. Kasa Smart Plug Ultra Mini EP10 (2-pack)</h2>
+<p>A Wi-Fi plug with no hub and no subscription: hard-reboot a frozen mini PC or router from your phone, schedule desk lights, works with Alexa, Google Home and Home Assistant. <a href="https://www.amazon.com/dp/B091FXQQMQ?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="5-alex-tech-10-ft-split-cable-sleeve">5. Alex Tech 10 ft split cable sleeve</h2>
+<p>Braided split tubing you push the cables into: ten seconds to a clean bundle behind a desk or under a rack shelf, cut to length, reusable, keeps pets off the cords. <a href="https://www.amazon.com/dp/B07FW3GTXB?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="6-kamrui-ak1plus-mini-pc-intel-n5095-16-gb">6. KAMRUI AK1PLUS mini PC (Intel N5095, 16 GB)</h2>
+<p>A palm-size, low-power desktop that is a popular first Proxmox or Home Assistant box: dual HDMI, 16 GB RAM, an M.2 SSD you can swap, and it sips power on a shelf 24/7. <a href="https://www.amazon.com/dp/B099KSJN8P?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="7-tp-link-archer-ax21-ax1800-wi-fi-6-router">7. TP-Link Archer AX21 AX1800 Wi-Fi 6 router</h2>
+<p>The budget Wi-Fi 6 router that shows up in every "what router should I buy" thread: dual-band, gigabit ports, OneMesh, and it runs as a plain access point behind an OPNsense box. <a href="https://www.amazon.com/dp/B08H8ZLKKK?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="8-anker-8-in-1-usb-c-docking-station">8. Anker 8-in-1 USB-C docking station</h2>
+<p>One cable from the laptop to two monitors, Ethernet, USB-A ports and power delivery; the desk dock people keep recommending for hybrid work setups. <a href="https://www.amazon.com/dp/B0874M3KW4?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="9-govee-16-4-ft-rgbic-led-strip">9. Govee 16.4 ft RGBIC LED strip</h2>
+<p>The strip behind half the desk and rack photos online: segment colours, app and voice control, music sync, and it is the Govee line Home Assistant users pick. <a href="https://www.amazon.com/dp/B0991Q94KP?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="10-anker-2100j-surge-protector-power-strip">10. Anker 2100J surge-protector power strip</h2>
+<p>A flat-plug surge protector with a 2100-joule rating, multiple outlets and USB ports: the strip to put under a desk full of chargers and small boxes. <a href="https://www.amazon.com/dp/B09SG2Q23M?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
+<h2 id="how-we-pick">How we pick</h2>
+<p>A product makes this list when it sits near the top of its Amazon Best Sellers category, has a long record of reviews over several years, and is the kind of thing people in the homelab and desk-setup corners of YouTube, TikTok and Reddit keep making videos about. The list is refreshed as new videos go up; the newest picks are at the top of the channel's Shorts.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
 <pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Gemini Nano only runs on some phones. Here is how to check its status before every call, what each of the four states means, and the surprises that trip people up once.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>gemini nano</category><category>ml kit</category><category>on-device ai</category><category>kotlin</category>
@@ -1375,52 +1402,5 @@ done
 pct destroy 123 --purge</code></pre>
 <p>The loop waits until <code>pvecm status</code> reports the cluster as quorate, then runs the write. Wrap each destructive or config-changing step this way and a brief membership blip costs you a pause, not a half-finished job.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>Every cluster node is wired, ideally on the same switch</li><li>Two-node clusters have a QDevice on separate hardware, never on a cluster node</li><li><code>pvecm status</code> shows the expected vote count (3 for two nodes plus a QDevice)</li><li>Corosync logs show no membership changes over the past day</li><li>Nodes with two ports give Corosync a second link (<code>link1</code>)</li><li>Scripts check for quorum before each write</li><li>You know the <code>pvecm expected 1</code> lever, and when not to pull it</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>New book: Automations That Just Work (Home Assistant without the surprises)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/</guid>
-<pubDate>Mon, 12 Oct 2026 12:30:00 -0400</pubDate><description>Book 6 in the Homelab the Right Way series is out: reliable Home Assistant, from Zigbee coordinator placement to automations you can read a year later and a monthly update hour with a way back. Here is the motion-light automation from Chapter 4, done properly, and the one Zigbee change that fixes most dropped sensors.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>home assistant</category><category>zigbee</category><category>z-wave</category><category>automations</category><category>ebook</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Book 6 in the series is out today: <strong>Automations That Just Work: Reliable Home Assistant with Zigbee, Z-Wave, Dashboards and Updates That Don't Break Things</strong>. It is 56 pages and 23 diagrams on the second six months of a Home Assistant install, the part where the magic has worn off and the family has stopped trusting the house.</p>
-<p>The free sample is the whole of Chapter 4, the automations chapter. Here is a taste of what is in it, plus the Zigbee fix from Chapter 2 that most people need first.</p>
-<h2 id="the-trap-a-motion-light-that-turns-off-while-you-are-still-there">The trap: a motion light that turns off while you are still there</h2>
-<p>The usual motion light has a motion trigger, a "turn on", a fixed two-minute delay, and a "turn off". It works most nights. Then someone stands still in the hallway reading a label and the light goes out on them.</p>
-<p>The reason is the automation's <strong>mode</strong>. The default, <code>single</code>, means that when motion fires again while the first run is still waiting out its delay, the second trigger is silently dropped (there is a warning in the log, which nobody reads). The countdown that started on the first motion keeps running, and the light goes off two minutes after the <em>first</em> movement, not the last.</p>
-<h2 id="the-fix-restart-and-a-wait-not-a-delay">The fix: <code>restart</code> and a wait, not a delay</h2>
-<p>Two changes. Set the mode to <code>restart</code>, so fresh motion cancels the running countdown and starts over. And wait for the sensor to be off <em>for</em> two minutes instead of sleeping for two minutes:</p>
-<pre><code>alias: Hallway light on motion
-description: On with motion after dark; off 2 min after motion stops
-mode: restart
-triggers:
-  - trigger: state
-    entity_id: binary_sensor.hallway_motion
-    to: "on"
-conditions:
-  - condition: state
-    entity_id: sun.sun
-    state: below_horizon
-actions:
-  - action: light.turn_on
-    target:
-      entity_id: light.hallway_ceiling
-    data:
-      brightness_pct: 60
-  - wait_for_trigger:
-      - trigger: state
-        entity_id: binary_sensor.hallway_motion
-        to: "off"
-        for: "00:02:00"
-  - action: light.turn_off
-    target:
-      entity_id: light.hallway_ceiling</code></pre>
-<p>Every new motion restarts the run, so the light only goes off two minutes after the last movement ends. The <code>for:</code> on the wait also absorbs a sensor that flaps on and off within a second.</p>
-<p>Three more rules from the chapter that keep automations readable:</p>
-<ul><li>Every <code>state</code> trigger gets a <code>to:</code>. Without it, the automation fires on <em>any</em> change, including attribute updates like brightness or <code>last_seen</code>, and runs twenty times an hour.</li><li>Flappy sensors get <code>for:</code> on the trigger. A door that reports open, closed, open within a second fires three times without it and zero times with <code>for: "00:00:05"</code>.</li><li>When an automation "didn't work", read its <strong>trace</strong> (Settings, Automations &amp; Scenes, the automation, three-dot menu, Traces) before changing anything. It shows which trigger fired, what every condition evaluated to, and what each action did. Guessing is slower than reading.</li></ul>
-<h2 id="the-zigbee-fix-that-comes-first">The Zigbee fix that comes first</h2>
-<p>Most "the bedroom sensor dropped again" problems are not the sensor. They are the coordinator stick plugged straight into a USB 3.0 port on the server, inside a metal case, next to the access point. USB 3.0 ports and cables radiate noise in the 2.4 GHz band, which is exactly where Zigbee lives.</p>
-<p>The fix is a <strong>USB 2.0 extension cable</strong>, one to two metres long, with the stick on the end of it, a metre away from any SSD, hub or access point. If the machine has a USB 2.0 port, use that. This single change fixes more Zigbee networks than any setting. The chapter goes on to the channel choice (Zigbee 15, 20 or 25, between Wi-Fi channels 1, 6 and 11, chosen before pairing anything), why battery sensors never route and a mains plug in each room is the mesh, and pairing devices in the room they will live in.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=USB+2.0+extension+cable+1m+male+to+female&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">USB 2.0 extension cable, 1-2 m</a> · <a href="https://www.amazon.com/dp/B0DY84BB96?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Home Assistant Connect ZBT-1</a> · <a href="https://www.amazon.com/dp/B0B6P22YJC?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SONOFF ZBDongle-E</a> · <a href="https://www.amazon.com/s?k=SMLIGHT+SLZB-06+Zigbee+PoE+Ethernet+coordinator&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SMLIGHT SLZB-06 Ethernet/PoE Zigbee coordinator</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
-<h2 id="what-the-book-covers">What the book covers</h2>
-<ol><li>A home that works when the internet doesn't: the five-minute WAN unplug test, one naming scheme, areas and labels</li><li>Zigbee that stays up: coordinator choice and placement, channels, ZHA or Zigbee2MQTT, routers, a working Zigbee2MQTT configuration</li><li>Z-Wave without the mystery: 800-series controllers, Z-Wave JS UI, S2 inclusion, node statistics instead of nightly heals</li><li>Automations that mean something: triggers, conditions, modes, the motion light, traces (the free sample chapter)</li><li>Helpers, templates and blueprints: house mode and guest mode, template sensors with defaults, a motion-light blueprint</li><li>Dashboards people actually use: phone, wall tablet and admin; Sections and tiles; conditional cards</li><li>Notifications that don't cry wolf: tags, actionable alerts, one daily battery report, quiet hours, the alert integration</li><li>Updates without breaking things: the monthly routine, backup plus Proxmox snapshot, one layer at a time, three ways back</li></ol>
-<p>Plus the Weekend Reliability Checklist and a cheat sheet. PDF and EPUB, with the full automations chapter free below.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Motion lights on <code>mode: restart</code> with a <code>wait_for_trigger</code>, not a fixed delay</li><li>Every <code>state</code> trigger has a <code>to:</code>; flappy sensors have <code>for:</code></li><li>Coordinator on a USB 2.0 extension cable, away from the case and the access point</li><li>Zigbee on channel 15, 20 or 25, set before pairing</li><li>A mains-powered router in each room between the coordinator and the far sensors</li></ul><p><a href="https://payhip.com/b/eHgh0">Go deeper: Automations That Just Work</a></p>]]></content:encoded></item>
+<ul><li>Every cluster node is wired, ideally on the same switch</li><li>Two-node clusters have a QDevice on separate hardware, never on a cluster node</li><li><code>pvecm status</code> shows the expected vote count (3 for two nodes plus a QDevice)</li><li>Corosync logs show no membership changes over the past day</li><li>Nodes with two ports give Corosync a second link (<code>link1</code>)</li><li>Scripts check for quorum before each write</li><li>You know the <code>pvecm expected 1</code> lever, and when not to pull it</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item>
 </channel></rss>
