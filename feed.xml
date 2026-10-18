@@ -1,9 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 17 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 18 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Snapshots on a schedule, replicas on another box: sanoid and syncoid pull replication for ZFS</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</guid>
+<item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Gemini Nano only runs on some phones. Here is how to check its status before every call, what each of the four states means, and the surprises that trip people up once.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>gemini nano</category><category>ml kit</category><category>on-device ai</category><category>kotlin</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Gemini Nano is the language model that ships with the phone. But only <em>some</em> phones. Build the feature as if it is always there and most of your users get an error, or a button that does nothing.</p>
+<p>This post covers how to plan for that, using Chapter 3 (Gemini Nano Without the Guesswork) of <em>On-Device AI for Android</em>.</p>
+<h2 id="how-it-works-in-one-paragraph">How it works, in one paragraph</h2>
+<p>Gemini Nano runs inside AICore, an Android system service. AICore keeps the model updated, applies Google's safety filters and lets every app on the device share one copy. You never bundle or host the base model. You reach it through ML Kit's GenAI APIs, which come in two shapes:</p>
+<ul><li><strong>Feature APIs</strong> for common jobs: Summarization, Proofreading, Rewriting, Image description and Speech recognition. Each one is tuned for its task and needs no prompt writing.</li><li><strong>The Prompt API</strong> for everything else: your own text prompt, or an image plus text, with optional settings such as temperature and maximum output tokens.</li></ul>
+<h2 id="the-trap-assuming-the-model-is-there">The trap: assuming the model is there</h2>
+<p>Google's ML Kit GenAI overview page publishes the supported device list, and it differs by API. At the time of writing (October 2026) the feature APIs list recent flagships from Google (Pixel 9, 10 and 11 families), Samsung (Galaxy S25 and S26 families and recent foldables) and models from other makers. The Prompt API has its own list, grouped by Gemini Nano version. The list grows, so check it on developers.google.com/ml-kit/genai before you promise a feature.</p>
+<p>Two more conditions from the same documentation:</p>
+<ul><li>The GenAI APIs need Android API level 26 or higher.</li><li>They are not supported on devices with an unlocked bootloader.</li></ul>
+<p>The book's advice is blunt: design for "unavailable" first. On most of your users' phones today, the Gemini Nano path will report that it cannot run. That has to lead somewhere useful.</p>
+<h2 id="the-fix-every-call-starts-with-a-status-check">The fix: every call starts with a status check</h2>
+<p>Each GenAI client can report one of four states. Each one has a clear next step:</p>
+<div class="table"><table><thead><tr><th>State</th><th>What it means</th><th>What to do</th></tr></thead><tbody><tr><td>AVAILABLE</td><td>You can run inference now</td><td>Run it</td></tr><tr><td>DOWNLOADABLE</td><td>The phone supports it, but the model or the feature's adapter is not on the device yet</td><td>Download, with progress</td></tr><tr><td>DOWNLOADING</td><td>A download is in progress</td><td>Wait or queue the request</td></tr><tr><td>UNAVAILABLE</td><td>This device cannot run it, or AICore has not fetched its latest configuration yet</td><td>Use another backend</td></tr></tbody></table></div>
+<p>Only UNAVAILABLE sends the user elsewhere. The other three end in AVAILABLE.</p>
+<h3 id="the-prompt-api-behind-an-interface">The Prompt API, behind an interface</h3>
+<p>The Prompt API is version 1.0.0-beta4 at the time of writing. Its Kotlin API is coroutine-first: <code>checkStatus()</code> is a suspend function, <code>download()</code> returns a Flow, and <code>generateContentStream()</code> streams chunks.</p>
+<pre><code>dependencies {
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
+}</code></pre>
+<p>The book wraps it in a <code>TextGenerator</code> interface, so the status maps to an availability the rest of the app understands:</p>
+<pre><code>class NanoGenerator : TextGenerator {
+    private val model = Generation.getClient()
+    override val label = "On this phone (Gemini Nano)"
+
+    override suspend fun availability(): Availability =
+        when (model.checkStatus()) {
+            FeatureStatus.AVAILABLE -&gt; Availability.Ready
+            FeatureStatus.DOWNLOADABLE,
+            FeatureStatus.DOWNLOADING -&gt; Availability.NeedsDownload(null)
+            else -&gt; Availability.Unavailable("Gemini Nano is not supported here")
+        }
+
+    suspend fun downloadModel(onProgress: (Long) -&gt; Unit) {
+        model.download().collect { s -&gt;
+            if (s is DownloadStatus.DownloadProgress)
+                onProgress(s.totalBytesDownloaded)
+            if (s is DownloadStatus.DownloadFailed) throw s.e
+        }
+    }
+
+    override fun generate(messages: List&lt;ChatMessage&gt;): Flow&lt;String&gt; {
+        val prompt = messages.toPlainPrompt()     // see below
+        return model.generateContentStream(prompt)
+            .map { chunk -&gt; chunk.candidates[0].text }
+    }
+}</code></pre>
+<p>The point of the interface is the fallback. When <code>availability()</code> says Unavailable, the app's chooser moves on to a local LiteRT-LM model or a home server, and the screen does not change.</p>
+<p>The Prompt API takes one prompt, not a structured chat history, so <code>toPlainPrompt()</code> is yours to write: a short instruction line, then the last few turns as "User:" and "Assistant:" lines. Keep it well under the input limit below.</p>
+<h2 id="the-easiest-win-summarization">The easiest win: Summarization</h2>
+<p>If your feature is "summarize this", start with the Summarization feature API (1.0.0-beta1 at the time of writing). It needs no prompt engineering. The feature APIs return Guava ListenableFutures, so add the coroutines Guava adapter to await them:</p>
+<pre><code>dependencies {
+    implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.11.0")
+}</code></pre>
+<p>Create the client once with the input type, the output length (one, two or three bullets) and the language. Check its status with <code>checkFeatureStatus()</code>, and download with <code>downloadFeature()</code> when it reports DOWNLOADABLE. Close the client when the screen goes away; the documentation suggests <code>onCleared()</code> in your ViewModel.</p>
+<p>Input must be under 4000 tokens, roughly 3000 English words, for both Summarization and the Prompt API. For longer text, the summarization docs suggest summarizing the first 4000 tokens or turning on automatic truncation with <code>setLongInputAutoTruncationEnabled</code>.</p>
+<h2 id="things-that-surprise-people-once">Things that surprise people once</h2>
+<ul><li><strong>Fresh devices are not ready.</strong> Right after a phone is set up or AICore's data is cleared, AICore may still be initializing and fetching its configuration. The documentation advises retrying later. Treat these errors as "try again in a moment", not as "unsupported forever".</li><li><strong>There is a per-app quota.</strong> AICore enforces an inference quota per app. Do not fire a request on every keystroke. Trigger generation on a deliberate action.</li><li><strong>Long output is a bad fit.</strong> The docs advise against use cases that need more than 4K tokens of output.</li><li><strong>It is beta.</strong> Pin the version, read the release notes on each upgrade, and keep this code behind your interface.</li></ul>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Check the supported device list for the specific API you use.</li><li>Require API level 26+, and expect UNAVAILABLE on unlocked bootloaders.</li><li>Call the status check before every use, and handle all four states.</li><li>Give UNAVAILABLE a real fallback behind one interface.</li><li>Show download progress for DOWNLOADABLE.</li><li>Keep input under 4000 tokens and output use cases short.</li><li>Generate on a deliberate action, not per keystroke.</li><li>Pin the beta versions: genai-prompt 1.0.0-beta4, genai-summarization 1.0.0-beta1.</li></ul><p><a href="https://payhip.com/b/J9jlp">Go deeper: On-Device AI for Android</a></p>]]></content:encoded></item><item><title>Pocket Assistant: a local AI organizer for bills, notes and tasks</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/pocket-assistant-ai-organizer/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/pocket-assistant-ai-organizer/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Pocket Assistant scans documents, organizes notes, tracks tasks and runs an AI chat on your phone, with no cloud sync and no account.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.pocketassistant.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>productivity</category><category>notes</category><category>privacy</category><category>on-device-ai</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.pocketassistant.jpg" alt=""></p><p>Bills, receipts, voice memos, to-do lists and reminders tend to end up in five different apps, several of which keep a copy of your life on their servers. Pocket Assistant pulls those jobs into one organizer and keeps all of it on your phone. The AI that sorts and reads your documents runs on the device, and there is no cloud sync and no account.</p>
+<h2 id="what-it-does">What it does</h2>
+<h3 id="document-scanning">Document scanning</h3>
+<ul><li>Scan bills, receipts and documents.</li><li>The AI pulls out the key information.</li><li>Documents are organized by category and date.</li><li>Everything you scan is searchable.</li></ul>
+<h3 id="notes">Notes</h3>
+<ul><li>Voice-to-text notes.</li><li>AI-assisted organization.</li><li>Tags and categories.</li><li>A quick-capture widget.</li></ul>
+<h3 id="ai-chat">AI chat</h3>
+<ul><li>A chat assistant for help with tasks and questions.</li><li>Context-aware responses.</li><li>Processing happens on the device.</li></ul>
+<h3 id="tasks-and-reminders">Tasks and reminders</h3>
+<ul><li>Create and manage tasks.</li><li>Reminders based on context.</li><li>Daily and weekly planning.</li><li>Tasks connect with your notes.</li></ul>
+<h2 id="how-the-pieces-fit-together">How the pieces fit together</h2>
+<p>The useful part is that these are not four separate tools. A scanned bill becomes searchable information instead of a photo in your gallery. A voice note you dictate gets organized and tagged, and it can be linked with a task. The daily and weekly planning views sit on top of the tasks and reminders, so the things you captured during the week turn into a plan.</p>
+<p>The quick-capture widget and quick actions are there for the moment something comes up. If capturing an idea takes more than a couple of taps, it usually does not get captured at all, so a home-screen widget is worth setting up on day one.</p>
+<h3 id="a-simple-routine-to-start-with">A simple routine to start with</h3>
+<p>Based on what the app offers, a reasonable way to start:</p>
+<ol><li>Add the widget to your home screen for quick capture.</li><li>Scan the bills and receipts currently sitting on your desk.</li><li>Turn your current to-do list into tasks, and attach notes where they help.</li><li>Use the weekly planning view once a week to see what is coming up.</li></ol>
+<h2 id="privacy">Privacy</h2>
+<p>The listing is clear on this point:</p>
+<ul><li>All data is stored on your device.</li><li>No cloud sync and no accounts.</li><li>AI processing happens on the device.</li><li>Your data never leaves your phone.</li></ul>
+<p>For an app that holds your bills and receipts, that matters. Financial documents are exactly the kind of data you might not want uploaded to an organizer's servers. The trade-off of no cloud sync is that your data lives on the one device, so it is worth knowing that before you rely on it.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Category:</strong> Lifestyle, rated Everyone.</li><li><strong>Interface:</strong> simple design, dark mode support, a home-screen widget and quick actions.</li><li><strong>No sync:</strong> everything stays on the phone it is on; there is no cloud copy.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You have paper bills and receipts you want searchable without uploading them anywhere.</li><li>You capture ideas by voice and want them organized automatically.</li><li>You want tasks, reminders and notes in one place.</li><li>You prefer an organizer with no account and no cloud sync.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.pocketassistant">Get Pocket Assistant: AI Organizer on Google Play</a></p>]]></content:encoded></item><item><title>Snapshots on a schedule, replicas on another box: sanoid and syncoid pull replication for ZFS</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</guid>
 <pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>ZFS snapshots undo deletions and bad upgrades, but they die with the pool. A sanoid retention policy, syncoid pull replication run from the backup box, and a monthly checksum restore turn snapshots into something you can actually recover from.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>zfs</category><category>truenas</category><category>nas</category><category>snapshots</category><category>sanoid</category><category>syncoid</category><category>backups</category>
@@ -955,23 +1045,7 @@ android {
     versionName = "1.0.0"  // major.minor.patch, for humans
 }</code></pre>
 <h2 id="checklist-before-the-first-upload">Checklist before the first upload</h2>
-<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul><p><a href="https://payhip.com/b/Qdxgz">Go deeper: Ship Your First Android App</a></p>]]></content:encoded></item><item><title>Shape &amp; Shade: find your face shape on your phone, without uploading your selfie</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/shape-and-shade-face-shape-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/shape-and-shade-face-shape-app/</guid>
-<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Shape &amp; Shade estimates your face shape from your own measurements, on your phone, and gives you hairstyle, glasses, brow, beard and contour ideas for it. No upload, no account, no beauty scores. Coming soon to Google Play.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.shapeshade.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>face-shape</category><category>on-device-ai</category><category>privacy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.shapeshade.jpg" alt=""></p><p>Most face shape tools work the same way: you upload a selfie to someone's server and get a verdict back. Some want an account first, a few put the answer behind a paywall, and almost none tell you <em>why</em> they picked "oval". Shape &amp; Shade is a new Android app from Hartmann Studios that does the whole thing on your phone and shows its work.</p>
-<h2 id="how-a-scan-works">How a scan works</h2>
-<p>Tap <strong>Find my face shape</strong>, fit your face in the oval and take a photo, or pick one you already have (the system Photo Picker, so the app needs no storage permission). On-device AI, Google's MediaPipe Face Landmarker, finds 478 points on your face. That model ships inside the app, so the scan doesn't need a server.</p>
-<p>From those points the app measures four things: forehead width, cheekbone width, jaw width and face length. The face shape <em>decision</em> is plain math on those ratios, not a black box: the app compares your proportions with six reference shapes (oval, round, square, heart, diamond, oblong) and picks the closest one. If you're close to two, it says so, for example "between heart and oval".</p>
-<h2 id="what-you-get">What you get</h2>
-<ul><li><strong>Your shape, with the reason.</strong> The measurement lines are drawn on your photo, with a "Why this shape" note in plain language, such as "Your forehead is wider than your jaw" and "Your chin is narrow".</li><li><strong>Guides for your shape.</strong> Hairstyles, glasses frames, brows, beard and contour ideas. The top three in each category are free.</li><li><strong>History.</strong> Your scans stay on your phone, and one tap in Settings deletes all of them.</li></ul>
-<h2 id="pro">Pro</h2>
-<p>Pro adds a <strong>Color Season</strong> scan (hold a white sheet of paper for white balance, in daylight; you get one of 12 seasons, a palette, and colors to skip), <strong>live drape</strong> (colors tinted under your chin on camera, two side by side), <strong>glasses try-on</strong>, the full guides, unlimited history and no ads. Color season is for fun and style ideas, not a rule.</p>
-<h2 id="what-it-never-does">What it never does</h2>
-<p>It never rates how you look. There are no beauty scores, no attractiveness numbers, and no guessing at age, ethnicity or gender. Face shape is an estimate from your measurements.</p>
-<h2 id="privacy">Privacy</h2>
-<p>Your selfie stays on your phone. There's no account and no upload. The free version shows ads (Google's consent form is in Settings, under Privacy choices).</p>
-<p>Shape &amp; Shade is coming soon to Google Play, free with ads, in 22 languages. Until the listing is live, the screenshots and the promo video are on the app's site: <a href="https://chartmann1590.github.io/shapeshade-site/">chartmann1590.github.io/shapeshade-site</a>.</p><p><a href="https://chartmann1590.github.io/shapeshade-site/">Shape &amp; Shade: Face Shape: coming soon to Google Play</a></p>]]></content:encoded></item><item><title>A backup job that never runs never fails</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</guid>
+<ul><li><code>applicationId</code> is yours, not <code>com.example</code>, and follows the naming rules</li><li>Upload key created: RSA 2048 or more, valid 25 years or more</li><li>Keystore stored outside the repo and backed up in two places</li><li>Passwords in a password manager; <code>keystore.properties</code> and <code>*.jks</code> in <code>.gitignore</code></li><li><code>./gradlew bundleRelease</code> produces <code>app-release.aab</code></li><li>The release variant installed and tested on a real phone (<code>./gradlew installRelease</code>)</li><li><code>versionCode</code> increased since the last upload</li></ul><p><a href="https://payhip.com/b/Qdxgz">Go deeper: Ship Your First Android App</a></p>]]></content:encoded></item><item><title>A backup job that never runs never fails</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/</guid>
 <pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Failure alerts can&#x27;t warn you about a backup job that stopped running. A vzdump hook that pings a dead-man&#x27;s switch, plus a weekly backup-age report, turns that silence into a phone notification.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-20.jpg" type="image/jpeg" length="0"/>
 <category>proxmox</category><category>backups</category><category>vzdump</category><category>monitoring</category><category>alerts</category>
@@ -1048,7 +1122,23 @@ actions:
 <ul><li>Disable the backup job for a day and confirm the dead-man's switch fires.</li><li>Point rclone at a bucket name that does not exist and confirm you hear about it.</li></ul>
 <p>If nothing arrives, fix the alert before you trust anything else in this post.</p>
 <h2 id="checklist-monitoring">Checklist: monitoring</h2>
-<ul><li>Notification targets set up (phone push plus email), with a matcher for vzdump warnings and errors</li><li>Every backup job on the notification system, on Proxmox and on PBS</li><li>A dead-man's switch pinged by the vzdump hook, the rclone sync and the database dump timer</li><li>A weekly backup-age report that also lists guests with no backup at all</li><li>A Home Assistant automation that complains when its own backup is stale</li><li>Backup storage usage watched, with 80 percent as the act-now line</li><li>Every alert path deliberately triggered once</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Aria: a private voice assistant that runs on your Android phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</guid>
+<ul><li>Notification targets set up (phone push plus email), with a matcher for vzdump warnings and errors</li><li>Every backup job on the notification system, on Proxmox and on PBS</li><li>A dead-man's switch pinged by the vzdump hook, the rclone sync and the database dump timer</li><li>A weekly backup-age report that also lists guests with no backup at all</li><li>A Home Assistant automation that complains when its own backup is stale</li><li>Backup storage usage watched, with 80 percent as the act-now line</li><li>Every alert path deliberately triggered once</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Shape &amp; Shade: find your face shape on your phone, without uploading your selfie</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/shape-and-shade-face-shape-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/shape-and-shade-face-shape-app/</guid>
+<pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Shape &amp; Shade estimates your face shape from your own measurements, on your phone, and gives you hairstyle, glasses, brow, beard and contour ideas for it. No upload, no account, no beauty scores.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.shapeshade.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>face-shape</category><category>on-device-ai</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.shapeshade.jpg" alt=""></p><p>Most face shape tools work the same way: you upload a selfie to someone's server and get a verdict back. Some want an account first, a few put the answer behind a paywall, and almost none tell you <em>why</em> they picked "oval". Shape &amp; Shade is a new Android app from Hartmann Studios that does the whole thing on your phone and shows its work.</p>
+<h2 id="how-a-scan-works">How a scan works</h2>
+<p>Tap <strong>Find my face shape</strong>, fit your face in the oval and take a photo, or pick one you already have (the system Photo Picker, so the app needs no storage permission). On-device AI, Google's MediaPipe Face Landmarker, finds 478 points on your face. That model ships inside the app, so the scan doesn't need a server.</p>
+<p>From those points the app measures four things: forehead width, cheekbone width, jaw width and face length. The face shape <em>decision</em> is plain math on those ratios, not a black box: the app compares your proportions with six reference shapes (oval, round, square, heart, diamond, oblong) and picks the closest one. If you're close to two, it says so, for example "between heart and oval".</p>
+<h2 id="what-you-get">What you get</h2>
+<ul><li><strong>Your shape, with the reason.</strong> The measurement lines are drawn on your photo, with a "Why this shape" note in plain language, such as "Your forehead is wider than your jaw" and "Your chin is narrow".</li><li><strong>Guides for your shape.</strong> Hairstyles, glasses frames, brows, beard and contour ideas. The top three in each category are free.</li><li><strong>History.</strong> Your scans stay on your phone, and one tap in Settings deletes all of them.</li></ul>
+<h2 id="pro">Pro</h2>
+<p>Pro adds a <strong>Color Season</strong> scan (hold a white sheet of paper for white balance, in daylight; you get one of 12 seasons, a palette, and colors to skip), <strong>live drape</strong> (colors tinted under your chin on camera, two side by side), <strong>glasses try-on</strong>, the full guides, unlimited history and no ads. Color season is for fun and style ideas, not a rule.</p>
+<h2 id="what-it-never-does">What it never does</h2>
+<p>It never rates how you look. There are no beauty scores, no attractiveness numbers, and no guessing at age, ethnicity or gender. Face shape is an estimate from your measurements.</p>
+<h2 id="privacy">Privacy</h2>
+<p>Your selfie stays on your phone. There's no account and no upload. The free version shows ads (Google's consent form is in Settings, under Privacy choices).</p>
+<p>Shape &amp; Shade is free on Google Play: <a href="https://play.google.com/store/apps/details?id=com.charles.shapeshade">https://play.google.com/store/apps/details?id=com.charles.shapeshade</a>. It comes in 22 languages.</p><p><a href="https://play.google.com/store/apps/details?id=com.charles.shapeshade">Get Shape &amp; Shade: Face Shape on Google Play</a></p>]]></content:encoded></item><item><title>Aria: a private voice assistant that runs on your Android phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/aria-on-device-ai-assistant/</guid>
 <pubDate>Wed, 14 Oct 2026 12:30:00 -0400</pubDate><description>Aria handles speech recognition, the language model and voice output on your phone. No cloud LLM, no voice uploads, no account.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.aria.assistant.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>voice-assistant</category><category>on-device-ai</category><category>privacy</category><category>offline</category>
@@ -1315,79 +1405,5 @@ actions:
 <h2 id="good-to-know">Good to know</h2>
 <ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Category:</strong> Food and Drink, rated Everyone.</li><li><strong>You need Grocy:</strong> the app updates an existing Grocy inventory, so it assumes you already run Grocy or plan to.</li><li><strong>On-device AI:</strong> identification runs locally rather than through a cloud service.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You run Grocy and your stock levels are out of date more often than not.</li><li>You want expiration dates tracked without logging every item by hand.</li><li>You manage supplies for a household and want a shopping list built from what is actually there.</li><li>You prefer that photos of your kitchen stay on your phone.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charleshartmann.grocyfridge">Get Grocy Fridge Scanner on Google Play</a></p>]]></content:encoded></item><item><title>Never delete this stopped Proxmox VM</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/never-delete-a-proxmox-template-base/</guid>
-<pubDate>Sun, 11 Oct 2026 12:30:00 -0400</pubDate><description>A Proxmox template is always stopped, so it looks exactly like an abandoned VM. Here is how full and linked clones differ, how to find every guest that depends on a base, and how to retire a template safely.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>templates</category><category>linked clones</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-16.jpg" alt=""></p><p>Templates are one of Proxmox's best features. You build a base image once, and new guests come off it in seconds. They are also one of its quietest traps, because they create dependencies you cannot see in the guest list, and those dependencies bite on the day you tidy up.</p>
-<p>This post is about that day: what a template really is to the guests built from it, how to prove whether one is load-bearing, and how to retire one without breaking anything.</p>
-<h2 id="full-clones-vs-linked-clones">Full clones vs linked clones</h2>
-<p>When you clone a template, Proxmox offers two modes:</p>
-<ul><li><strong>Full clone:</strong> a complete, independent copy of the disk. Slower to create, uses more space, depends on nothing.</li><li><strong>Linked clone:</strong> a thin copy that stores only the differences from the template's disk. Instant, tiny, and <strong>permanently tied to the template's base disk</strong>.</li></ul>
-<p>That last part is the whole story. A linked clone is not a copy of the template. It is a layer of changes sitting on top of it. Take away the bottom layer and the top layer has nothing to stand on.</p>
-<p>You can see the relationship in the disk names. A template's disks are named like <code>base-9000-disk-0</code>, and a linked clone's config refers to that base, like this:</p>
-<pre><code>local-lvm:base-9000-disk-0/vm-105-disk-0</code></pre>
-<p>Read it left to right: VM 105's disk lives on top of template 9000's base disk.</p>
-<h2 id="the-trap-it-s-stopped-so-it-s-junk">The trap: "it's stopped, so it's junk"</h2>
-<p>Templates are always stopped. In a list of guests, a template looks exactly like an abandoned VM.</p>
-<p>There is a nastier version too. A plain stopped container that was converted to a template, then used as the source for linked clones, looks like any other forgotten container. Nothing about it shouts "other guests need me".</p>
-<p>Delete that base, and what happens depends on your storage:</p>
-<div class="table"><table><thead><tr><th>Storage</th><th>What happens when you delete the base</th></tr></thead><tbody><tr><td>ZFS and some others</td><td>Proxmox refuses, because the base still has dependents</td></tr><tr><td>File-based (qcow2 on a directory or NFS)</td><td>The clones' backing file can simply vanish, and every linked clone built from it stops booting</td></tr></tbody></table></div>
-<p>Either way, you find out at the worst possible moment. The rule of thumb from the book: <strong>never delete a template, or anything named <code>base-*</code>, until you have proven nothing references it.</strong></p>
-<h2 id="the-fix-part-1-find-every-dependent">The fix, part 1: find every dependent</h2>
-<p>Every guest config lives in <code>/etc/pve</code>, so one grep tells you who depends on a base. For template 9000:</p>
-<pre><code># Who uses template 9000's disks?
-grep -rl "base-9000-" /etc/pve/nodes/*/qemu-server/ /etc/pve/nodes/*/lxc/</code></pre>
-<p>If the grep returns anything other than the template's own config, the template is load-bearing. Leave it, label it, and move on.</p>
-<p>To see every template on the cluster in the first place:</p>
-<pre><code># All templates on the cluster
-grep -l "^template: 1" /etc/pve/nodes/*/qemu-server/*.conf \
-  /etc/pve/nodes/*/lxc/*.conf</code></pre>
-<h2 id="the-fix-part-2-label-the-load-bearing-guests">The fix, part 2: label the load-bearing guests</h2>
-<p>The cheapest fix in the whole chapter is a note and a tag. Write it in the guest's Notes field (the Summary tab), and add a <code>keep</code> tag:</p>
-<pre><code>qm set 9000 --tags "template,keep" \
-  --description "BASE TEMPLATE. Linked clones depend on this. Do not delete."
-pct set 9050 --tags "template,keep"</code></pre>
-<p>Tags show up as colored pills in the resource tree. A bright red <code>keep</code> tag stops a lot of 1 a.m. mistakes, and the note tells whoever is cleaning up why the guest is there.</p>
-<p>The same idea carries into any cleanup script. The book's backup-before-delete loop skips templates outright before it touches anything:</p>
-<pre><code>grep -q "^template: 1" /etc/pve/{lxc,qemu-server}/$id.conf 2&gt;/dev/null &amp;&amp; \
-  { echo "SKIP $id: template"; continue; }</code></pre>
-<h2 id="the-fix-part-3-untangle-before-you-retire">The fix, part 3: untangle before you retire</h2>
-<p>Sometimes you really do want a template gone: it is old, its OS is out of date, and you have built a better one. You can retire it, but only after its linked clones stop needing it. That means turning each linked clone into a full, independent guest first.</p>
-<p>The simplest way is a fresh full clone of each linked clone:</p>
-<pre><code># VM: full, independent copy of linked clone 105 as 305
-qm clone 105 305 --full 1 --name app-server
-# Container: same idea
-pct clone 205 405 --full 1 --hostname app-ct</code></pre>
-<p>Moving a disk to a different storage also writes a full copy:</p>
-<pre><code>qm disk move 105 scsi0 other-store --delete 1</code></pre>
-<p>For containers, <code>pct move-volume</code> does the same job.</p>
-<p>Then work through it in order:</p>
-<ol><li>Test the full clone.</li><li>Retire the linked one.</li><li>Rerun the dependents grep for that template.</li><li>When it comes back with nothing but the template's own config, the template is finally safe to remove.</li></ol>
-<p>Deleting it is still a cleanup like any other: back it up, verify the archive, then destroy with purge.</p>
-<h2 id="long-lived-guests-should-be-full-clones">Long-lived guests should be full clones</h2>
-<p>Linked clones are instant and tiny, which makes them tempting. But the book's checklist is clear: long-lived production guests should be <strong>full clones</strong>, so they depend on nothing and a future cleanup cannot pull the floor out from under them.</p>
-<p>And because templates stick around, keep them fresh: rebuild or update them on a schedule, with a patched OS and current cloud-init, so new guests do not start life months behind.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Every template is tagged <code>keep</code>, with a note saying what depends on it</li><li>You have grepped for <code>base-&lt;id&gt;-</code> before deleting anything that might be a base</li><li>Any cleanup script skips guests with <code>template: 1</code> in their config</li><li>Long-lived production guests are full clones, not linked clones</li><li>Before retiring a template: full-clone (or disk-move) each linked clone, test it, retire the linked one, rerun the grep</li><li>Templates are rebuilt or updated on a schedule (patched OS, current cloud-init)</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>TrailSage: an offline GPS audio tour guide for your road trips</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/trailsage-ai-road-trip-guide/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/trailsage-ai-road-trip-guide/</guid>
-<pubDate>Sun, 11 Oct 2026 12:30:00 -0400</pubDate><description>TrailSage turns a drive into a guided audio tour, with offline maps and AI commentary generated on your phone. No accounts, no cloud.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.trailsage.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>road-trip</category><category>offline</category><category>travel</category><category>on-device-ai</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.trailsage.jpg" alt=""></p><p>Long drives have a way of going quiet in the wrong places. The scenery gets interesting right where the cell signal disappears, and most navigation and tour apps stop being useful at exactly that point. TrailSage is built around the opposite assumption: that you will be somewhere without coverage, and the app should keep working anyway.</p>
-<p>It combines offline GPS navigation with an audio tour guide. The commentary is generated by an AI model that runs on the phone itself, so the stories about the places along your route do not depend on a connection or an account.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Offline maps and navigation.</strong> You download maps ahead of time, then get turn-by-turn directions and live location tracking without cell service.</li><li><strong>AI audio tours.</strong> An on-device model generates commentary about points of interest along your route, including historical facts and local stories.</li><li><strong>A choice of voices.</strong> The narration comes with multiple voice options.</li><li><strong>Hands-off playback.</strong> Tours can start automatically when you drive, can be paused and resumed, and the narration adjusts to your speed.</li><li><strong>Trip planning.</strong> You can save favorite routes, customize the stops on a tour, share routes with friends, and import GPX files.</li><li><strong>A driving-friendly interface.</strong> The layout is clean, with large buttons and a night mode, and it runs on both phones and tablets.</li></ul>
-<h2 id="how-a-trip-with-it-works">How a trip with it works</h2>
-<p>The workflow follows from the feature list. Before you leave, while you still have a connection, you download the maps for the area you are heading into. From there the app does not need the internet: navigation, location tracking and the tour commentary all run on the device.</p>
-<p>If you already have a route planned in another tool, the GPX import means you do not have to rebuild it. You can adjust which stops the tour covers, save the route for later, or share it with whoever you are travelling with.</p>
-<p>Once you start driving, the auto-start option means the tour can begin without you touching the phone, and the speed-adjusted narration is meant to keep the commentary in step with how fast you are moving. If you stop for fuel or food, you pause and pick it back up later.</p>
-<h3 id="why-on-device-ai-matters-here">Why on-device AI matters here</h3>
-<p>Generating the tour commentary on the phone is what lets the audio guide work in the same dead zones as the offline maps. A cloud-based guide would go silent the moment the signal dropped. With TrailSage, the model is already on the device, so the stories keep coming.</p>
-<h2 id="privacy">Privacy</h2>
-<p>The listing is direct about this. All of the AI processing happens on the device. There is no cloud component and no account to create. Your routes stay on your phone, and the app states that it does no tracking and no data uploads.</p>
-<p>For a travel app, that is a meaningful difference. Your route history is a fairly detailed record of where you go, and here it is not leaving the phone.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Category:</strong> Travel and Local, rated Everyone.</li><li><strong>Battery:</strong> the app is described as battery-efficient, which matters on a long day of navigation.</li><li><strong>Prepare before you go:</strong> offline maps have to be downloaded before you lose service, so do that at home or at your last stop with a connection.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You take road trips through areas where cell coverage is patchy or missing.</li><li>You want to learn something about the places you are driving past, without reading a screen.</li><li>You prefer an app that works without an account and keeps your routes on your phone.</li><li>You already plan routes elsewhere and want to bring them in as GPX files.</li><li>You want a night mode and large buttons for use in the car.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.trailsage">Get TrailSage: AI Road Trip Guide on Google Play</a></p>]]></content:encoded></item>
+<ul><li>You run Grocy and your stock levels are out of date more often than not.</li><li>You want expiration dates tracked without logging every item by hand.</li><li>You manage supplies for a household and want a shopping list built from what is actually there.</li><li>You prefer that photos of your kitchen stay on your phone.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charleshartmann.grocyfridge">Get Grocy Fridge Scanner on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
