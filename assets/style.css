@@ -151,3 +151,15 @@ h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0 0 .5em}h1{font-size:cla
 
 .merch-card .merch-img{width:120px;height:120px;border-radius:12px;object-fit:cover;flex:none}.merch-card .mini.store-btn{background:var(--ink);color:var(--bg)}
 .merch-band .app-strip img{width:56px;height:56px;border-radius:12px;object-fit:cover}
+
+/* newsletter push (Oct 18 2026): slim bar, nav button, compact top-of-post form, /newsletter/ page */
+.nl-bar{background:linear-gradient(90deg,rgba(25,198,192,.22),rgba(124,92,255,.18));border-bottom:1px solid rgba(25,198,192,.35);font-size:.88rem;text-align:center}
+.nl-bar .wrap{padding:7px 16px}.nl-bar span{color:var(--ink)}.nl-bar a{font-weight:700;color:var(--teal);white-space:nowrap}
+@media (max-width:560px){.nl-bar{font-size:.8rem}.nl-bar span{display:block}}
+.nav .nl-btn{color:var(--teal);font-weight:700}
+.nl-top{display:block;padding:14px 18px;margin:0 0 1.6em;box-shadow:none}
+.nl-top .nl-top-copy{margin:0 0 10px;font-size:.95rem}.nl-top .nl-top-copy b{color:var(--ink)}
+.nl-top .nl-form .btn{padding:10px 18px}.nl-top .nl-form input[type=email]{padding:10px 14px}
+.nl-page h2{margin-top:1.8em}.nl-page .nl{margin:8px 0 10px}
+.nl-list{padding-left:1.1em}.nl-list li{margin:.55em 0}.nl-recent li{margin:.35em 0}
+.nl-tip{margin:1em 0;padding:14px 18px;border-left:3px solid var(--teal);background:rgba(25,198,192,.08);border-radius:10px}.nl-tip p{margin:.2em 0}
