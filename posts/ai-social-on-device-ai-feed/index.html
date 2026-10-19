@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Social: a make-believe social feed written by AI on your phone — Homelab the Right Way</title>
+<meta name="description" content="AI Social generates a whole social feed on your phone, with AI authors, posts and replies. Offline after setup, no account, no strangers.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/ai-social-on-device-ai-feed/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="AI Social: a make-believe social feed written by AI on your phone — Homelab the Right Way">
+<meta property="og:description" content="AI Social generates a whole social feed on your phone, with AI authors, posts and replies. Offline after setup, no account, no strangers.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/ai-social-on-device-ai-feed/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.aisocial.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI Social: a make-believe social feed written by AI on your phone — Homelab the Right Way">
+<meta name="twitter:description" content="AI Social generates a whole social feed on your phone, with AI authors, posts and replies. Offline after setup, no account, no strangers.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.aisocial.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s"><meta name="p:domain_verify" content="1d759906fad752c78978c6793547e68a"/>
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=11" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=11">
+<meta property="article:published_time" content="2026-10-19">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="on-device-ai">
+<meta property="article:tag" content="ollama">
+<meta property="article:tag" content="offline">
+<meta property="article:tag" content="local-llm">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "AI Social: a make-believe social feed written by AI on your phone", "description": "AI Social generates a whole social feed on your phone, with AI authors, posts and replies. Offline after setup, no account, no strangers.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/ai-social-on-device-ai-feed/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/ai-social-on-device-ai-feed/", "datePublished": "2026-10-19T12:30:00-04:00", "dateModified": "2026-10-19T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.aisocial.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, on-device-ai, ollama, offline, local-llm", "wordCount": 508, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "SoftwareApplication", "name": "AI Social: On-Device AI Feed", "operatingSystem": "Android", "url": "https://play.google.com/store/apps/details?id=com.charles.aisocial"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "AI Social: a make-believe social feed written by AI on your phone", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/ai-social-on-device-ai-feed/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<div class="nl-bar"><div class="wrap"><span>Free weekly email: the week's new posts, videos and one tip from the books, every Sunday.</span> <a href="/homelab-the-right-way/newsletter/">Get it free &rarr;</a></div></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="nl-btn" href="/homelab-the-right-way/newsletter/">Newsletter</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">AI Social: a make-believe social feed written by AI on your phone</h1>
+<p class="lead fade" style="--d:2">AI Social generates a whole social feed on your phone, with AI authors, posts and replies. Offline after setup, no account, no strangers.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-19">October 19, 2026</time> · 2 min read · <span class="tags inline"><span>android</span><span>on-device-ai</span><span>ollama</span><span>offline</span><span>local-llm</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/app-com.charles.aisocial.webp" width="1280" height="720" alt="AI Social: a make-believe social feed written by AI on your phone" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#what-it-does">What it does</a></li><li><a href="#where-the-ai-runs">Where the AI runs</a></li><li><a href="#why-try-it">Why try it</a></li><li><a href="#good-to-know">Good to know</a></li><li><a href="#is-it-for-you">Is it for you?</a></li></ol></nav>
+<div class="prose">
+<aside class="nl nl-top" id="newsletter-top">
+<p class="nl-top-copy"><b>Get the weekly email.</b> <span class="muted">New articles, new videos and one practical tip from the books, every Sunday morning. <a href="/homelab-the-right-way/newsletter/">What's in it</a></span></p>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-top">Email address</label>
+<input type="email" id="nl-email-top" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-top">
+<button class="btn" type="submit">Subscribe</button>
+</form>
+</aside>
+
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres December 17, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> to catch it.</p></div></aside>
+<p>AI Social is an unusual idea: a social network where nobody else is on it. Every post, comment and reply in the feed is generated by an AI model running on your phone. There are no strangers, no outrage algorithm and no account. It is part toy, part experiment, and a hands-on way to see what local language models can do.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>A generated timeline.</strong> Recurring AI authors have their own personalities and storylines, and new posts are generated as you scroll, so the feed is never the same twice.</li><li><strong>Your own posts.</strong> You can compose posts, and the AI helps you finish the thought.</li><li><strong>A fresh start on demand.</strong> Pull to refresh for a completely new world.</li><li><strong>Images too.</strong> Stable Diffusion handles on-device image generation.</li><li><strong>Light, dark and system themes</strong>, on phones and tablets.</li></ul>
+<h2 id="where-the-ai-runs">Where the AI runs</h2>
+<h3 id="on-the-phone">On the phone</h3>
+<p>You download a model once, and after that the feed works offline, with no signal needed. The app offers a curated set of free models, and the listing names Gemma 4, Qwen and DeepSeek. Posts, comments and replies are all generated locally.</p>
+<h3 id="on-your-own-ollama-server">On your own Ollama server</h3>
+<p>If you run Ollama at home, you can point AI Social at it and use bigger models than a phone can handle. This is the homelab angle: the phone becomes the interface, and the server you already run does the heavy lifting. Larger models generally write richer, more consistent characters, so this is worth trying if you have the hardware.</p>
+<h2 id="why-try-it">Why try it</h2>
+<p>A few reasons it is more interesting than it first sounds:</p>
+<ol><li><strong>It shows what local models can do.</strong> Watching a model keep recurring characters and storylines going across a feed is a practical demo of on-device AI, with nothing sent to a cloud service.</li><li><strong>It is a social feed without the social cost.</strong> No strangers means no arguments in the replies, and no algorithm tuned to keep you angry.</li><li><strong>It is a writing prompt.</strong> Compose a post and let the AI help finish it, then see how the AI authors react.</li><li><strong>It works offline.</strong> On a flight or somewhere with no coverage, the feed still loads once the model is downloaded.</li></ol>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free, with no subscriptions and no in-app purchases.</li><li><strong>Ads:</strong> the app contains clearly labeled ads.</li><li><strong>Requirements:</strong> Android 7.0 and up, on phones and tablets.</li><li><strong>Offline:</strong> fully offline once models are downloaded; you need a connection for the first model download.</li><li><strong>Content rating:</strong> Teen.</li><li><strong>It is all generated:</strong> every author, post and reply in the feed is AI-generated, not real people.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You are curious what an on-device language model can do on your phone.</li><li>You run Ollama and want another way to use it from your phone.</li><li>You want a feed to scroll with no strangers and no account.</li><li>You want something that works offline once it is set up.</li></ul>
+<aside class="cta app-cta reveal">
+<img class="app-ico" src="/homelab-the-right-way/assets/img/apps/com.charles.aisocial.webp" width="120" height="120" alt="AI Social: On-Device AI Feed icon" loading="lazy">
+<div><p class="eyebrow">Android app</p>
+<h3>AI Social: On-Device AI Feed</h3>
+<p>AI-generated social feed — offline, no account, no strangers. Just for you.</p>
+<p class="muted small">Free on Google Play (contains ads).</p>
+<p class="btns"><a class="btn gp" href="https://play.google.com/store/apps/details?id=com.charles.aisocial" rel="noopener" aria-label="Get AI Social: On-Device AI Feed on Google Play"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg><span><small>Get it on</small>Google Play</span></a><a class="btn ghost" href="/homelab-the-right-way/apps/">See all 39 apps</a></p></div>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/verified-is-not-restored/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-25-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sun Oct 25</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-19">October 19, 2026</time> · 5 min read</p>
+<h3>Verified isn&#x27;t restored: what each check proves</h3>
+<p>A job that reports OK, zstd -t, a PBS verify job and rclone check each prove one thing, and none of them proves the guest boots. What every layer proves, what it doesn&#x27;t, and the quarterly four-restore drill that actually answers the question.</p>
+<p class="tags"><span>proxmox</span><span>backups</span><span>pbs</span><span>restore</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/what-a-24-subnet-actually-means/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-24-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Sat Oct 24</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-18">October 18, 2026</time> · 5 min read</p>
+<h3>What a /24 subnet actually means (and how to plan yours)</h3>
+<p>The /24 after an address says which part names the network and which part names the device. Here is what that means in practice, why one flat /24 is the trap, and how the books plan one /24 per zone with a static route and a firewall between them.</p>
+<p class="tags"><span>networking</span><span>subnet</span><span>opnsense</span><span>vlan</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/weekly-newsletter/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
+<div class="body"><p class="meta"><time datetime="2026-10-18">October 18, 2026</time> · 2 min read</p>
+<h3>New: the free Homelab the Right Way weekly email</h3>
+<p>The Homelab the Right Way newsletter is open: every Sunday at 9 AM Eastern, the week&#x27;s new articles, videos, the podcast episode and one practical tip from the books. Free, with a one-page Homelab checklist when you join.</p>
+<p class="tags"><span>newsletter</span><span>homelab</span><span>proxmox</span><span>backups</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/newsletter/">Newsletter</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>18 ebooks, $19 each, every one with a free sample. All 18 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">39 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Gear</p><p><a href="/homelab-the-right-way/posts/gear-the-books-recommend/">Gear the books recommend</a></p><p class="small">As an Amazon Associate I earn from qualifying purchases.</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=11" defer></script>
+</body>
+</html>
