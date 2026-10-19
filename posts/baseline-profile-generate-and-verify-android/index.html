@@ -60,6 +60,7 @@
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap">The trap</a></li><li><a href="#step-1-the-generator-module">Step 1: the generator module</a></li><li><a href="#step-2-write-the-journeys">Step 2: write the journeys</a></li><li><a href="#step-3-generate-and-commit">Step 3: generate and commit</a></li><li><a href="#step-4-prove-it-is-applied">Step 4: prove it is applied</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
 <div class="prose">
 
+
 <p>A Baseline Profile is the single change most likely to make an existing Compose app start faster and scroll more smoothly without touching its logic. It is a list of the classes and methods your app needs on its most important paths, shipped inside the app, so the runtime can compile them ahead of time on install instead of discovering them slowly on the user's phone. This post generates one with the Baseline Profile Gradle plugin and then proves, three ways, that it is applied.</p>
 <h2 id="the-trap">The trap</h2>
 <p>Your Kotlin compiles to DEX bytecode. The Android Runtime (ART) can interpret it, JIT-compile hot methods while the app runs, or run machine code compiled ahead of time (AOT). ART does not AOT-compile your whole app on install. It records which methods were used into a profile and compiles them later, when the device is idle and charging.</p>

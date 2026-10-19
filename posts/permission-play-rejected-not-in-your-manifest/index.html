@@ -59,6 +59,7 @@
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-you-are-reading-the-wrong-manifest">The trap: you are reading the wrong manifest</a></li><li><a href="#step-1-look-at-what-you-actually-ship">Step 1: look at what you actually ship</a></li><li><a href="#step-2-remove-what-a-library-added-and-you-don-t-need">Step 2: remove what a library added and you don&#x27;t need</a></li><li><a href="#step-3-pick-the-narrower-option-first">Step 3: pick the narrower option first</a></li><li><a href="#photos-and-videos-the-picker-needs-no-permission">Photos and videos: the picker needs no permission</a></li><li><a href="#a-case-note-from-a-real-app">A case note from a real app</a></li><li><a href="#checklist-before-you-send-an-update">Checklist before you send an update</a></li></ol></nav>
 <div class="prose">
 
+
 <p>Play Console flags a restricted permission on your update. You open <code>AndroidManifest.xml</code>, search for it, and find nothing. You never added it. It is still in the build.</p>
 <p>That is the most common way a permission problem catches people. This post walks through why it happens and how to fix it for good, using Chapter 4 (Sensitive Permissions) of <em>Pass Google Play Review</em>.</p>
 <h2 id="the-trap-you-are-reading-the-wrong-manifest">The trap: you are reading the wrong manifest</h2>

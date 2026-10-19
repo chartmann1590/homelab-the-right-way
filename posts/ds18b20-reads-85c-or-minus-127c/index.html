@@ -58,6 +58,7 @@
 <div class="wrap prose-wrap">
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-two-numbers-that-look-like-readings">The trap: two numbers that look like readings</a></li><li><a href="#the-fix-in-the-firmware">The fix in the firmware</a></li><li><a href="#the-fix-in-esphome">The fix in ESPHome</a></li><li><a href="#stuck-at-85-check-the-wiring-not-the-code">Stuck at 85: check the wiring, not the code</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
 <div class="prose">
+
 <aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres October 19, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://youtube.com/shorts/BRAU0B4IZN0" rel="noopener">Set a reminder on YouTube</a> to catch it.</p></div></aside>
 <p>The DS18B20 is the easy sensor in a water-quality monitor. It is a waterproof stainless probe, the probe and its cable can go fully underwater, and it is accurate to ±0.5 °C out of the box with no calibration maths. So when the tank card suddenly says the water is 85 °C, or -127 °C, it is tempting to blame the probe, the board or the tank heater.</p>
 <p>None of those is the cause. Both numbers are the sensor telling you it has no reading. This post covers what each one means, how the Smart Turtle Tank firmware keeps them off your graphs, and where to look when the probe will not stop saying 85.</p>

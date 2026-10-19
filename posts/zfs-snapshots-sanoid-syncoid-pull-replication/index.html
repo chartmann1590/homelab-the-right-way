@@ -61,6 +61,7 @@
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap">The trap</a></li><li><a href="#why-snapshots-are-cheap">Why snapshots are cheap</a></li><li><a href="#step-1-a-retention-policy-with-sanoid">Step 1: a retention policy with sanoid</a></li><li><a href="#step-2-how-incremental-replication-works">Step 2: how incremental replication works</a></li><li><a href="#step-3-pull-do-not-push">Step 3: pull, do not push</a></li><li><a href="#step-4-prove-it">Step 4: prove it</a></li><li><a href="#checklist">Checklist</a></li></ol></nav>
 <div class="prose">
 
+
 <p>A ZFS snapshot is a read-only picture of a dataset at one instant. It takes about a second to create and costs no space at first. Snapshots on a schedule, thinned automatically and copied to a second machine, are the single biggest upgrade most homelab storage can get. This post builds exactly that with two tools from the same project: sanoid takes and prunes snapshots, syncoid replicates them.</p>
 <h2 id="the-trap">The trap</h2>
 <p>Homelab storage usually fails in one of two opposite ways. The first lab has no snapshots at all, so an accidental <code>rm -rf</code> on a share is permanent. The second takes snapshots every fifteen minutes and never prunes them: ten thousand of them, a pool that is mysteriously full, and a <code>zfs list -t snapshot</code> that takes a minute to answer.</p>

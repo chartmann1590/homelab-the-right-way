@@ -59,6 +59,7 @@
 <nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</a></li><li><a href="#the-fix-three-edits">The fix: three edits</a></li><li><a href="#the-second-trap-kapt">The second trap: kapt</a></li><li><a href="#the-third-trap-icons-that-stop-resolving">The third trap: icons that stop resolving</a></li><li><a href="#checklist-for-an-agp-9-upgrade">Checklist for an AGP 9 upgrade</a></li></ol></nav>
 <div class="prose">
 
+
 <p>You open an older Android project, bump the Android Gradle plugin to 9, and sync. The build stops with one of two messages: "Cannot add extension with name 'kotlin'" or "The 'org.jetbrains.kotlin.android' plugin is no longer required". Nothing in your code changed. The build files did not keep up with AGP.</p>
 <p>This post covers what changed in AGP 9, the small set of edits that fix it, and two related surprises: kapt and the Material icons. Everything here comes from Chapter 2 (Thinking in Composables) and Chapter 8 (Saving Data: Room and DataStore) of <em>Compose Without the Confusion</em>.</p>
 <h2 id="the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</h2>
