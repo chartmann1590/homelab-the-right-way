@@ -113,7 +113,34 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <h2 id="what-it-does-not-do">What it does not do</h2>
 <p>One drive is not a backup strategy on its own. If it is your only copy, it is a single point of failure like any other disk. Keep at least one more copy somewhere else, and test a restore now and then. The book <a href="https://payhip.com/b/1iHXQ">Never Lose Your Data</a> walks through the whole 3-2-1 setup.</p>
 <p>More picks like this one are in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
-<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B08HN37XC1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SanDisk 2TB Extreme Portable SSD</a></p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Podcast, episode 1: The green check lies</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</guid>
+<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B08HN37XC1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">SanDisk 2TB Extreme Portable SSD</a></p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Podcast merch: seven designs straight out of episode 1 (the green check lies, and a turtle)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-merch/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-merch/</guid>
+<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Seven new items in the Homelab the Right Way merch store, all built from episode 1 of the podcast: The Green Check Lies tee and dad hat, the You Don&#x27;t Have a Backup, You Have a Feeling tee, the Go Restore Something hoodie, the Everything Is the Backups Episode mug, the show badge sticker and the ...And a Turtle sticker.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/podcast-hero.jpg" type="image/jpeg" length="0"/>
+<category>merch</category><category>podcast</category><category>homelab</category><category>selfhosted</category><category>store</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/podcast-hero.jpg" alt=""></p><p>The podcast launched last night (<a href="https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/">episode 1: The green check lies</a>), and a few lines from it deserved to be printed. Seven new designs are in the <a href="https://homelab-the-right-way.printful.me/">Homelab the Right Way merch store</a> today: two tees, a hoodie, an embroidered dad hat, a mug and two stickers. Same rules as every drop: original typography, printed or embroidered to order by Printful, nothing sitting in a warehouse. The hosts, Maya, Sam and Theo, are fictional AI hosts, so none of them appear on anything; the show's rack-and-mics logo does.</p>
+<h2 id="the-green-check-lies-tee">The Green Check Lies (tee)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/the-green-check-lies-tee">The Green Check Lies Tee</a>: a teal check box, the three words that open the first episode, and the pill underneath, "Backed up is not the same as restored." The green check on a Proxmox backup job proves the job ran. It does not prove the archive restores, that new VMs were included, or that the retention policy kept anything. The episode spends twelve minutes on exactly that; <em>Never Lose Your Data</em> spends a chapter.</p>
+<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
+<h2 id="you-don-t-have-a-backup-you-have-a-feeling-tee">You Don't Have a Backup, You Have a Feeling (tee)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/you-dont-have-a-backup-you-have-a-feeling-tee">You Don't Have a Backup, You Have a Feeling Tee</a>: Sam's line from the closing segment, under a studio mic. If you have never restored from it, you don't have a backup, you have a feeling. The four restore drills in the book are the cure.</p>
+<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
+<h2 id="go-restore-something-hoodie">Go Restore Something (hoodie)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/go-restore-something-hoodie">Go Restore Something Hoodie</a>: how every episode ends. The show's rack with its two mic antennas on top, "GO RESTORE SOMETHING." in big type, and "before you add one more service" underneath, which is the first of the three things the hosts would tell a beginner.</p>
+<p>Gildan 18500 heavy blend hoodie in Black, Navy, Dark Heather and Forest Green. $47.50 to $64 depending on size.</p>
+<h2 id="the-green-check-lies-dad-hat">The Green Check Lies (dad hat)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/the-green-check-lies-dad-hat">The Green Check Lies Dad Hat</a>: the same check box and catchphrase, embroidered in two thread colours on a classic Yupoong 6245CM dad cap.</p>
+<p>Black, Navy, Dark Grey and Spruce. $28.</p>
+<h2 id="everything-is-the-backups-episode-mug">Everything Is the Backups Episode (mug)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/everything-is-the-backups-episode-mug">Everything Is the Backups Episode Mug</a>: Maya's verdict halfway through the Home Assistant segment, when the update routine turned out to be "backup plus a snapshot first" again. Headphones on top, "restore something today" on the amber pill, printed on both sides. Dishwasher and microwave safe.</p>
+<p>Glossy ceramic mug, 11, 15 and 20 oz. $17 (11 oz) to $27.50 (20 oz).</p>
+<h2 id="homelab-the-right-way-podcast-sticker">Homelab the Right Way Podcast (sticker)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/homelab-the-right-way-podcast-sticker">Homelab the Right Way Podcast Sticker</a>: the show badge. The rack-and-mics logo, "The Podcast", the episode 1 title on the pill, and "three AI hosts, real answers" around the bottom. Kiss-cut vinyl for the laptop lid or the rack door.</p>
+<p>3 x 3, 4 x 4 and 5.5 x 5.5 in. $4.50 to $5.50 depending on size.</p>
+<h2 id="and-a-turtle-sticker">...And a Turtle (sticker)</h2>
+<p><a href="https://homelab-the-right-way.printful.me/product/and-a-turtle-sticker">...And a Turtle Sticker</a>: episode 1 is titled "backups, networking, self-hosting and a turtle", and the turtle segment (the wire that can fry an ESP32, the DS18B20 reading that is not a temperature) was the hosts' favourite. So: a teal turtle, the episode title, and the podcast tag. Kiss-cut vinyl.</p>
+<p>3 x 3, 4 x 4 and 5.5 x 5.5 in. $4.50 to $5.50 depending on size.</p>
+<h2 id="where-everything-is">Where everything is</h2>
+<p>All seven are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 45 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout. Episode 1 is on <a href="https://redcircle.com/shows/homelab-the-right-way/episodes/55cb28a3-0a54-4fc3-952d-70a2fedea93f">RedCircle</a>, and the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/">show notes</a> carry the chapters and every article mentioned.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Podcast, episode 1: The green check lies</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</guid>
 <pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>The first episode of the Homelab the Right Way Podcast, 46 minutes with three AI hosts on Proxmox backups that actually restore, why a two-node cluster freezes, the six self-hosting traps, Home Assistant motion lights and the turtle tank wire that fries an ESP32. Player, chapters, every article mentioned and the gear.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>podcast</category><category>proxmox</category><category>backups</category><category>networking</category><category>home assistant</category><category>esp32</category>
@@ -1106,113 +1133,5 @@ docker compose pull &amp;&amp; docker compose up -d</code></pre>
 <p>Pro: every persona, all languages, every style, all voices, longer gallery clips, write your own lines, unlimited exports without the tag, and no ads. It is sold as a subscription with a free trial for new subscribers, or as a one-time lifetime unlock; prices are shown in Google Play.</p>
 <h2 id="privacy">Privacy</h2>
 <p>Everything runs on your phone with on-device AI. The microphone and camera are used only while the camera screen is open, audio and video are processed on the device and never uploaded, and there is no account. Delete a clip from the library, or everything from Settings &gt; Delete all data. The privacy policy is at <a href="https://chartmann1590.github.io/pawdub-site/privacy/">chartmann1590.github.io/pawdub-site/privacy</a>.</p>
-<p>Pawdub has been submitted to Google Play and is in review. Until the listing is live, the <a href="https://chartmann1590.github.io/pawdub-site/">Pawdub site</a> has the screenshots and the promo video; this post gets the Play link the day it goes live.</p><p><a href="https://chartmann1590.github.io/pawdub-site/">Pawdub: Funny Pet Translator: coming soon to Google Play</a></p>]]></content:encoded></item><item><title>Upgrading to AGP 9: the Kotlin plugin you can delete</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/agp-9-kotlin-plugin-you-can-delete/</guid>
-<pubDate>Thu, 15 Oct 2026 12:30:00 -0400</pubDate><description>Since Android Gradle plugin 9.0, Kotlin is built into AGP. Here is what to remove, what to move, why kapt has to go, and the one icons dependency Material 3 stopped adding for you.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>kotlin</category><category>jetpack compose</category><category>gradle</category><category>agp</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>You open an older Android project, bump the Android Gradle plugin to 9, and sync. The build stops with one of two messages: "Cannot add extension with name 'kotlin'" or "The 'org.jetbrains.kotlin.android' plugin is no longer required". Nothing in your code changed. The build files did not keep up with AGP.</p>
-<p>This post covers what changed in AGP 9, the small set of edits that fix it, and two related surprises: kapt and the Material icons. Everything here comes from Chapter 2 (Thinking in Composables) and Chapter 8 (Saving Data: Room and DataStore) of <em>Compose Without the Confusion</em>.</p>
-<h2 id="the-trap-applying-kotlin-twice">The trap: applying Kotlin twice</h2>
-<p>Since Android Gradle plugin 9.0, Kotlin support is built into AGP itself. You no longer apply the separate <code>org.jetbrains.kotlin.android</code> plugin. Older projects apply it anyway, because that was the rule for years. With AGP 9 the plugin and AGP both try to set up Kotlin, and the sync fails with the messages above.</p>
-<p>There is a second leftover in most older modules: an <code>android { kotlinOptions { } }</code> block. That block belonged to the old plugin, so it has to move too.</p>
-<h2 id="the-fix-three-edits">The fix: three edits</h2>
-<p>Google documents the migration for built-in Kotlin. In short:</p>
-<ol><li>Remove the kotlin-android plugin from your build files.</li><li>Remove it from your version catalog as well, so nothing re-adds it.</li><li>Move any <code>android { kotlinOptions { } }</code> block to <code>kotlin { compilerOptions { } }</code>.</li></ol>
-<p>One plugin stays. You still apply the <strong>Compose compiler plugin</strong>. It ships with Kotlin and uses the same version number, so it points at the <code>kotlin</code> version in your catalog.</p>
-<h3 id="what-a-working-agp-9-setup-looks-like">What a working AGP 9 setup looks like</h3>
-<p>Here is the version catalog from the book's sample project, using the versions current at the time of writing (October 2026):</p>
-<pre><code># gradle/libs.versions.toml (excerpt)
-[versions]
-agp = "9.4.0"
-kotlin = "2.4.21"
-ksp = "2.3.12"
-composeBom = "2026.09.00"
-activity = "1.13.0"
-lifecycle = "2.11.0"
-
-[libraries]
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-compose-ui = { module = "androidx.compose.ui:ui" }
-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-compose-material3 = { module = "androidx.compose.material3:material3" }
-compose-icons-core = { module = "androidx.compose.material:material-icons-core" }
-
-[libraries.activity-compose]
-module = "androidx.activity:activity-compose"
-version.ref = "activity"
-
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }</code></pre>
-<p>Notice what is missing from <code>[plugins]</code>: there is no <code>kotlin-android</code> entry. The only Kotlin-related plugin is <code>kotlin-compose</code>, and its version is the Kotlin version.</p>
-<p>The module build file is just as short:</p>
-<pre><code>// app/build.gradle.kts (excerpt)
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-}
-
-android {
-    namespace = "com.example.pantry"
-    compileSdk = 36   // use the newest stable API level your AGP supports
-    defaultConfig {
-        applicationId = "com.example.pantry"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-    }
-    buildFeatures { compose = true }
-}</code></pre>
-<p>Two plugins. No <code>kotlinOptions</code> inside <code>android { }</code>. If your module still has compiler flags, they go in a top-level <code>kotlin { compilerOptions { } }</code> block instead.</p>
-<h2 id="the-second-trap-kapt">The second trap: kapt</h2>
-<p>If your project uses Room, Hilt or another annotation processor through kapt, the plugin cleanup is not the end. With AGP 9's built-in Kotlin, the old <code>kotlin-kapt</code> plugin is not compatible. Google's migration guide recommends moving to <strong>KSP</strong>, and offers <code>com.android.legacy-kapt</code> only as a stopgap. Room, Hilt and most annotation processors support KSP today.</p>
-<p>Moving Room to KSP is a few lines. The catalog gets the KSP and Room plugins (the <code>ksp</code> version is already in <code>[versions]</code> above):</p>
-<pre><code># gradle/libs.versions.toml (additions)
-[versions]
-room = "2.8.5"
-
-[libraries]
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-
-[plugins]
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-room = { id = "androidx.room", version.ref = "room" }</code></pre>
-<p>And the module applies them, swapping <code>kapt(...)</code> for <code>ksp(...)</code> on the compiler:</p>
-<pre><code>// app/build.gradle.kts
-plugins {
-    // ...
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.room)
-}
-
-room {
-    schemaDirectory("$projectDir/schemas")
-}
-
-dependencies {
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-}</code></pre>
-<p>The Room Gradle plugin's <code>schemaDirectory</code> writes a JSON description of every database version into your project. Commit those files. Room uses them for automatic migrations and for migration tests.</p>
-<p>Hilt works the same way. It is built on Dagger and processed with KSP. At the time of writing the Dagger and Hilt release is 2.60.1.</p>
-<h2 id="the-third-trap-icons-that-stop-resolving">The third trap: icons that stop resolving</h2>
-<p>This one is not AGP, but it tends to arrive in the same upgrade. Since Material 3 1.4.0, the library no longer pulls in <code>material-icons-core</code> for you. Its release notes say so. After the upgrade, <code>Icons.Default.Add</code> suddenly does not resolve, and the error looks unrelated to anything you touched.</p>
-<p>The fix is to add the artifact yourself. It is already in the catalog above as <code>compose-icons-core</code>, and the BOM still manages its version:</p>
-<pre><code>dependencies {
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.icons.core)   // Icons.Default.*
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.activity.compose)
-    debugImplementation(libs.compose.ui.tooling)
-}</code></pre>
-<p>The BOM line is the one that saves you the most pain. You declare one BOM version and leave the version off every individual Compose library. The BOM picks a set of versions that were tested together.</p>
-<h2 id="checklist-for-an-agp-9-upgrade">Checklist for an AGP 9 upgrade</h2>
-<ul><li>Remove <code>org.jetbrains.kotlin.android</code> from every module and from the version catalog.</li><li>Move <code>android { kotlinOptions { } }</code> to <code>kotlin { compilerOptions { } }</code>.</li><li>Keep the Compose compiler plugin (<code>org.jetbrains.kotlin.plugin.compose</code>) at your Kotlin version.</li><li>Replace kapt with KSP. Use <code>com.android.legacy-kapt</code> only as a stopgap.</li><li>For Room, add the Room Gradle plugin, set <code>schemaDirectory</code>, and commit the schema files.</li><li>If <code>Icons.Default</code> stops resolving, add <code>material-icons-core</code> and let the BOM version it.</li><li>Leave versions off individual Compose libraries and let one BOM version pick them.</li></ul><p><a href="https://payhip.com/b/fNO53">Go deeper: Compose Without the Confusion</a></p>]]></content:encoded></item>
+<p>Pawdub has been submitted to Google Play and is in review. Until the listing is live, the <a href="https://chartmann1590.github.io/pawdub-site/">Pawdub site</a> has the screenshots and the promo video; this post gets the Play link the day it goes live.</p><p><a href="https://chartmann1590.github.io/pawdub-site/">Pawdub: Funny Pet Translator: coming soon to Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
