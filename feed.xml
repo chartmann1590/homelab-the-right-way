@@ -3,7 +3,42 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 20 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Free 3D-printed Looki camera mount: snap-in cradle + hoodie collar clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</guid>
+<item><title>Guest Wi-Fi that can&#x27;t reach your servers: 5 OPNsense rules, in order</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</guid>
+<pubDate>Tue, 20 Oct 2026 12:30:00 -0400</pubDate><description>A guest network that only gets the internet takes one alias and five firewall rules on the GUEST interface, in a specific order. DNS and DHCP to the firewall, block every private range, block the firewall itself, then allow the internet. Here is the full table and how to test it from a phone.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-26.jpg" type="image/jpeg" length="0"/>
+<category>opnsense</category><category>firewall</category><category>guest wifi</category><category>vlan</category><category>homelab</category><category>networking</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-26.jpg" alt=""></p><p>Your guests can see your server. If visiting phones, a friend's laptop and the smart plug you don't really trust all land on the same network as your NAS and your Proxmox host, every one of them can reach those web pages. A separate Wi-Fi name doesn't change that on its own. The firewall rules behind it do.</p>
+<p>The good news: on OPNsense, a guest network that gets the internet and nothing else is one alias and five rules. The order of those rules is the whole job.</p>
+<h2 id="the-trap-a-guest-network-that-is-only-a-name">The trap: a guest network that is only a name</h2>
+<p>Giving guests their own interface or VLAN is step one, and it's easy to stop there. Without rules that block the private ranges, the guest network looks separate and isn't: the separation comes from the rules, not from the interface.</p>
+<p>There's a second, quieter leak: the firewall itself. Even when guests can't reach the NAS, they can often still load the firewall's login page or try SSH on it. Nobody on guest Wi-Fi needs either.</p>
+<h2 id="before-you-touch-a-rule">Before you touch a rule</h2>
+<p>Snapshot the firewall VM first. On a Proxmox host:</p>
+<pre><code>qm snapshot 100 pre-hardening</code></pre>
+<p>It takes seconds and turns a lockout into a two-minute rollback. Also keep a way into the console that doesn't depend on the firewall: the Proxmox web UI's noVNC console still works when OPNsense's rules are broken.</p>
+<h2 id="the-fix-part-1-one-alias-for-every-private-range">The fix, part 1: one alias for every private range</h2>
+<p>Go to <strong>Firewall → Aliases</strong> and create:</p>
+<ul><li><strong>Name:</strong> <code>RFC1918</code></li><li><strong>Type:</strong> Network(s)</li><li><strong>Content:</strong> <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li></ul>
+<p>Those three ranges are the private address space your home networks live in: the main LAN, a servers network, and the firewall's own addresses on them. One alias means one rule can block them all.</p>
+<h2 id="the-fix-part-2-five-rules-on-the-guest-interface">The fix, part 2: five rules on the GUEST interface</h2>
+<p>Give guests (and any IoT gear you don't trust) their own interface or VLAN. Then, on the <strong>GUEST</strong> interface, add these rules in exactly this order:</p>
+<div class="table"><table><thead><tr><th>#</th><th>Action</th><th>Source</th><th>Destination</th><th>Port</th><th>Purpose</th></tr></thead><tbody><tr><td>1</td><td>Pass</td><td>GUEST net</td><td>GUEST address</td><td>53 (TCP/UDP)</td><td>DNS to the firewall</td></tr><tr><td>2</td><td>Pass</td><td>GUEST net</td><td>GUEST address</td><td>67-68 (UDP)</td><td>DHCP</td></tr><tr><td>3</td><td>Block</td><td>GUEST net</td><td>RFC1918</td><td>any</td><td>No private networks, including the firewall's other IPs</td></tr><tr><td>4</td><td>Block</td><td>GUEST net</td><td>This Firewall</td><td>any</td><td>No web UI or SSH from guests</td></tr><tr><td>5</td><td>Pass</td><td>GUEST net</td><td>any</td><td>any</td><td>Internet</td></tr></tbody></table></div>
+<p>Read it top to bottom and it tells the story:</p>
+<ol><li><strong>DNS to the firewall.</strong> Guests still need names to resolve, so they ask the firewall's address on their own network, and nothing else.</li><li><strong>DHCP.</strong> Guests still need an address. Ports 67-68 UDP to the GUEST address.</li><li><strong>Block every private range.</strong> This is the rule that does the heavy lifting. Guests can't reach the NAS, the Proxmox host, the house LAN, or any other private network, and that includes the firewall's IPs on those other networks.</li><li><strong>Block the firewall itself.</strong> No web UI and no SSH from guest devices.</li><li><strong>Allow the internet.</strong> With the private ranges and the firewall already blocked, guests get the internet and nothing else.</li></ol>
+<p>The two pass rules sit above the blocks on purpose: DNS and DHCP are the only two things a guest is allowed to ask the firewall for. The internet rule comes last, after everything private has already been ruled out.</p>
+<h2 id="make-guest-dns-private-too">Make guest DNS private too</h2>
+<p>Rule 1 sends guest DNS to the firewall, so it gets whatever the firewall does. Worth making that good while you're in there: in <strong>Services → Unbound DNS</strong>, enable Unbound with DNSSEC, and add at least two DNS over TLS upstreams, for example Quad9 (<code>9.9.9.9</code>, port 853, hostname <code>dns.quad9.net</code>) and Cloudflare (<code>1.1.1.1</code>, port 853, hostname <code>cloudflare-dns.com</code>). Verify from a client:</p>
+<pre><code>dig +dnssec example.com @&lt;firewall-ip&gt;    # look for the "ad" flag
+dig dnssec-failed.org @&lt;firewall-ip&gt;      # deliberately broken: should SERVFAIL</code></pre>
+<h2 id="test-it-like-a-guest">Test it like a guest</h2>
+<p>A rule you didn't test is a rule you hope works. Join the guest Wi-Fi with a phone and try two things:</p>
+<ul><li><strong>Your NAS's web page.</strong> It shouldn't load.</li><li><strong>The firewall's login page.</strong> It shouldn't load either.</li></ul>
+<p>Then load any normal website. It should work. If a private page does load, check the alias content and the rule order against the table above.</p>
+<p>Keep that test in your update routine. After every OPNsense update, the checks are: WAN up, DNS resolves, VPN tunnel connected, guest network isolated.</p>
+<h2 id="if-you-add-a-servers-network-later">If you add a servers network later</h2>
+<p>The same thinking runs the other way. When your servers move to their own network behind OPNsense, block SERVERS → GUEST on the servers interface, and allow only the specific house-LAN access you need, such as your desktop to the servers' web UIs.</p>
+<h2 id="checklist-guest-network">Checklist: guest network</h2>
+<ul><li>☐ Firewall VM snapshot taken (<code>qm snapshot 100 pre-hardening</code>), noVNC console reachable</li><li>☐ Guests (and untrusted IoT) on their own interface or VLAN</li><li>☐ <code>RFC1918</code> alias: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li><li>☐ GUEST rules in order: DNS, DHCP, block RFC1918, block This Firewall, pass any</li><li>☐ Unbound with DNSSEC and DNS over TLS upstreams</li><li>☐ Tested from a phone on guest Wi-Fi: NAS page and firewall login page both fail, the internet works</li><li>☐ "Guest network isolated" is on your after-update checklist</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Free 3D-printed Looki camera mount: snap-in cradle + hoodie collar clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</guid>
 <pubDate>Tue, 20 Oct 2026 12:30:00 -0400</pubDate><description>A free, two-part 3D-printed mount for the Looki L1 wearable camera: a snap-in cradle and a collar clip. STL and OpenSCAD downloads, the exact ABS print settings that worked, and the print timelapse.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-hero.jpg" type="image/jpeg" length="0"/>
 <category>3d printing</category><category>looki</category><category>openscad</category><category>abs</category><category>maker</category>
@@ -1072,76 +1107,5 @@ df -h /mnt/pve/nas-backup       # should show the NAS size, not the root disk</c
 <p>Kiss-cut vinyl in 3 x 3, 4 x 4 and 5.5 x 5.5 inches; Printful adds the white kiss-cut border. $4.50 to $5.50.</p>
 <h2 id="where-everything-lives">Where everything lives</h2>
 <p>The store now carries 29 designs across tees, hoodies, hats, mugs, stickers, desk mats, a poster and a tote. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
-<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Ten quick edits should not queue ten syncs: unique work in WorkManager, done right</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/data-that-survives-workmanager-unique-work-sync/</guid>
-<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>Enqueue a sync every time a note is saved and a burst of edits queues a burst of uploads. WorkManager&#x27;s unique work, the right ExistingWorkPolicy, and retry classification that returns retry() only for transient errors keep an offline-first app from syncing against itself.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>workmanager</category><category>offline first</category><category>kotlin</category><category>room</category><category>sync</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The user saves a note on the subway and puts the phone in their pocket. Android may kill your process a minute later. The note still has to reach the server when the train comes up for air, maybe in an hour, maybe tomorrow. That is persistent work, and on Android persistent work means WorkManager. Google's offline-first guide says as much: draining an offline queue is persistent work that is often delegated to WorkManager.</p>
-<p>WorkManager 2.12.0 is the stable release at the time of writing (October 2026). It stores every request in its own database, so scheduled work survives process death and reboots. The scheduling part is easy. The part that goes wrong is how many syncs you schedule, and what the worker says when one fails.</p>
-<h2 id="the-trap-one-sync-per-save">The trap: one sync per save</h2>
-<p>The obvious design is to enqueue a <code>SyncWorker</code> from the repository every time a row is written. It works in the emulator. Then a user edits a note ten times in a minute, and ten syncs are queued. Each one pushes the same dirty rows, each one pulls the same pages, and two of them can run at the same time against the same database. Add a retry on a flaky connection and the queue grows faster than it drains.</p>
-<p>The fix is three decisions, all of them one line each: make the push unique work, pick the right policy for duplicates, and return <code>Result.retry()</code> only for errors that can actually clear up on their own.</p>
-<h2 id="fix-1-unique-work-with-the-right-policy">Fix 1: unique work with the right policy</h2>
-<p><code>enqueueUniqueWork</code> (one-time) and <code>enqueueUniquePeriodicWork</code> (periodic) take a name and a policy for what to do when unfinished work with that name already exists. For one-time work, <code>ExistingWorkPolicy</code> has four options:</p>
-<ul><li><strong>REPLACE</strong> cancels the existing work and enqueues the new request.</li><li><strong>KEEP</strong> ignores the new request and keeps the existing one.</li><li><strong>APPEND</strong> adds the new work to the end of the existing chain.</li><li><strong>APPEND_OR_REPLACE</strong> appends unless the existing chain has failed or been cancelled, in which case it starts fresh.</li></ul>
-<p>For a push, KEEP is the right one. If a sync is already queued, it will pick up every dirty row when it runs, including the one just saved, so the new request adds nothing.</p>
-<pre><code>object SyncScheduler {
-    private const val PUSH = "notes-push"
-    private const val PERIODIC = "notes-periodic"
-
-    fun requestPush(context: Context, wifiOnly: Boolean) {
-        val request = OneTimeWorkRequestBuilder&lt;SyncWorker&gt;()
-            .setConstraints(syncConstraints(wifiOnly))
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
-            .build()
-        WorkManager.getInstance(context)
-            .enqueueUniqueWork(PUSH, ExistingWorkPolicy.KEEP, request)
-    }
-
-    fun schedulePeriodic(context: Context, wifiOnly: Boolean) {
-        val request = PeriodicWorkRequestBuilder&lt;SyncWorker&gt;(6, TimeUnit.HOURS)
-            .setConstraints(syncConstraints(wifiOnly))
-            .build()
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(PERIODIC, ExistingPeriodicWorkPolicy.KEEP, request)
-    }
-}</code></pre>
-<p>Call <code>schedulePeriodic</code> from <code>Application.onCreate()</code>; with KEEP it is harmless to call on every launch. Periodic work has a floor: the minimum repeat interval is 15 minutes, the same as JobScheduler. A flex interval lets it run within a window at the end of each period rather than at an exact moment.</p>
-<h2 id="fix-2-constraints-that-match-the-user-s-settings">Fix 2: constraints that match the user's settings</h2>
-<p>Constraints make WorkManager wait for the right conditions. For sync, a connected network is usually enough, plus the user's Wi-Fi-only setting:</p>
-<pre><code>fun syncConstraints(wifiOnly: Boolean) = Constraints.Builder()
-    .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
-    .setRequiresBatteryNotLow(true)
-    .build()</code></pre>
-<p>One consequence is easy to miss: if a constraint stops being met while the worker runs, WorkManager stops the worker and retries it later. Your <code>doWork</code> must be safe to stop at any suspension point, which is one more reason every sync step should be idempotent.</p>
-<h2 id="fix-3-retry-only-what-can-succeed-later">Fix 3: retry only what can succeed later</h2>
-<p>When a worker returns <code>Result.retry()</code>, WorkManager waits for the backoff delay and runs it again. <code>Result.failure()</code> stops it, and fails everything chained after it. Deciding which errors are transient (timeouts, HTTP 5xx, 429) and which are permanent (401 after a token refresh, 400 for a malformed payload) is the most important line of sync code you will write:</p>
-<pre><code>class SyncWorker(
-    context: Context,
-    params: WorkerParameters,
-    private val sync: SyncEngine,
-) : CoroutineWorker(context, params) {
-    override suspend fun doWork(): Result = when (sync.syncOnce()) {
-        SyncOutcome.Done -&gt; Result.success()
-        SyncOutcome.Transient -&gt; if (runAttemptCount &lt; 5) Result.retry() else Result.failure()
-        SyncOutcome.Permanent -&gt; Result.failure()
-    }
-}</code></pre>
-<p>The backoff numbers come from the WorkManager guide: the delay can be no less than 10 seconds, the policy is LINEAR or EXPONENTIAL, and the default is EXPONENTIAL with a 30-second delay. That is the exponential backoff the offline-first guide recommends for network reads and queued writes, for free: your code only classifies the failure and returns <code>retry()</code>, with no sleep loop of its own. Cap attempts with <code>runAttemptCount</code>, as above, so a permanently broken request does not retry forever.</p>
-<p>A worker with constructor parameters beyond context and params needs a <code>WorkerFactory</code>. With Hilt, annotate it with <code>@HiltWorker</code> and use <code>HiltWorkerFactory</code>; without DI, register a custom factory through <code>Configuration.Provider</code> in your <code>Application</code> and disable the default initializer in the manifest.</p>
-<h2 id="chains-expedited-work-and-the-foreground-rules">Chains, expedited work and the foreground rules</h2>
-<p>Work can run in sequence, each step's output becoming the next step's input. A chain is the natural shape for "upload attachments, then push notes, then pull":</p>
-<pre><code>WorkManager.getInstance(context)
-    .beginUniqueWork("full-sync", ExistingWorkPolicy.KEEP, uploadAttachments)
-    .then(pushNotes)
-    .then(pullNotes)
-    .enqueue()</code></pre>
-<p>The chaining guide's failure rule: when a step fails or is cancelled, every dependent step is marked failed or cancelled too. Keep chains short and make each step meaningful on its own, so a failure tells you something.</p>
-<p>When the user is waiting (they tapped "Sync now"), mark the request expedited with <code>setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)</code>, so an exhausted quota degrades to normal work instead of dropping it. On Android versions before 12, WorkManager may run expedited work as a foreground service, so any worker used with <code>setExpedited</code> must implement <code>getForegroundInfo()</code>; leaving it out can crash on older platform versions.</p>
-<p>For a long first sync, a <code>CoroutineWorker</code> can call <code>setForeground()</code> to run as a foreground service with an ongoing notification. If your app targets Android 14 (API 34) or higher, you must specify a foreground service type for every long-running worker, declare it in the manifest by merging it into WorkManager's own service, and request the matching permission (<code>FOREGROUND_SERVICE_DATA_SYNC</code> for sync). Starting with Android 16, the guide notes, long-running workers can exhaust your app's job quota. For most apps the honest design is a sync that does a bounded amount of work per run and lets the next run continue, rather than one heroic foreground session.</p>
-<h2 id="show-the-state-from-the-repository-not-the-worker">Show the state from the repository, not the worker</h2>
-<p>To display "Syncing..." or "Last sync failed", observe the unique work's state as a Flow with <code>getWorkInfosForUniqueWorkFlow("notes-push")</code> and map <code>RUNNING</code>, <code>ENQUEUED</code> and <code>FAILED</code> to UI states. The worker itself never touches the UI.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>The push is unique work named once, enqueued with <code>ExistingWorkPolicy.KEEP</code>.</li><li>Periodic sync is unique too, scheduled from <code>Application.onCreate()</code>, interval 15 minutes or more.</li><li>Constraints read the user's Wi-Fi-only setting; <code>doWork</code> is safe to stop at any suspension point.</li><li><code>retry()</code> only for timeouts, 5xx and 429; <code>failure()</code> for 400 and 401 after a refresh.</li><li>Attempts capped with <code>runAttemptCount</code>; backoff left to WorkManager.</li><li>Chains short; a failed step fails its dependents, and that is intended.</li><li>Expedited workers implement <code>getForegroundInfo()</code>; long-running workers declare a foreground service type when targeting API 34+.</li><li>Every sync step is idempotent, because a stopped worker runs it again.</li></ul>
-<p>A sync that outlives the app is not the clever part. The clever part is making sure only one of them runs, and that it gives up at the right moment.</p><p><a href="https://payhip.com/b/TaqWf">Go deeper: Data That Survives</a></p>]]></content:encoded></item>
+<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
 </channel></rss>
