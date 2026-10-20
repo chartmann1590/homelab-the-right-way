@@ -165,3 +165,5 @@ h1,h2,h3{line-height:1.15;letter-spacing:-.02em;margin:0 0 .5em}h1{font-size:cla
 .nl-tip{margin:1em 0;padding:14px 18px;border-left:3px solid var(--teal);background:rgba(25,198,192,.08);border-radius:10px}.nl-tip p{margin:.2em 0}
 
 .prose figure.post-img{margin:1.2em 0}.prose figure.post-img img{max-width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+
+.app-card.soon .app-meta{margin:2px 0 4px}.app-card.soon .pill{font-size:.68rem}
