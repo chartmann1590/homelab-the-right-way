@@ -1,9 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 20 Oct 2026 12:30:00 -0400</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 21 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Guest Wi-Fi that can&#x27;t reach your servers: 5 OPNsense rules, in order</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</guid>
+<item><title>Three probes, one XIAO: the turtle-tank water monitor, from pin map to calibration</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/turtle-tank-water-monitor-three-probes-one-xiao/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/turtle-tank-water-monitor-three-probes-one-xiao/</guid>
+<pubDate>Wed, 21 Oct 2026 12:30:00 -0400</pubDate><description>The three-sensor water monitor from Smart Turtle Tank in one page: the six XIAO ESP32-C3 pins, the firmware that reads a DS18B20, a TDS probe and a turbidity probe without lying to you, why the maths lives on the server, and the one-time calibration routine.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-18.jpg" type="image/jpeg" length="0"/>
+<category>esp32</category><category>turtle tank</category><category>sensors</category><category>arduino</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-18.jpg" alt=""></p><p>A turtle tank changes slowly, and the three things that go wrong with it (water too cold, water getting dirty, water going cloudy) are all things a cheap probe can turn into a number. The build in <em>Smart Turtle Tank</em> uses a Seeed XIAO ESP32-C3 and three sensors: a DS18B20 waterproof temperature probe, a Keyestudio TDS probe and a Keyestudio turbidity probe. This post is the whole build on one page, the way the three new video tutorials walk through it: pin map, firmware, server maths, calibration.</p>
+<h2 id="the-six-pins">The six pins</h2>
+<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/dp/B0DRNSV5CS?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Seeed Studio XIAO ESP32C3</a> · <a href="https://www.amazon.com/dp/B09NVWNGLQ?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">BOJACK DS18B20 waterproof temperature sensor module kit</a> · <a href="https://www.amazon.com/dp/B08DGLY3J2?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">KEYESTUDIO TDS Meter Probe V1 sensor module</a> · <a href="https://www.amazon.com/dp/B07Q657288?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">KEYESTUDIO Turbidity Sensor Module V1</a> · <a href="https://www.amazon.com/dp/B01HTC4XKY?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">HiLetgo DC 0-25V voltage sensor module</a> · <a href="https://www.amazon.com/dp/B082VYXDF1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">REXQualis 400-point solderless breadboards</a> · <a href="https://www.amazon.com/dp/B01EV70C78?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">ELEGOO 120 pcs Dupont jumper wires</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
+<p>The XIAO has one GND pin and one 3V3 pin, and four boards need each of them, so the breadboard in the parts list is a power strip and nothing more: a black jumper from GND into the minus rail, an orange jumper from 3V3 into the plus rail, and a strip of tape by the plus rail that says "3V3, not 5V".</p>
+<div class="table"><table><thead><tr><th>XIAO pin</th><th>GPIO</th><th>Connects to</th><th>Device</th></tr></thead><tbody><tr><td>3V3</td><td>-</td><td>+ line, then VCC / +</td><td>Temp adapter, TDS board</td></tr><tr><td>GND</td><td>-</td><td>- line, then all grounds</td><td>Temp, TDS, turbidity, divider</td></tr><tr><td>5V</td><td>-</td><td>V</td><td>Turbidity board only</td></tr><tr><td>D4</td><td>GPIO6</td><td>DAT</td><td>Temp adapter</td></tr><tr><td>D1</td><td>GPIO3 (analog)</td><td>A</td><td>TDS board</td></tr><tr><td>D2</td><td>GPIO4 (analog)</td><td>S (output)</td><td>Voltage divider</td></tr></tbody></table></div>
+<p>The rule behind the table: a sensor's power can come from 5V if it needs it, but anything that goes back into a D pin must be at or under 3.3 V. The temperature adapter and the TDS board run on 3V3 and stay under the limit on their own. The turbidity board needs 5 V and outputs up to about 4.5 V, which is why its S pin goes into a divide-by-5 module and the module's output goes to D2. That one wire gets its own post and its own video; the short version is "never straight into the XIAO".</p>
+<p>Keep the USB-C cable unplugged the whole time you wire. It goes in last.</p>
+<h2 id="the-firmware-in-the-pieces-you-will-change">The firmware, in the pieces you will change</h2>
+<p>A PlatformIO project for the XIAO needs three libraries and two build flags:</p>
+<pre><code>[env:xiao_c3]
+platform = espressif32
+board = seeed_xiao_esp32c3
+framework = arduino
+monitor_speed = 115200
+build_flags =
+  -DARDUINO_USB_MODE=1
+  -DARDUINO_USB_CDC_ON_BOOT=1
+lib_deps =
+  paulstoffregen/OneWire
+  milesburton/DallasTemperature
+  bblanchon/ArduinoJson@^7</code></pre>
+<p>The board name picks the pin names; with a different board, D4 means a different pin. The two build flags make Serial work over the XIAO's own USB-C port.</p>
+<p>The pin map in code matches the table:</p>
+<pre><code>#define TEMP_PIN D4        // GPIO6, DS18B20 DAT (adapter has the pull-up)
+#define TDS_PIN D1         // GPIO3, ADC1
+#define TURB_PIN D2        // GPIO4, ADC1, through the /5 divider module
+#define TURB_RATIO 5.0f    // 2.0f if you used the two-resistor divider</code></pre>
+<p>Both analog pins are on ADC1 on purpose: on an ESP32, ADC2 stops working while Wi-Fi is on, and ADC1 does not. Read them with <code>analogReadMilliVolts()</code>, which applies the chip's factory calibration and returns millivolts.</p>
+<p>The reading loop takes the two analog probes as a median of 32 reads, not an average:</p>
+<pre><code>static float medianMv(int pin) {     // 32 reads, keep the median
+  uint16_t v[32];
+  for (int i = 0; i &lt; 32; i++) { v[i] = analogReadMilliVolts(pin); delay(10); }
+  std::sort(v, v + 32);
+  return (v[15] + v[16]) / 2.0f;
+}</code></pre>
+<p>The filter pump and the lamp's timer put spikes on the water and on the supply. Two spikes in 32 reads pull an average up by a lot and the median not at all.</p>
+<p>The temperature probe needs a different kind of care. The Dallas library returns -127 when the probe is not connected and 85.0 at power-on before the first conversion finishes. Both are "no reading", not readings:</p>
+<pre><code>static void sampleOnce() {
+  temp.requestTemperatures();        // ~750 ms at 12-bit
+  float t = temp.getTempCByIndex(0);
+  if (t &gt; -100 &amp;&amp; t != 85.0f) { accT += t; nT++; } // drop -127 and 85
+  accTds += medianMv(TDS_PIN) / 1000.0f;
+  accTurb += medianMv(TURB_PIN) / 1000.0f * TURB_RATIO;
+  nA++;
+}</code></pre>
+<p>Read one probe at a time. The TDS and turbidity probes both put a small voltage into the same water, and reading them together can make the TDS number jumpy.</p>
+<p>Every 30 seconds the board samples; every five minutes it averages the good samples into one reading and sends it as JSON over HTTPS, with raw volts for TDS and turbidity and degrees C for temperature. A reading that could not be sent stays in a RAM ring buffer of 96 readings and goes out, oldest first, when the network is back.</p>
+<h2 id="why-the-maths-is-on-the-server">Why the maths is on the server</h2>
+<p>The firmware never turns volts into ppm or into a clarity percentage. The server does, with calibration constants stored as settings. A recalibration is then a settings change, not a reflash, and every old reading can be reinterpreted because the raw volts were stored too.</p>
+<p>TDS, temperature-compensated, is the formula the Keyestudio and DFRobot boards document:</p>
+<pre><code>coeff = 1 + 0.02 * (T - 25)
+Vc    = V / coeff
+ppm   = (133.42*Vc^3 - 255.86*Vc^2 + 857.39*Vc) * 0.5 * K</code></pre>
+<p>Turbidity is reported as a clarity percentage rather than NTU, because the cheap probe is not accurate enough for real NTU. It is a straight line between two points you measure yourself:</p>
+<pre><code>sensorV   = adcV * 5           (the divider ratio)
+clarity % = 100 * (V - V_dirty) / (V_clear - V_dirty), clamped to 0-100</code></pre>
+<p>Both TDS and clarity are trend meters. The app labels them that way, and a liquid test kit is still the answer when either of them moves.</p>
+<h2 id="calibrating-once">Calibrating once</h2>
+<p>Write the numbers down somewhere that survives; they are settings on the server and nowhere else.</p>
+<ol><li>Temperature: the DS18B20 and a reference aquarium thermometer in the same cup of water for five minutes. The difference is <code>temp_offset_c</code>. Expect a few tenths of a degree; the probe is rated +/-0.5 C.</li><li>TDS: a cup of tank water, the probe in it, a handheld TDS pen in it. Set K so the server's ppm matches the pen, or use a 342 ppm calibration solution.</li><li>Turbidity: a dark cup of clean tap water gives V_clear. The same cup with a pinch of soil stirred in gives V_dirty. The probe reads higher in clear water, so V_clear is the bigger number.</li><li>Baseline: with the tank freshly changed, press Water changed in the app. That stores the current TDS as the baseline the alerts work from, because an absolute TDS number depends on your tap water and what matters is how far it has climbed since the last change.</li></ol>
+<p>Set the send interval to one minute from the server while you do this, then back to five.</p>
+<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=stick+on+aquarium+thermometer+strip&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Stick-on aquarium thermometer</a> · <a href="https://www.amazon.com/s?k=freshwater+liquid+test+kit+ammonia+nitrite+nitrate&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Liquid test kit for ammonia, nitrite and nitrate</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
+<h2 id="the-readings-that-mean-a-wiring-mistake">The readings that mean a wiring mistake</h2>
+<ul><li>Temperature shows null, -127 or 85: a probe wire is loose on DAT, VCC or GND. Re-seat them and check the adapter is on 3V3. 85 is the power-on value, which means the probe never got a successful read.</li><li>TDS reads 0 in the tank, or jumps around: the probe cable is unplugged, or both probes are being read together. Read one at a time.</li><li>Turbidity near 0 V, or reading over 3.3 V at D2: is the switch on A? Is S going into the divider's VCC terminal? Are the divider's minus pin and GND terminal on the rail? A switch left on D gives a flat reading no matter what the water does.</li><li>Nothing arrives at the server: serial monitor first. Is Wi-Fi up, is NTP time set? A 401 is the wrong key, a 400 is bad JSON.</li><li>Clarity drifts every time the lamp switches: the probe is in the lamp's beam. Move the carrier or shade the probe.</li></ul>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Power strip: GND to the minus rail, 3V3 to the plus rail, tape that says "3V3, not 5V".</li><li>Temperature: probe wires into the adapter by letter; VCC and GND from the rails; DAT to D4.</li><li>TDS: cable to the rails (red to 3V3); A to D1; probe plugged in.</li><li>Turbidity: switch on A; V from the XIAO's 5V pin; G to the minus rail; S into the divider's VCC terminal; divider GND terminal and minus pin to the minus rail; divider S pin to D2; plus pin empty.</li><li>Serial-only sketch first: temperature sensible, TDS near zero in air, turbidity higher in clear water.</li><li>Then the real firmware, then the four calibration steps, then Water changed.</li></ul>
+<h2 id="watch-the-series">Watch the series</h2>
+<p>The first video (the temperature probe) is embedded above. The TDS probe video is at https://youtube.com/shorts/Z3tRstZTqas and the turbidity probe video (the 5V trap and the divider) is at https://youtube.com/shorts/4EJy9Svk83Q.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>Photobooth: run an event photo booth from an Android phone or tablet</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/photobooth-event-camera-android/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/photobooth-event-camera-android/</guid>
+<pubDate>Wed, 21 Oct 2026 12:30:00 -0400</pubDate><description>Photobooth turns an Android phone or tablet into an event photo booth with strip layouts, effects, printing, QR sharing and a live slideshow.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.photobooth.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>photography</category><category>events</category><category>weddings</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.photobooth.jpg" alt=""></p><p>Renting a photo booth for a wedding or a party is an expense many hosts skip. Photobooth: Event Camera offers a do-it-yourself alternative: set up an Android phone or tablet, and it runs the booth for your guests, from the countdown to the photo strip to sharing and printing.</p>
+<h2 id="what-it-does">What it does</h2>
+<h3 id="booth-mode">Booth mode</h3>
+<ul><li>A full-screen camera interface.</li><li>An automatic capture timer.</li><li>Photo strip layouts with 2, 3 or 4 photos.</li><li>Custom backgrounds and frames.</li></ul>
+<h3 id="effects">Effects</h3>
+<ul><li>Filters and overlays.</li><li>Stickers and text.</li><li>Green screen support.</li><li>Photo booth props.</li></ul>
+<h3 id="printing-and-sharing">Printing and sharing</h3>
+<ul><li>Direct printing to compatible printers.</li><li>Sharing to social media, by email and by text.</li><li>Cloud backup options.</li></ul>
+<h3 id="event-features">Event features</h3>
+<ul><li>A guest book mode for weddings.</li><li>QR code sharing, so guests can get their photos.</li><li>A live slideshow of the photos taken.</li><li>Multiple event templates.</li></ul>
+<h3 id="customization">Customization</h3>
+<ul><li>Adjustable photo size and quality.</li><li>Custom branding and logos.</li><li>Support for multiple cameras.</li><li>Portrait and landscape modes.</li></ul>
+<h2 id="planning-a-booth-with-it">Planning a booth with it</h2>
+<p>The app covers the software side. The rest is setup, and the features listed point to a straightforward plan:</p>
+<ol><li><strong>Pick the device.</strong> A tablet gives guests a bigger screen to see themselves, while a phone is easier to mount. Choose portrait or landscape to match how it is mounted.</li><li><strong>Choose a layout.</strong> Decide on 2, 3 or 4 photos per strip, and pick a template for the event.</li><li><strong>Brand it.</strong> Add the couple's names, a birthday, or a company logo with the branding option, plus a background or frame.</li><li><strong>Decide on prints.</strong> If you want physical strips, connect a compatible printer and test a print before guests arrive.</li><li><strong>Set up sharing.</strong> QR code sharing lets guests take photos home on their own phones, and the live slideshow can run on a second screen.</li><li><strong>Test the timer.</strong> Run through the countdown a few times so you know how long guests have to pose.</li></ol>
+<h3 id="green-screen">Green screen</h3>
+<p>Green screen support opens up themed backgrounds. It needs a green backdrop behind the booth and even lighting, so plan the space for it if you want to use it.</p>
+<h2 id="where-it-fits">Where it fits</h2>
+<p>The listing names weddings and receptions, birthday parties, corporate events, and school dances and reunions. The guest book mode is the wedding-specific feature; custom logos are what make it work for a company event.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing; the Play listing also notes in-app purchases.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Printing:</strong> works with compatible printers, so check yours before the event.</li><li><strong>Category:</strong> Photography, rated Everyone.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You are hosting a wedding, party or event and want a booth without renting one.</li><li>You have a spare Android phone or tablet and a way to mount it.</li><li>You want guests to get their photos by QR code, print or text.</li><li>You want the booth branded for the occasion.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.photobooth">Get Photobooth: Event Camera on Google Play</a></p>]]></content:encoded></item><item><title>Guest Wi-Fi that can&#x27;t reach your servers: 5 OPNsense rules, in order</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</guid>
 <pubDate>Tue, 20 Oct 2026 12:30:00 -0400</pubDate><description>A guest network that only gets the internet takes one alias and five firewall rules on the GUEST interface, in a specific order. DNS and DHCP to the firewall, block every private range, block the firewall itself, then allow the internet. Here is the full table and how to test it from a phone.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-26.jpg" type="image/jpeg" length="0"/>
 <category>opnsense</category><category>firewall</category><category>guest wifi</category><category>vlan</category><category>homelab</category><category>networking</category>
@@ -1058,64 +1155,5 @@ fun AvatarPicker(onPicked: (Uri) -&gt; Unit) {
 <ul><li><code>READ_MEDIA_IMAGES</code></li><li><code>READ_MEDIA_VIDEO</code></li><li><code>READ_MEDIA_VISUAL_USER_SELECTED</code></li><li><code>READ_EXTERNAL_STORAGE</code></li><li><code>WRITE_EXTERNAL_STORAGE</code></li></ul>
 <p>One more detail worth knowing: the Photo and video permissions declaration page kept listing the old permission from the live bundle until the new release went live. Seeing it there after the fix does not mean the fix failed.</p>
 <h2 id="checklist-before-you-send-an-update">Checklist before you send an update</h2>
-<ul><li>Read the permission list from the release build with <code>apkanalyzer manifest permissions</code>, not from your source manifest.</li><li>Check the Merged Manifest tab to see which library added each entry.</li><li>Remove unused library permissions with <code>tools:node="remove"</code>.</li><li>Choose media with the photo picker. No <code>READ_MEDIA_*</code> unless the app is gallery-type.</li><li>Persist picked URIs with <code>takePersistableUriPermission</code> if you upload in the background.</li><li>For every other restricted permission, try the narrower option in the table first.</li><li>After the fix ships, expect the declaration page to show the old permission until the new release is live.</li></ul><p><a href="https://payhip.com/b/YcoD4">Go deeper: Pass Google Play Review</a></p>]]></content:encoded></item><item><title>When your NFS share drops, Proxmox backups fill your root disk</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nfs-share-drops-backups-fill-root-disk/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nfs-share-drops-backups-fill-root-disk/</guid>
-<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>If your NAS is a Directory storage on a path you mounted yourself and the mount fails at boot, vzdump writes into the empty folder on the host&#x27;s root disk. Here are the three NFS backup gotchas and the fix for each.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-22.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>nfs</category><category>backups</category><category>vzdump</category><category>storage</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-22.jpg" alt=""></p><p>NFS is the most common backup target in homelabs. A NAS share is cheap, it is off the host, and Proxmox speaks it natively. It also has three classic gotchas, and the first one is nasty because nothing about it looks broken until the host itself starts failing.</p>
-<h2 id="the-trap-the-mount-isn-t-there-but-the-directory-is">The trap: the mount isn't there, but the directory is</h2>
-<p>A common way to add a NAS is to mount the share yourself, say at <code>/mnt/backups</code>, and then add that path to Proxmox as a plain <strong>Directory</strong> storage. It works fine, right up to the morning the mount fails at boot.</p>
-<p>When that happens, the share is gone but the empty folder is still there. Proxmox has no way to know the folder was supposed to be a network share, so the nightly job happily writes its archives into it. That folder lives on the host's root disk.</p>
-<p>Within a night or two, the host's root filesystem is full, and things start breaking in confusing ways. From the backup job's point of view it all looked fine: it had a target, it wrote to it, and the job finished.</p>
-<p>This is one of the four failure modes hiding behind a reassuring green check in the Datacenter view. The storage silently isn't there, and the job either fails (good, if someone hears about it) or writes into an empty local directory and fills your root disk (very bad).</p>
-<h2 id="fix-1-use-the-native-nfs-storage-type">Fix 1: use the native NFS storage type</h2>
-<p>The cleanest fix is to let Proxmox own the mount. With the native NFS storage type, Proxmox manages the mount and marks the storage offline if it fails, so a dropped share becomes a failed job, not a full root disk.</p>
-<pre><code>pvesm add nfs nas-backup --server 192.168.10.40 --export /volume1/proxmox \
-  --content backup --options vers=4.1
-pvesm status</code></pre>
-<p>The share then appears under <code>/mnt/pve/nas-backup</code>, and <code>pvesm status</code> tells you whether Proxmox can actually reach it.</p>
-<p>While you are there, keep the archives off the default <code>local</code> storage. It works, and it is the worst choice: the archives sit on the same disk as the host.</p>
-<h2 id="fix-2-if-you-keep-your-own-mount-mark-it-as-a-mountpoint">Fix 2: if you keep your own mount, mark it as a mountpoint</h2>
-<p>If you have a reason to keep a Directory storage on a path you mount yourself, tell Proxmox the path must be a mountpoint:</p>
-<pre><code>pvesm set nas-backup --is_mountpoint yes</code></pre>
-<p>That flag tells Proxmox an empty folder at that path is not enough: something has to be mounted there before it counts as the backup storage.</p>
-<h2 id="gotcha-2-root-squash-breaks-backups">Gotcha 2: root squash breaks backups</h2>
-<p>vzdump writes as root. Many NAS defaults map root to nobody, which makes backups fail with permission errors.</p>
-<p>The fix is on the NAS side: allow root access for the Proxmox hosts' IPs only. Depending on the NAS, the setting is called <code>no_root_squash</code> or "Map root user to admin". Scope it to the Proxmox hosts rather than opening root access to the whole network.</p>
-<h2 id="gotcha-3-a-hung-nfs-server-can-freeze-the-host-s-tools">Gotcha 3: a hung NFS server can freeze the host's tools</h2>
-<p>A hung NFS server with a hard mount can freeze any process touching it. That includes the backup job, <code>pvestatd</code> and the web UI's storage view, so a NAS that stops answering can make the Proxmox host look broken too.</p>
-<p>Two habits keep this from biting:</p>
-<ul><li>If your NAS reboots for updates at 2 a.m., schedule backups away from that window.</li><li>Check the storage before you trust a job.</li></ul>
-<pre><code>pvesm status                    # every storage should say "active"
-df -h /mnt/pve/nas-backup       # should show the NAS size, not the root disk</code></pre>
-<p>That <code>df</code> line is the quickest test for the first trap. If the size it reports is your root disk's size, the share is not mounted and anything written there is going to the host.</p>
-<h2 id="while-you-re-on-the-share-set-retention">While you're on the share: set retention</h2>
-<p>A share that fills up causes the same pain from the other direction: nothing gets pruned, the share fills, and every job after that fails. Set retention on the storage itself, so every job that writes there inherits it:</p>
-<pre><code>pvesm set nas-backup \
-  --prune-backups keep-last=2,keep-daily=7,keep-weekly=4,keep-monthly=3</code></pre>
-<h2 id="make-sure-a-failure-actually-reaches-you">Make sure a failure actually reaches you</h2>
-<p>The native storage type turns a dropped share into a failed job, and a failed job only helps if someone hears about it. By default, failures go to the root mailbox on the host, which nobody reads. On Proxmox VE 8.1 and later, set up a target under <strong>Datacenter → Notifications</strong>, point backup failures at it, and then force a failure on purpose to prove it works:</p>
-<pre><code>vzdump 101 --storage does-not-exist</code></pre>
-<p>If no message arrives, fix that before anything else.</p>
-<h2 id="checklist-nfs-backup-storage">Checklist: NFS backup storage</h2>
-<ul><li>Backup storage is native NFS (or PBS), or has <code>is_mountpoint</code> set</li><li>Archives are not on the default <code>local</code> storage</li><li>The NAS allows root only for the Proxmox hosts' IPs (<code>no_root_squash</code> / "Map root user to admin")</li><li>Backups are scheduled away from the NAS's update and reboot window</li><li><code>pvesm status</code> shows every storage as "active"</li><li><code>df -h /mnt/pve/nas-backup</code> shows the NAS size, not the root disk</li><li>Retention is set on the storage with <code>--prune-backups</code></li><li>A forced failure produces a notification you actually read</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Merch drop 3: a new tee, hoodie, mug and sticker in the Homelab the Right Way store</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-3/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-3/</guid>
-<pubDate>Fri, 16 Oct 2026 12:30:00 -0400</pubDate><description>Four new items in the Homelab the Right Way merch store: the It&#x27;s Not a Hobby, It&#x27;s Infrastructure tee, the Backups: Tested, Not Hoped hoodie, the Rebooting: Human, Please Wait mug and the Homelab Certified sticker.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop3-hero.jpg" type="image/jpeg" length="0"/>
-<category>merch</category><category>homelab</category><category>selfhosted</category><category>store</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop3-hero.jpg" alt=""></p><p>Four new designs landed in the <a href="https://homelab-the-right-way.printful.me/">Homelab the Right Way merch store</a> today. Same rules as the first two drops: every item is built around a line a homelabber has actually said, printed or cut to order by Printful, and shipped from their facilities, so nothing is sitting in a warehouse waiting to sell out. Here is what each one is, and the joke behind it.</p>
-<h2 id="it-s-not-a-hobby-it-s-infrastructure-tee">It's Not a Hobby, It's Infrastructure (tee)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/its-not-a-hobby-its-infrastructure-tee">It's Not a Hobby, It's Infrastructure Tee</a>: a three-node cluster graph in teal with amber status LEDs, the four-line slogan, and a small "Highly available" tag along the bottom. The joke is the conversation every homelabber has had with someone who asked why there is a rack in the closet. Once the household Wi-Fi, the DNS, the camera feeds and the media library all run through it, it stopped being a hobby a long time ago.</p>
-<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
-<h2 id="backups-tested-not-hoped-hoodie">Backups: Tested, Not Hoped (hoodie)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/backups-tested-not-hoped-hoodie">Backups: Tested, Not Hoped Hoodie</a>: a drive icon with a check badge, "Backups: tested, not hoped" in big type, and underneath it the line that matters: "Restore day is not the day to find out." It is the whole of <em>Never Lose Your Data</em> in one sentence. A backup you have never restored is a guess, and the book spends a chapter on turning that guess into a scheduled test.</p>
-<p>Gildan 18500 heavy blend hoodie in Black, Navy, Dark Heather and Forest Green. $47.50 to $64 depending on size.</p>
-<h2 id="rebooting-human-please-wait-mug">Rebooting: Human, Please Wait (mug)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/rebooting-human-please-wait-mug">Rebooting: Human, Please Wait Mug</a>: a power icon, "Rebooting" in block letters, an amber "Human, please wait" pill, and the fine print "Do not power off until coffee is done." The art is printed twice, once on each side of the handle, so it reads whichever hand you hold it in. It is the morning version of the update screen you are not supposed to interrupt.</p>
-<p>White glossy mug in 11, 15 and 20 oz. $17 to $27.50.</p>
-<h2 id="homelab-certified-sticker">Homelab Certified (sticker)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/homelab-certified-sticker">Homelab Certified Sticker</a>: a navy hexagon badge with a teal outline, a tiny three-node cluster, and an amber ribbon that reads "Breaks things on purpose," with "Then writes it down" below it. That is the only certification that counts in a homelab: you broke it on a Saturday, you understood why, and the notes are in the wiki so next time takes five minutes instead of five hours.</p>
-<p>Kiss-cut vinyl in 3 x 3, 4 x 4 and 5.5 x 5.5 inches; Printful adds the white kiss-cut border. $4.50 to $5.50.</p>
-<h2 id="where-everything-lives">Where everything lives</h2>
-<p>The store now carries 29 designs across tees, hoodies, hats, mugs, stickers, desk mats, a poster and a tote. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
-<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+<ul><li>Read the permission list from the release build with <code>apkanalyzer manifest permissions</code>, not from your source manifest.</li><li>Check the Merged Manifest tab to see which library added each entry.</li><li>Remove unused library permissions with <code>tools:node="remove"</code>.</li><li>Choose media with the photo picker. No <code>READ_MEDIA_*</code> unless the app is gallery-type.</li><li>Persist picked URIs with <code>takePersistableUriPermission</code> if you upload in the background.</li><li>For every other restricted permission, try the narrower option in the table first.</li><li>After the fix ships, expect the declaration page to show the old permission until the new release is live.</li></ul><p><a href="https://payhip.com/b/YcoD4">Go deeper: Pass Google Play Review</a></p>]]></content:encoded></item>
 </channel></rss>
