@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SkyPulse: a live flight tracker for what is flying over you — Homelab the Right Way</title>
+<meta name="description" content="SkyPulse shows live aircraft on a map with flight, aircraft and airport details, plus alerts when a flight takes off or lands.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://chartmann1590.github.io/homelab-the-right-way/posts/skypulse-live-flight-tracker-android/">
+<meta property="og:site_name" content="Homelab the Right Way">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="SkyPulse: a live flight tracker for what is flying over you — Homelab the Right Way">
+<meta property="og:description" content="SkyPulse shows live aircraft on a map with flight, aircraft and airport details, plus alerts when a flight takes off or lands.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://chartmann1590.github.io/homelab-the-right-way/posts/skypulse-live-flight-tracker-android/">
+<meta property="og:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.skypulse.app.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SkyPulse: a live flight tracker for what is flying over you — Homelab the Right Way">
+<meta name="twitter:description" content="SkyPulse shows live aircraft on a map with flight, aircraft and airport details, plus alerts when a flight takes off or lands.">
+<meta name="twitter:image" content="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.skypulse.app.jpg">
+<meta name="theme-color" content="#0b1422">
+<meta name="google-site-verification" content="cvH6zjcMSIXHM5-sSjNSocd_gGxDbaENfIkzePngg5s"><meta name="p:domain_verify" content="1d759906fad752c78978c6793547e68a"/>
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/homelab-the-right-way/assets/img/favicon.png">
+<link rel="apple-touch-icon" href="/homelab-the-right-way/assets/img/favicon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Homelab the Right Way" href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml">
+<link rel="preload" href="/homelab-the-right-way/assets/style.css?v=12" as="style">
+<link rel="stylesheet" href="/homelab-the-right-way/assets/style.css?v=12">
+<meta property="article:published_time" content="2026-10-22">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="flight tracker">
+<meta property="article:tag" content="aviation">
+<meta property="article:tag" content="travel">
+<meta property="article:tag" content="alerts">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "SkyPulse: a live flight tracker for what is flying over you", "description": "SkyPulse shows live aircraft on a map with flight, aircraft and airport details, plus alerts when a flight takes off or lands.", "url": "https://chartmann1590.github.io/homelab-the-right-way/posts/skypulse-live-flight-tracker-android/", "mainEntityOfPage": "https://chartmann1590.github.io/homelab-the-right-way/posts/skypulse-live-flight-tracker-android/", "datePublished": "2026-10-22T12:30:00-04:00", "dateModified": "2026-10-22T12:30:00-04:00", "image": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.skypulse.app.jpg", "width": 1200, "height": 630}, "author": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "publisher": {"@type": "Organization", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/", "logo": {"@type": "ImageObject", "url": "https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png", "width": 800, "height": 800}, "sameAs": ["https://www.youtube.com/@HomelabTheRightWay", "https://payhip.com/HomelabtheRightWay"]}, "keywords": "android, flight tracker, aviation, travel, alerts", "wordCount": 636, "inLanguage": "en", "isPartOf": {"@type": "Blog", "name": "Homelab the Right Way", "url": "https://chartmann1590.github.io/homelab-the-right-way/"}, "about": {"@type": "SoftwareApplication", "name": "SkyPulse: Live Flight Tracker", "operatingSystem": "Android", "url": "https://play.google.com/store/apps/details?id=com.charles.skypulse.app"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://chartmann1590.github.io/homelab-the-right-way/"}, {"@type": "ListItem", "position": 2, "name": "Posts", "item": "https://chartmann1590.github.io/homelab-the-right-way/#posts"}, {"@type": "ListItem", "position": 3, "name": "SkyPulse: a live flight tracker for what is flying over you", "item": "https://chartmann1590.github.io/homelab-the-right-way/posts/skypulse-live-flight-tracker-android/"}]}</script>
+</head>
+<body class="post">
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<div class="nl-bar"><div class="wrap"><span>Free weekly email: the week's new posts, videos and one tip from the books, every Sunday.</span> <a href="/homelab-the-right-way/newsletter/">Get it free &rarr;</a></div></div>
+<header class="top"><div class="wrap bar">
+<a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<nav class="nav" aria-label="Main"><a href="/homelab-the-right-way/#posts">Posts</a><a href="/homelab-the-right-way/#ebooks">Ebooks</a><a href="/homelab-the-right-way/apps/">Apps</a><a href="/homelab-the-right-way/merch/">Merch</a><a href="/homelab-the-right-way/about/">About</a><a href="/homelab-the-right-way/links/">Links</a><a class="nl-btn" href="/homelab-the-right-way/newsletter/">Newsletter</a><a class="store-btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a><a class="yt-btn" href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a></nav>
+</div></header>
+<main id="main">
+
+<article class="post-page">
+<header class="post-hero"><div class="wrap">
+<p class="eyebrow fade" style="--d:0"><a href="/homelab-the-right-way/">Home</a> › <a href="/homelab-the-right-way/#posts">Posts</a></p>
+<h1 class="fade" style="--d:1">SkyPulse: a live flight tracker for what is flying over you</h1>
+<p class="lead fade" style="--d:2">SkyPulse shows live aircraft on a map with flight, aircraft and airport details, plus alerts when a flight takes off or lands.</p>
+<p class="meta fade" style="--d:3"><time datetime="2026-10-22">October 22, 2026</time> · 3 min read · <span class="tags inline"><span>android</span><span>flight tracker</span><span>aviation</span><span>travel</span><span>alerts</span></span></p>
+</div>
+<div class="wrap hero-img fade" style="--d:2"><img src="/homelab-the-right-way/assets/img/posts/app-com.charles.skypulse.app.webp" width="1280" height="720" alt="SkyPulse: a live flight tracker for what is flying over you" fetchpriority="high"></div>
+</header>
+<div class="wrap prose-wrap">
+<nav class="toc reveal" aria-label="On this page"><p class="eyebrow">On this page</p><ol><li><a href="#what-it-does">What it does</a></li><li><a href="#two-ways-to-use-it">Two ways to use it</a></li><li><a href="#design-and-devices">Design and devices</a></li><li><a href="#good-to-know">Good to know</a></li><li><a href="#is-it-for-you">Is it for you?</a></li></ol></nav>
+<div class="prose">
+<aside class="nl nl-top" id="newsletter-top">
+<p class="nl-top-copy"><b>Get the weekly email.</b> <span class="muted">New articles, new videos and one practical tip from the books, every Sunday morning. <a href="/homelab-the-right-way/newsletter/">What's in it</a></span></p>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-top">Email address</label>
+<input type="email" id="nl-email-top" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-top">
+<button class="btn" type="submit">Subscribe</button>
+</form>
+</aside>
+
+<aside class="premiere reveal"><span class="dot"></span><div><b>Video premieres November 30, 2026 at 12 PM ET</b><p>This post has a companion video on the channel. <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> to catch it.</p></div></aside>
+<p>You hear a jet overhead and wonder where it is going. Or you are waiting on someone's flight and keep refreshing an airline page to see whether it has left yet. SkyPulse is an Android flight tracker built for both of those moments: it puts the aircraft in the sky on a live map, tells you what each one is, and can notify you when a flight you care about takes off or lands.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Live flight tracking.</strong> Aircraft positions update on a map in real time, with flight numbers, routes, altitudes, the airline, the aircraft type, and departure and arrival times.</li><li><strong>Aircraft details.</strong> Tap a plane to see its registration and photos, its age and model, owner and operator details, and its flight history.</li><li><strong>Airport information.</strong> Arrivals and departures, runway information, weather conditions and terminal maps for airports.</li><li><strong>Smart alerts.</strong> Get notified when flights take off or land, set alerts by flight number or by route, and tune the notification settings, including quiet hours.</li><li><strong>Map and radar.</strong> An interactive radar map you can zoom to any region, with layers for routes, airports and weather that you can switch on and off, in dark or light map themes.</li><li><strong>Fast search.</strong> Look up flights and airports quickly from a simple interface.</li></ul>
+<h2 id="two-ways-to-use-it">Two ways to use it</h2>
+<h3 id="looking-up">Looking up</h3>
+<p>The map is the heart of the app. Zoom to your area and you see the aircraft currently flying there. Tapping one opens the flight's details: where it came from, where it is headed, how high it is, which airline flies it and what kind of aircraft it is. From there, the aircraft details go a level deeper, with the registration, photos, the airframe's age and model, who owns and operates it, and where it has flown before.</p>
+<p>Layers keep the map readable. If you only want routes, or you want weather on top to see why everything is circling, you can toggle each layer independently.</p>
+<h3 id="waiting-on-someone">Waiting on someone</h3>
+<p>The alerts are the part that saves you from refreshing. You can set an alert for a specific flight number, or for a route, and SkyPulse notifies you when the flight takes off and when it lands. Quiet hours keep late-night arrivals from waking you up if you would rather see them in the morning. Pair that with the airport view, where you can check arrivals, departures, runway information and the weather at the destination, and you have most of what you need for a pickup in one place.</p>
+<h2 id="design-and-devices">Design and devices</h2>
+<p>The interface is kept simple: a fast search for flights and airports, dark mode support, and a layout optimized for tablets as well as phones. A tablet makes a good dedicated "what's overhead" screen, since the map has more room to breathe.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li>SkyPulse is free to download, and the listing describes it as free with optional premium.</li><li>The free features listed are basic flight tracking, airport information, 7-day flight history and standard alerts.</li><li>Google Play marks the app as containing ads.</li><li>It is rated Everyone and sits in the Travel and Local category.</li></ul>
+<p>If you only need occasional lookups and standard alerts, the free tier covers that. The listing does not spell out exactly what premium adds beyond the free list, so check inside the app before you decide whether you need it.</p>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You often look up at planes and want to know what they are.</li><li>You pick people up from the airport and want a notification instead of refreshing a page.</li><li>You want airport arrivals, departures and weather next to the live map.</li><li>You like dark mode and a clean layout, on a phone or a tablet.</li></ul>
+<aside class="cta app-cta reveal">
+<img class="app-ico" src="/homelab-the-right-way/assets/img/apps/com.charles.skypulse.app.webp" width="120" height="120" alt="SkyPulse: Live Flight Tracker icon" loading="lazy">
+<div><p class="eyebrow">Android app</p>
+<h3>SkyPulse: Live Flight Tracker</h3>
+<p>Track live flights overhead — aircraft, airports &amp; smart alerts.</p>
+<p class="muted small">Free on Google Play (contains ads).</p>
+<p class="btns"><a class="btn gp" href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app" rel="noopener" aria-label="Get SkyPulse: Live Flight Tracker on Google Play"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg><span><small>Get it on</small>Google Play</span></a><a class="btn ghost" href="/homelab-the-right-way/apps/">See all 41 apps</a></p></div>
+</aside>
+<aside class="nl nl-post reveal" id="newsletter">
+<div class="nl-copy"><p class="eyebrow">Free weekly newsletter</p>
+<h3>Liked this? Get the weekly email</h3>
+<p>New articles, new videos and one practical tip from the books, every Sunday morning.</p></div>
+<form class="nl-form" action="https://buttondown.com/api/emails/embed-subscribe/homelabtherightway" method="post">
+<label class="sr" for="nl-email-post">Email address</label>
+<input type="email" id="nl-email-post" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email">
+<input type="hidden" name="tag" value="blog-post">
+<button class="btn" type="submit">Subscribe</button>
+<p class="muted small nl-note">One email a week. Unsubscribe anytime.</p>
+</form>
+</aside>
+<p class="share muted small">Found this useful? <a href="https://www.youtube.com/@HomelabTheRightWay" rel="noopener">Subscribe on YouTube</a> for the daily video, or <a href="/homelab-the-right-way/feed.xml">follow the RSS feed</a>.</p>
+</div>
+</div>
+</article>
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/xiao-esp32-c3-six-pins-d4-is-gpio6/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-27-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Tue Oct 27</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-22">October 22, 2026</time> · 5 min read</p>
+<h3>D4 is GPIO6: the six XIAO ESP32-C3 pins the tank build uses, and their two names</h3>
+<p>The Smart Turtle Tank water sensor touches only six pins on the XIAO ESP32-C3. Here is what each one does, why the signal pins are D1, D2 and D4, and the naming trap that bites when you move from Arduino code to ESPHome.</p>
+<p class="tags"><span>esp32</span><span>xiao</span><span>turtle tank</span><span>esphome</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/turtle-tank-water-monitor-three-probes-one-xiao/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-18-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-21">October 21, 2026</time> · 6 min read</p>
+<h3>Three probes, one XIAO: the turtle-tank water monitor, from pin map to calibration</h3>
+<p>The three-sensor water monitor from Smart Turtle Tank in one page: the six XIAO ESP32-C3 pins, the firmware that reads a DS18B20, a TDS probe and a turbidity probe without lying to you, why the maths lives on the server, and the one-time calibration routine.</p>
+<p class="tags"><span>esp32</span><span>turtle tank</span><span>sensors</span><span>arduino</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/opnsense-hardening-kill-switch-suricata-updates/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-10-29-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill">Premieres Thu Oct 29</span></div>
+<div class="body"><p class="meta"><time datetime="2026-10-21">October 21, 2026</time> · 5 min read</p>
+<h3>Your firewall works. Is it hardened? The OPNsense pass most setups skip</h3>
+<p>OPNsense out of the box is a solid firewall. A deliberate hardening pass makes it a great one: ISP DNS that can&#x27;t sneak back in, modest blocklists, a VPN kill switch that really fails closed, Suricata sized to your RAM, and an update routine with a rollback.</p>
+<p class="tags"><span>opnsense</span><span>firewall</span><span>vpn</span><span>wireguard</span></p></div></a></li></ul></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="/homelab-the-right-way/"><img src="/homelab-the-right-way/assets/img/avatar.webp" width="38" height="38" alt=""><span>Homelab <b>the Right Way</b></span></a>
+<p class="muted">Proxmox · OPNsense · Home Assistant · Backups. A new article every day, each with a short companion video.</p></div>
+<div><p class="eyebrow">Site</p><p><a href="/homelab-the-right-way/#posts">Posts</a> · <a href="/homelab-the-right-way/#ebooks">Ebooks</a> · <a href="https://payhip.com/HomelabtheRightWay" rel="noopener">Store</a> · <a href="/homelab-the-right-way/apps/">Apps</a> · <a href="/homelab-the-right-way/merch/">Merch</a> · <a href="/homelab-the-right-way/about/">About</a> · <a href="/homelab-the-right-way/links/">Links</a> · <a href="/homelab-the-right-way/newsletter/">Newsletter</a> · <a href="/homelab-the-right-way/feed.xml">RSS</a></p></div>
+<div><p class="eyebrow">Ebooks</p><p>18 ebooks, $19 each, every one with a free sample. All 18 for $89 in the <a href="https://payhip.com/b/aMB6c" rel="noopener">Everything Bundle</a>.</p><p class="btns foot-store"><a class="btn" href="https://payhip.com/HomelabtheRightWay" rel="noopener">Visit the store</a></p><p class="small foot-apps"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 2.8v18.4c0 .4.4.6.7.4L20.4 12.6c.4-.2.4-.8 0-1L4.7 2.4c-.3-.2-.7 0-.7.4z"/></svg> <a href="/homelab-the-right-way/apps/">41 free Android apps</a> on Google Play</p></div>
+<div><p class="eyebrow">Gear</p><p><a href="/homelab-the-right-way/posts/gear-the-books-recommend/">Gear the books recommend</a></p><p class="small">As an Amazon Associate I earn from qualifying purchases.</p></div>
+<div><p class="eyebrow">Follow</p><p class="follow-row"><a class="follow" href="https://www.youtube.com/@HomelabTheRightWay" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>YouTube</a><a class="follow" href="https://bsky.app/profile/homelabtherightway.bsky.social" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.8c-1.1-2.1-4-6-6.8-8C2.6 1 1.5 1.3 .8 1.6 0 2 0 3.2 0 3.9c0 .7.4 5.8.6 6.6.8 2.9 3.7 3.8 6.4 3.5-4 .6-7.4 2-2.8 6.9 5 5.2 6.9-1.1 7.8-4.3.9 3.2 2 9.3 7.7 4.3 4.3-4.3 1.2-6.3-2.8-6.9 2.7.3 5.6-.6 6.4-3.5.2-.8.6-5.9.6-6.6 0-.7 0-1.9-.8-2.3-.7-.3-1.8-.6-4.4 1.2-2.8 2-5.7 5.9-6.8 8z"/></svg>Bluesky</a><a class="follow" href="https://x.com/homelabrightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>X</a><a class="follow" href="https://www.facebook.com/share/1Fi4iuFhXQ/" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H7v4h3v8h4v-8h3l1-4h-4V8z"/></svg>Facebook</a><a class="follow" href="https://www.tiktok.com/@homelabtherightway" rel="me noopener"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 3c.3 2.4 1.8 3.9 4 4.1v3c-1.5 0-2.9-.5-4-1.3v6.3A5.4 5.4 0 1 1 10.6 9.7v3.1a2.4 2.4 0 1 0 2.4 2.4V3H16z"/></svg>TikTok</a></p></div>
+</div>
+<p class="muted small">Articles are drafted with AI help and based on the Homelab the Right Way books. Check commands against your own setup before running them. © 2026 Homelab the Right Way.</p>
+</div></footer>
+<script src="/homelab-the-right-way/assets/site.js?v=12" defer></script>
+</body>
+</html>
