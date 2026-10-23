@@ -3,7 +3,38 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 23 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>NutriSnap: a calorie tracker that scans meals with offline AI</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nutrisnap-offline-ai-calorie-tracker/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nutrisnap-offline-ai-calorie-tracker/</guid>
+<item><title>Free 3D-printed HC-SR501 PIR sensor case with a rim clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</guid>
+<pubDate>Fri, 23 Oct 2026 12:30:00 -0400</pubDate><description>A free 3D-printed case for the HC-SR501 PIR motion sensor with a snap-on lid and a sawtooth clip that grips a 9.7 to 11.5 mm tank or tote rim. STL and OpenSCAD downloads, the exact ABS print settings, and the real print timelapse.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/real-hero.jpg" type="image/jpeg" length="0"/>
+<category>3d printing</category><category>pir sensor</category><category>hc-sr501</category><category>turtle tank</category><category>openscad</category><category>abs</category><category>maker</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/real-hero.jpg" alt=""></p><p>The HC-SR501 is the cheap PIR motion sensor in a lot of DIY builds, and it usually ends up taped or zip-tied somewhere. This is a free case for it that <strong>clips straight onto the rim of a tank or tote</strong>: the board slides in, a lid snaps on, and a sawtooth U-clip underneath grips the rim. It was designed for a turtle tote whose rim measured 9.5 to 10.2 mm, and the OpenSCAD source is included so the clip can be changed for a different rim.</p>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/real-01-front-on-tote-rim.jpg" alt="The printed PIR case clipped onto the turtle tote rim, lens dome facing out" loading="lazy"></figure>
+<h2 id="printed-and-assembled">Printed and assembled</h2>
+<p>The photos here are the real case, printed in ABS, with an HC-SR501 inside and clipped onto the tote. The lens dome looks out through the front window, and the three Dupont wires come out of the slot in the back.</p>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/real-02-back-clip-and-wires.jpg" alt="Back of the case on the rim: the clip and the wires leaving the back slot" loading="lazy"></figure>
+<h2 id="downloads">Downloads</h2>
+<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/pir-case/turtle_pir_case_body_print.stl">turtle_pir_case_body_print.stl</a> (163 KB): the case body with the clip, already oriented for printing</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/pir-case/turtle_pir_case_lid_print.stl">turtle_pir_case_lid_print.stl</a> (76 KB): the snap-on lid</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/pir-case/turtle_pir_case.scad">turtle_pir_case.scad</a>: the editable OpenSCAD source</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/pir-case/abs_raft_profile.ini">abs_raft_profile.ini</a>: the PrusaSlicer profile the case was sliced with</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/pir-case/turtle-pir-case.zip">Everything as one zip</a></li></ul>
+<p>Also on <a href="https://www.printables.com/model/1887940-hc-sr501-pir-sensor-case-with-rim-clip-snap-on-lid">Printables</a>. License: CC BY 4.0, Charles Hartmann / Homelab the Right Way.</p>
+<h2 id="what-it-fits">What it fits</h2>
+<p>The standard <strong>HC-SR501</strong> board: a 32.5 x 24 mm PCB, a 23 mm lens dome that stands 15 mm off the board, the 3-pin header on one long edge and the two trim pots on the other. The board slides down into slots in the side walls (2.0 mm slots for the 1.6 mm board), header edge up, with the Dupont plugs already on.</p>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/render-assembly.jpg" alt="Render of the assembled case: body, board and lid" loading="lazy"></figure>
+<h2 id="the-case">The case</h2>
+<ul><li><strong>Size:</strong> 37.6 x 20.8 x 32 mm with the lid, 51 mm tall including the clip. 2.2 mm walls, 2.5 mm floor, 2.0 mm front.</li><li><strong>Front:</strong> a 24.2 mm window for the dome, which sticks out about 8.5 mm. A 1.6 mm outer chamfer keeps the wall from shading the dome's side view. The window is open to the top as a slot so the board can slide in with its dome on; a tongue on the lid closes it.</li><li><strong>Back:</strong> an 11 x 9.5 mm U-slot for the three Dupont plugs (they stick out about 4 mm), and a 22 x 6 mm screwdriver window over both trim pots. Sensitivity and delay can be adjusted with the case closed.</li><li><strong>Lid:</strong> two 1.0 x 5 mm legs with 0.5 mm bumps click into grooves in the side walls (about 0.3 mm of interference). Two tabs on the lid hold the board down.</li></ul>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/render-front.jpg" alt="Render of the front: the dome window and chamfer" loading="lazy"></figure>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/render-back-pots.jpg" alt="Render of the back: the wire slot and the pot window" loading="lazy"></figure>
+<h2 id="the-clip">The clip</h2>
+<p>The clip is a U under the floor that runs the full 37.6 mm width of the case. Each jaw is 19.05 mm (0.75 in) long and 3.5 mm thick, with a 1.2 mm lead-in at the tip. The gap is 11.5 mm at the root, and each jaw has <strong>6 sawtooth teeth</strong>, 0.9 mm tall on a 2.4 mm pitch, with the steep catch face up and the shallow ramp down. That leaves 9.7 mm between the tooth tips, so it grips rims about <strong>9.7 to 11.5 mm</strong> thick: it slides on easily and bites when pulled up.</p>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/render-section.jpg" alt="Cross-section render: the board slots and the clip teeth" loading="lazy"></figure>
+<h2 id="print-settings-that-worked">Print settings that worked</h2>
+<p>The case in the photos was printed in <strong>ABS</strong> with these settings (they are in <code>abs_raft_profile.ini</code>):</p>
+<ul><li>Nozzle 240 °C, bed 100 °C</li><li>0.2 mm layers, 0.4 mm nozzle, 4 perimeters, 40 percent gyroid infill</li><li><strong>Raft: 3 layers, 0.2 mm contact gap, 1.5 mm expansion.</strong> No brim, no skirt.</li><li><strong>No supports.</strong> The body prints upright with the jaw tips on the bed; the only bridges are the 11.5 mm floor between the jaws and the top of the pot window. The lid prints top face down.</li><li>Body and lid fit on one plate: 248 layers. PrusaSlicer estimated 2 h 50 min and about 16 g of ABS (15.3 cm³, 6.37 m of filament). The real print took about 3 h 08 min on OctoPrint.</li></ul>
+<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/plate-thumbnail.jpg" alt="The sliced plate as OctoPrint shows it: body and lid side by side" loading="lazy"></figure>
+<h2 id="assembly">Assembly</h2>
+<ol><li>Plug your three Dupont jumpers onto the sensor's header.</li><li>Slide the board down into the side slots, dome toward the front window, header edge up. The plugs come out through the back slot.</li><li>Press the lid on until it clicks.</li><li>Push the clip straight down over the rim.</li></ol>
+<h2 id="changing-it-openscad">Changing it (OpenSCAD)</h2>
+<p>The adjustable values are at the top of <code>turtle_pir_case.scad</code>. Edit, press F6, export the STL (<code>part = "print_body"</code> or <code>"print_lid"</code> gives the print-oriented parts).</p>
+<ul><li><code>gap</code>: jaw face to jaw face at the root, 11.5 mm. Measure your rim and set it a little over the thickness.</li><li><code>tooth_h</code>, <code>tooth_p</code>: tooth height (0.9 mm) and pitch (2.4 mm).</li><li><code>jaw_len</code>: how far the jaws reach below the floor, 19.05 mm.</li><li><code>clr</code>: board side clearance, 0.35 mm.</li><li><code>pcb_w</code>, <code>pcb_h</code>, <code>lens_d</code>: the board and dome size, from the HC-SR501 datasheet.</li></ul>
+<p>The design was drawn in OpenSCAD with AI help, from the HC-SR501 datasheet dimensions.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>NutriSnap: a calorie tracker that scans meals with offline AI</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nutrisnap-offline-ai-calorie-tracker/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nutrisnap-offline-ai-calorie-tracker/</guid>
 <pubDate>Fri, 23 Oct 2026 12:30:00 -0400</pubDate><description>NutriSnap estimates calories and macros from a photo of your meal using on-device AI, with no account, no uploads and no internet needed to scan.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.nutrisnap.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>calorie tracker</category><category>nutrition</category><category>privacy</category><category>offline ai</category>
@@ -1034,84 +1065,5 @@ adb shell dumpsys package dexopt | grep -A 1 $PKG</code></pre>
 <p>The broadcast prints "1" on success, and the dexopt status should read <code>speed-profile</code>.</p>
 <p>Ask from inside the app. <code>ProfileVerifier.getCompilationStatusAsync()</code> reports whether the profile was installed and compiled (<code>isCompiledWithProfile</code>, <code>hasProfileEnqueuedForCompilation()</code>). Log it in internal builds; "enqueued" is normal right after an install from outside Play.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>The generator module applies <code>androidx.baselineprofile</code> and targets <code>:app</code>.</li><li>The app depends on ProfileInstaller and on the generator through <code>baselineProfile(...)</code>.</li><li>Journeys cover launch, the main list, opening an item, and wait for content.</li><li><code>baseline-prof.txt</code> and <code>startup-prof.txt</code> are committed.</li><li><code>None</code> versus <code>Partial(Require)</code> shows a measured gap on a real device.</li><li><code>dumpsys package dexopt</code> reads <code>speed-profile</code>.</li><li>The profile is regenerated after screen redesigns, major Compose upgrades and before releases.</li></ul><p><a href="https://payhip.com/b/4nGE6">Go deeper: Fast by Default</a></p>]]></content:encoded></item><item><title>Ads that don&#x27;t get your app flagged: AdMob&#x27;s interstitial rules in plain English</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/admob-interstitial-rules-plain-english/</guid>
-<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>AdMob&#x27;s &quot;Disallowed interstitial implementations&quot; page in short, plus a real frequency cap from a shipping app and the two-flag check every ad call should make.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>admob</category><category>monetization</category><category>ads</category><category>kotlin</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>An interstitial fires on app launch. Another fires when the user taps Back. A banner sits one finger-width from the main button. Each one looks harmless on its own. Together they produce accidental clicks, which AdMob treats as invalid traffic, and reviews that mention nothing but the ads.</p>
-<p>This post covers what AdMob actually forbids for interstitials, how a small app turns that into a frequency cap in code, and the one check every ad call should make. It is drawn from Chapter 4 (Ad Placements That Don't Annoy) of <em>Get Paid for Your Android App</em>.</p>
-<h2 id="what-admob-forbids">What AdMob forbids</h2>
-<p>AdMob's help page "Disallowed interstitial implementations" lists the patterns that get apps flagged. In short:</p>
-<ul><li><strong>Not on app load or exit.</strong> Interstitials belong between pages of app content. For loading or returning to the app, Google recommends an app open ad instead.</li><li><strong>Not after every action.</strong> The page says you should place no more than one interstitial ad after every two user actions, and that this includes tapping the Back button. No interstitial immediately after another one was closed.</li><li><strong>Not in the way</strong> of navigation or the app's core content.</li><li><strong>Not unexpectedly.</strong> An interstitial that appears while the user is focused on a task (playing, filling a form, reading) leads to accidental clicks. Show them only at logical breaks, and preload them so they do not pop up late, after the next screen has already appeared.</li></ul>
-<h2 id="a-real-frequency-cap">A real frequency cap</h2>
-<p>The book uses the author's TipsyBuddy app (a drink-logging app) as a worked example. Its <code>InterstitialAdManager.kt</code> keeps two caps and skips ads entirely for subscribers:</p>
-<pre><code>// From TipsyBuddy, ads/InterstitialAdManager.kt (Legacy SDK)
-/** Minimum drinks logged between interstitial attempts. */
-private const val MIN_ACTIONS_BETWEEN_SHOWS = 3
-/** Minimum wall-clock gap between successful shows. */
-private const val MIN_INTERVAL_MS = 90_000L</code></pre>
-<p>So an interstitial needs at least 3 logged actions and at least 90 seconds since the last one. Three actions is stricter than AdMob's two-action floor.</p>
-<p>The file's header comment states the rule that matters most: it "fails silently if an ad cannot load" and "never blocks drink logging". An ad that is not ready is skipped, not waited for. The core action of the app always wins.</p>
-<h2 id="the-same-idea-with-the-next-gen-sdk">The same idea with the Next-Gen SDK</h2>
-<p>Here is the pattern written against the Next-Gen API from Google's "Load a single interstitial ad" guide. Imports from <code>com.google.android.libraries.ads.mobile.sdk.*</code> are omitted; Android Studio adds them.</p>
-<pre><code>class InterstitialController(
-    private val adUnitId: String,
-    private val isAdFree: () -&gt; Boolean,
-) {
-    @Volatile private var ad: InterstitialAd? = null
-    @Volatile private var loading = false
-    private var actions = 0
-    private var lastShownAt = 0L
-
-    fun preload() {
-        if (isAdFree() || ad != null || loading) return
-        loading = true
-        InterstitialAd.load(
-            AdRequest.Builder(adUnitId).build(),
-            object : AdLoadCallback&lt;InterstitialAd&gt; {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    this@InterstitialController.ad = ad; loading = false
-                }
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    loading = false   // try again at the next natural break
-                }
-            },
-        )
-    }
-
-    /** Call at a natural break, e.g. after an item is saved. Main thread. */
-    fun onNaturalBreak(activity: Activity) {
-        if (isAdFree()) return
-        actions++
-        val ready = ad
-        val now = SystemClock.elapsedRealtime()
-        val allowed = actions &gt;= MIN_ACTIONS &amp;&amp;
-            now - lastShownAt &gt;= MIN_INTERVAL_MS
-        if (ready == null || !allowed) { preload(); return }
-        ready.adEventCallback = object : InterstitialAdEventCallback {
-            override fun onAdDismissedFullScreenContent() { preload() }
-            override fun onAdFailedToShowFullScreenContent(
-                fullScreenContentError: FullScreenContentError
-            ) { preload() }
-        }
-        ad = null
-        actions = 0
-        lastShownAt = now
-        ready.show(activity)
-    }
-
-    companion object {
-        const val MIN_ACTIONS = 3   // stricter than AdMob's two-action floor
-        const val MIN_INTERVAL_MS = 90_000L
-    }
-}</code></pre>
-<p>What this gets right:</p>
-<ol><li><strong>It preloads.</strong> The ad is fetched ahead of time, so it is ready at the break instead of arriving late.</li><li><strong>It only shows at a natural break.</strong> You call <code>onNaturalBreak()</code> from the place in your UI where a unit of work ends, such as after an item is saved. Never on launch, never on exit.</li><li><strong>It counts actions and time.</strong> Both caps must pass.</li><li><strong>It never waits.</strong> If no ad is loaded, the moment passes and a new one is preloaded for next time.</li><li><strong>It respects paying users.</strong> <code>isAdFree()</code> short-circuits both loading and showing.</li></ol>
-<p>Call <code>preload()</code> once ads are ready, which in the book means after consent has been gathered and the SDK is initialized. Next-Gen also offers an ad preloading API (<code>InterstitialAdPreloader</code>) that keeps a cache filled for you. At the time of writing Google's guide labels it beta.</p>
-<h2 id="every-ad-call-checks-the-same-two-flags">Every ad call checks the same two flags</h2>
-<p>Two rules sit above every placement decision. A user who paid to remove ads must never see one again. An app without consent must never request one. The book puts both checks in one place:</p>
-<pre><code>val showAds: Boolean get() = adsReady.value &amp;&amp; !entitlements.adFree.value</code></pre>
-<p><code>adsReady</code> covers consent and SDK setup. <code>entitlements.adFree</code> covers the remove-ads purchase. Every banner, interstitial and native ad reads <code>showAds</code> instead of making its own judgment. When one of those two facts changes, every ad in the app follows.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>No interstitial on app load or exit. App open ads are the format designed for cold start and returning to the app.</li><li>No more than one interstitial per two user actions, and Back counts as an action.</li><li>Never show one interstitial right after another was closed.</li><li>Show interstitials only at a natural break, never mid-task.</li><li>Preload, and skip silently when no ad is ready. Never block the core action.</li><li>Cap by actions and by time (TipsyBuddy uses 3 actions and 90 seconds).</li><li>Route every ad through one flag that checks consent and the remove-ads entitlement.</li></ul><p><a href="https://payhip.com/b/zRXe3">Go deeper: Get Paid for Your Android App</a></p>]]></content:encoded></item>
+<ul><li>The generator module applies <code>androidx.baselineprofile</code> and targets <code>:app</code>.</li><li>The app depends on ProfileInstaller and on the generator through <code>baselineProfile(...)</code>.</li><li>Journeys cover launch, the main list, opening an item, and wait for content.</li><li><code>baseline-prof.txt</code> and <code>startup-prof.txt</code> are committed.</li><li><code>None</code> versus <code>Partial(Require)</code> shows a measured gap on a real device.</li><li><code>dumpsys package dexopt</code> reads <code>speed-profile</code>.</li><li>The profile is regenerated after screen redesigns, major Compose upgrades and before releases.</li></ul><p><a href="https://payhip.com/b/4nGE6">Go deeper: Fast by Default</a></p>]]></content:encoded></item>
 </channel></rss>
