@@ -3,7 +3,59 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 23 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Free 3D-printed HC-SR501 PIR sensor case with a rim clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</guid>
+<item><title>Your homelab has no idea it&#x27;s down: Uptime Kuma checks that catch real outages</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/uptime-kuma-keyword-monitors-retries-second-watcher/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/uptime-kuma-keyword-monitors-retries-second-watcher/</guid>
+<pubDate>Fri, 23 Oct 2026 12:30:00 -0400</pubDate><description>A ping says the guest is alive, not that the app works. Here is how to set up Uptime Kuma 2 with keyword monitors, sane retries, groups, maintenance windows and a second watcher, so the first person to learn something is down is you.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-30.jpg" type="image/jpeg" length="0"/>
+<category>uptime kuma</category><category>monitoring</category><category>homelab</category><category>docker</category><category>alerts</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-30.jpg" alt=""></p><p>Who tells you your homelab is down? If the honest answer is "whoever tries to use it first", the book's answer is that Uptime Kuma plus ntfy gets you from silence to useful alerts in an evening. <em>Watch Your Homelab</em> starts its monitoring stack with Uptime Kuma for a simple reason: it answers the first question users ask, "does it work right now?", by doing what a user does, on a timer, and telling you when the answer changes.</p>
+<h2 id="the-trap-checks-that-pass-while-the-service-is-broken">The trap: checks that pass while the service is broken</h2>
+<p>The tempting check is a ping. Ping tells you the guest's network stack is alive. It does not tell you that the web app inside returns a page, that the database behind it answers, or that the certificate has not expired.</p>
+<p>The second trap is the default of alerting on the first failed check. One dropped packet at 3 AM and your phone buzzes for a problem that fixed itself two seconds later.</p>
+<h2 id="install-it-on-the-monitoring-guest">Install it on the monitoring guest</h2>
+<p>Uptime Kuma 2 is the current major version (2.5 at the time the book was written, October 2026). The book runs it as its own small stack:</p>
+<pre><code># /opt/stacks/uptime-kuma/compose.yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/app/data</code></pre>
+<p>Start it with <code>docker compose up -d</code> and open port 3001 on the monitoring guest in a browser. The first visit creates the admin account.</p>
+<p>Two details matter here:</p>
+<ul><li><strong>Keep <code>./data</code> on local disk.</strong> The project states that network file systems such as NFS are not supported for it.</li><li><strong>Think twice before mounting the Docker socket.</strong> Monitoring containers by name needs <code>/var/run/docker.sock</code>, and mounting it gives the container full control of Docker on that host, read-only flag or not. The book's advice: prefer HTTP checks against the service itself, and only add the socket if container state is really what you want to watch.</li></ul>
+<h2 id="pick-the-monitor-type-that-matches-what-users-experience">Pick the monitor type that matches what users experience</h2>
+<p>Five monitor types cover almost everything in a homelab:</p>
+<div class="table"><table><thead><tr><th>Monitor</th><th>Checks</th><th>Use it for</th></tr></thead><tbody><tr><td>HTTP(s) - Keyword</td><td>The page loads and contains a word</td><td>Web apps: Immich, Nextcloud, Home Assistant</td></tr><tr><td>HTTP(s)</td><td>A status code in the accepted range</td><td>APIs and health endpoints</td></tr><tr><td>TCP Port</td><td>A port accepts a connection</td><td>Databases, SSH, MQTT</td></tr><tr><td>DNS</td><td>A name resolves to the expected record</td><td>Your local DNS resolver</td></tr><tr><td>Push</td><td>Something called a URL in time</td><td>Backups, cron jobs, the dead-man switch</td></tr></tbody></table></div>
+<p>The closer a check is to what a user actually does, the more a green light proves.</p>
+<p>The keyword monitor is the one to reach for first. A login page that returns HTTP 200 with a "502 Bad Gateway" body from a reverse proxy passes an HTTP check and fails a keyword check. Pick a word that only appears when the app really works, such as the app's name in the page title.</p>
+<p>For HTTPS services, open the monitor's advanced settings and turn on the certificate expiry notification. An expiring certificate is the most predictable outage there is, and the check costs nothing.</p>
+<h2 id="retries-ignore-the-blip-catch-the-outage">Retries: ignore the blip, catch the outage</h2>
+<p>Each monitor has a heartbeat interval, a retry count and a retry interval. A single failed check is marked pending and retried; the monitor only goes down (and notifies) after the first failure plus all retries fail. The book's homelab default:</p>
+<div class="table"><table><thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead><tbody><tr><td>Heartbeat interval</td><td>60 s</td><td>Fast enough for a home, light on the services</td></tr><tr><td>Retries</td><td>2</td><td>Ignores one-off blips</td></tr><tr><td>Heartbeat retry interval</td><td>20 s</td><td>Confirms a real outage within about a minute</td></tr><tr><td>Resend notification if down</td><td>0 or a few hundred</td><td>Off, or a reminder every few hours</td></tr></tbody></table></div>
+<p>One blip produces no alert; a real outage produces one alert about a minute later. For slow-by-nature things, like a NAS spinning up its disks, use a longer interval or a maintenance window rather than more retries.</p>
+<h2 id="groups-tags-and-maintenance-windows">Groups, tags and maintenance windows</h2>
+<p>Use groups to mirror how you think about the lab:</p>
+<ul><li><strong>Infrastructure:</strong> Proxmox, the firewall, DNS</li><li><strong>Home:</strong> Home Assistant, the MQTT broker</li><li><strong>Apps:</strong> everything users open</li></ul>
+<p>A group shows down when any child is down, so the overview reads at a glance.</p>
+<p>Maintenance windows silence notifications for a set of monitors during planned work. Create a recurring one for your monthly update hour, so the planned reboot of the Proxmox host does not page you.</p>
+<h2 id="jobs-that-run-on-a-schedule-push-monitors">Jobs that run on a schedule: push monitors</h2>
+<p>For backups and cron jobs, a push monitor turns the check around: Uptime Kuma waits for the job to call a unique URL and goes down if no call arrives in time. For a nightly job, set the interval slightly longer than the schedule (the book uses 25 hours) and call the URL at the end of the job, only on success:</p>
+<pre><code>curl -fsS -m 10 --retry 3 "$PUSH?status=up&amp;msg=OK"</code></pre>
+<p>With <code>set -e</code> at the top of the script, a failing step ends it before the curl, the heartbeat never arrives, and the monitor goes down. Silence is the failure signal.</p>
+<h2 id="who-watches-the-watcher">Who watches the watcher?</h2>
+<p>If the monitoring guest dies, its own Uptime Kuma cannot tell you. The book closes that gap with two small moves:</p>
+<ol><li>Run a second Uptime Kuma on separate hardware (a Raspberry Pi or any always-on machine) with a handful of monitors: the monitoring guest, the Proxmox web interface on port 8006, the router.</li><li>Add a Push monitor on that second instance and have the monitoring guest call it every minute from cron:</li></ol>
+<pre><code># crontab -e on the monitoring guest
+* * * * * curl -fsS -m 10 -o /dev/null http://192.168.10.5:3001/api/push/Wd9Kq2</code></pre>
+<p>If the guest, its host or its network goes away, the pushes stop and the second instance alerts. (The address and push token are the book's example lab; use the URL your own push monitor shows.)</p>
+<h2 id="notifications-and-a-status-page">Notifications and a status page</h2>
+<p>Add a notification once under Settings, then Notifications, and attach it to many monitors. The book uses ntfy (its next chapter) and ticks "Default enabled" so new monitors get it automatically.</p>
+<p>A status page shows chosen monitors without a login. Add only the family-facing services and it answers "is it just me?" for everyone in the house. Keep it on the internal network: publishing it on the internet tells strangers what you run.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Uptime Kuma 2 running from a Compose file, data on local disk</li><li>A keyword monitor for every web app; TCP or DNS monitors for the rest</li><li>Retries set to 2 with a 20 s retry interval; certificate expiry on for HTTPS</li><li>Groups for Infrastructure, Home and Apps, plus a recurring maintenance window</li><li>Push monitors on every backup and scheduled job</li><li>A second watcher on separate hardware with a dead-man push from the monitoring guest</li><li>One default notification and an internal-only status page</li></ul><p><a href="https://payhip.com/b/An62R">Go deeper: Watch Your Homelab</a></p>]]></content:encoded></item><item><title>Free 3D-printed HC-SR501 PIR sensor case with a rim clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-hc-sr501-pir-sensor-case-3d-print/</guid>
 <pubDate>Fri, 23 Oct 2026 12:30:00 -0400</pubDate><description>A free 3D-printed case for the HC-SR501 PIR motion sensor with a snap-on lid and a sawtooth clip that grips a 9.7 to 11.5 mm tank or tote rim. STL and OpenSCAD downloads, the exact ABS print settings, and the real print timelapse.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/pir-case/real-hero.jpg" type="image/jpeg" length="0"/>
 <category>3d printing</category><category>pir sensor</category><category>hc-sr501</category><category>turtle tank</category><category>openscad</category><category>abs</category><category>maker</category>
@@ -963,107 +1015,5 @@ zfs destroy backup/restore-test</code></pre>
 <p>9 x 7.5 inch mouse pad with a non-slip rubber base. $20.50.</p>
 <h2 id="where-everything-lives">Where everything lives</h2>
 <p>The store now carries 35 designs across tees, hoodies, a crewneck, hats, mugs, stickers, desk mats, a mouse pad, a poster and a tote. The full list with product photos is on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>, and the store link is in the link tree. Sizes, colours and current prices are on each product page; the prices above are before shipping, which Printful calculates at checkout.</p>
-<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Your app starts slow after every update: generate a Baseline Profile and prove it is applied</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/baseline-profile-generate-and-verify-android/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/baseline-profile-generate-and-verify-android/</guid>
-<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>After every install and update, Android runs your code interpreted and JIT-compiled until the device compiles it in the background. A Baseline Profile generated with the androidx.baselineprofile plugin makes your critical journeys fast from the first launch, and three checks prove it actually reached the device.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>performance</category><category>baseline profiles</category><category>jetpack compose</category><category>macrobenchmark</category><category>kotlin</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A Baseline Profile is the single change most likely to make an existing Compose app start faster and scroll more smoothly without touching its logic. It is a list of the classes and methods your app needs on its most important paths, shipped inside the app, so the runtime can compile them ahead of time on install instead of discovering them slowly on the user's phone. This post generates one with the Baseline Profile Gradle plugin and then proves, three ways, that it is applied.</p>
-<h2 id="the-trap">The trap</h2>
-<p>Your Kotlin compiles to DEX bytecode. The Android Runtime (ART) can interpret it, JIT-compile hot methods while the app runs, or run machine code compiled ahead of time (AOT). ART does not AOT-compile your whole app on install. It records which methods were used into a profile and compiles them later, when the device is idle and charging.</p>
-<p>That works eventually, and "eventually" is the problem. After every install and every update, users start in the slow path until the device has recorded enough and found a quiet moment to compile it. Google Play's Cloud Profiles help later installs of a release, but they need time and users to build up, so they do nothing for the first users of each new version.</p>
-<p>Jetpack libraries, Compose included, ship their own profiles, which is why a plain Compose app already benefits a little. Library profiles only cover library code, though. Your screens, ViewModels and repositories are in nobody's profile but yours. Google's documentation states that Baseline Profiles improve code execution speed by about 30% from the first launch for the code paths they include; your own gain depends on your app, and Macrobenchmark tells you what it is.</p>
-<h2 id="step-1-the-generator-module">Step 1: the generator module</h2>
-<p>The Baseline Profile Gradle plugin (<code>androidx.baselineprofile</code>, 1.5.0) does the plumbing. Android Studio's Baseline Profile Generator module template (File &gt; New &gt; New Module, Android Studio Iguana or newer, AGP 8.2 or newer) writes this for you. The generator is a <code>com.android.test</code> module that points at the app:</p>
-<pre><code>// baselineprofile/build.gradle.kts
-plugins {
-    id("com.android.test")
-    id("org.jetbrains.kotlin.android")
-    id("androidx.baselineprofile")
-}
-android {
-    namespace = "com.example.fieldnotes.baselineprofile"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 28
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    targetProjectPath = ":app"
-}
-dependencies {
-    implementation("androidx.benchmark:benchmark-macro-junit4:1.5.0")
-    implementation("androidx.test.uiautomator:uiautomator:2.4.0")
-}</code></pre>
-<p>Generation needs root on the device, except on Android 13 (API 33) and newer, where Macrobenchmark can collect profiles without root. A Gradle-managed device with <code>systemImageSource = "aosp"</code> works everywhere because AOSP images allow root.</p>
-<p>The app module applies the same plugin, depends on the generator, and includes ProfileInstaller:</p>
-<pre><code>// app/build.gradle.kts
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("androidx.baselineprofile")
-}
-dependencies {
-    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
-    baselineProfile(project(":baselineprofile"))
-}
-baselineProfile {
-    saveInSrc = true      // commit the generated profile
-    mergeIntoMain = true  // one profile for all variants
-}</code></pre>
-<p>ProfileInstaller matters for installs that do not come from Google Play: sideloaded builds, internal testing installs and other stores. There, Play is not around to hand the profile to ART, so ProfileInstaller writes it on the app's first launch.</p>
-<h2 id="step-2-write-the-journeys">Step 2: write the journeys</h2>
-<p>The generator is an instrumented test with <code>BaselineProfileRule</code>. It drives the app through the paths users take every day, and the rule records every class and method that ran:</p>
-<pre><code>@RunWith(AndroidJUnit4::class)
-@LargeTest
-class BaselineProfileGenerator {
-    @get:Rule val rule = BaselineProfileRule()
-
-    @Test fun generate() = rule.collect(
-        packageName = "com.example.fieldnotes",
-        includeInStartupProfile = true,
-    ) {
-        pressHome()
-        startActivityAndWait()
-        device.wait(Until.hasObject(By.res("notes_list")), 5_000)
-
-        val list = device.findObject(By.res("notes_list"))
-        list.setGestureMargin(device.displayWidth / 5)
-        list.fling(Direction.DOWN)
-        device.waitForIdle()
-
-        device.findObject(By.res("note_row")).click()
-        device.wait(Until.hasObject(By.res("editor_body")), 5_000)
-        device.pressBack()
-    }
-}</code></pre>
-<p>The test finds elements by resource id, so in Compose expose test tags as resource ids once near the root with <code>Modifier.semantics { testTagsAsResourceId = true }</code> and tag the elements the generator needs with <code>Modifier.testTag("notes_list")</code>.</p>
-<p>Good journeys follow a few rules. Cover what users actually do, most common first. Wait for content, because if the journey moves on before the list loads, the list's code is not in the profile. Keep it deterministic with local or seeded data rather than a live server. And never sign in to real accounts from a generator.</p>
-<h2 id="step-3-generate-and-commit">Step 3: generate and commit</h2>
-<p>Run the plugin's task, not the test directly:</p>
-<pre><code>./gradlew :app:generateBaselineProfile</code></pre>
-<p>The plugin builds the app, runs the generator and copies the result into your sources:</p>
-<pre><code>app/src/main/generated/baselineProfiles/baseline-prof.txt
-app/src/main/generated/baselineProfiles/startup-prof.txt</code></pre>
-<p>Commit both. Every release build compiles them into the app, and you will find the binary form under <code>assets/dexopt/baseline.prof</code> in the AAB or APK. The rules inside are plain text: <code>HSPLcom/example/fieldnotes/ui/NotesViewModel;-&gt;loadNotes()V</code>, where H means hot, S startup and P post-startup.</p>
-<p>The second file is a Startup Profile, produced because of <code>includeInStartupProfile = true</code>. It tells R8 to put every class needed at startup into the primary DEX file. It needs R8 enabled for release (<code>isMinifyEnabled = true</code>) and DEX layout optimization, which is on by default from AGP 8.3.</p>
-<h2 id="step-4-prove-it-is-applied">Step 4: prove it is applied</h2>
-<p>A profile that does not reach the device is just a file in a repository.</p>
-<p>Benchmark it. Compare a fresh install with no ahead-of-time compilation against one that requires your profile and fails loudly if the app has none:</p>
-<pre><code>@Test fun startupNoCompilation() = startup(CompilationMode.None())
-
-@Test fun startupBaselineProfile() = startup(
-    CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))</code></pre>
-<p>Run both on the same physical device and compare the median <code>timeToInitialDisplayMs</code>.</p>
-<p>Check the device by hand:</p>
-<pre><code>PKG=com.example.fieldnotes
-adb install app-release.apk
-adb shell am broadcast \
-  -a androidx.profileinstaller.action.INSTALL_PROFILE \
-  $PKG/androidx.profileinstaller.ProfileInstallReceiver
-adb shell am force-stop $PKG
-adb shell cmd package compile -f -m speed-profile $PKG
-adb shell dumpsys package dexopt | grep -A 1 $PKG</code></pre>
-<p>The broadcast prints "1" on success, and the dexopt status should read <code>speed-profile</code>.</p>
-<p>Ask from inside the app. <code>ProfileVerifier.getCompilationStatusAsync()</code> reports whether the profile was installed and compiled (<code>isCompiledWithProfile</code>, <code>hasProfileEnqueuedForCompilation()</code>). Log it in internal builds; "enqueued" is normal right after an install from outside Play.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>The generator module applies <code>androidx.baselineprofile</code> and targets <code>:app</code>.</li><li>The app depends on ProfileInstaller and on the generator through <code>baselineProfile(...)</code>.</li><li>Journeys cover launch, the main list, opening an item, and wait for content.</li><li><code>baseline-prof.txt</code> and <code>startup-prof.txt</code> are committed.</li><li><code>None</code> versus <code>Partial(Require)</code> shows a measured gap on a real device.</li><li><code>dumpsys package dexopt</code> reads <code>speed-profile</code>.</li><li>The profile is regenerated after screen redesigns, major Compose upgrades and before releases.</li></ul><p><a href="https://payhip.com/b/4nGE6">Go deeper: Fast by Default</a></p>]]></content:encoded></item>
+<p>If you are new here, the <a href="https://payhip.com/HomelabtheRightWay">books</a> are where the slogans come from. Every one of them has a free sample chapter.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
 </channel></rss>
