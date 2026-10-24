@@ -3,7 +3,68 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 24 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>CaptionBurn: burn auto-captions into videos on your phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/captionburn-on-device-video-captions/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/captionburn-on-device-video-captions/</guid>
+<item><title>Stop clicking through the installer: one cloud-init golden image for every Proxmox VM</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/cloud-init-golden-image-proxmox-template/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/cloud-init-golden-image-proxmox-template/</guid>
+<pubDate>Sat, 24 Oct 2026 12:30:00 -0400</pubDate><description>Build one Debian 13 cloud-image template in Proxmox with qm create and cloud-init (user, SSH key, network, guest agent), then clone it for every new VM instead of running an installer.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-01.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>cloud-init</category><category>debian</category><category>templates</category><category>automation</category><category>homelab</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-01.jpg" alt=""></p><p>Every new VM that starts with an ISO and a click-through installer is a little different from the last one. A different username here, a forgotten SSH key there, a typo in a static address. <em>Automate Your Homelab</em> starts its rebuildable lab somewhere else: one template made from a distribution's official cloud image, cloned for every VM, with cloud-init filling in the personal details on first boot.</p>
+<p>Cloud images are small, minimal installs built to be configured on first boot by cloud-init, which reads its settings from a little drive that Proxmox attaches to the VM. That is how a fresh clone wakes up with the right hostname, your user, your SSH key and its address, without anyone touching a console.</p>
+<h2 id="the-trap-hand-built-vms-that-drift">The trap: hand-built VMs that drift</h2>
+<p>The installer route has two problems. It is slow, and it is not repeatable: nothing records what you typed, so the next VM only matches the last one if you remember every answer. A template built from commands fixes both. A template cannot be started, only cloned, and as the book puts it, that is the point: nobody logs into it, so it never drifts.</p>
+<h2 id="pick-the-image">Pick the image</h2>
+<p>The book uses Debian 13 (trixie). Debian publishes cloud images at cloud.debian.org, and at the time of writing (October 2026) the trixie folder holds, among others:</p>
+<ul><li><strong>debian-13-genericcloud-amd64.qcow2</strong>: for cloud and virtual machines, with a smaller set of hardware drivers. This is the one for Proxmox VMs.</li><li><strong>debian-13-generic-amd64.qcow2</strong>: the same system with a wider set of drivers, for odd hardware.</li></ul>
+<p>Ubuntu publishes its own cloud images at cloud-images.ubuntu.com, and the commands below are the same for either.</p>
+<h2 id="build-the-template-once">Build the template once</h2>
+<p>Run these on the Proxmox host. They follow the Proxmox VE Cloud-Init Support documentation; VM ID 9000 and the storage names are examples.</p>
+<pre><code>cd /var/lib/vz/template/iso
+wget https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
+
+qm create 9000 --name debian13-tmpl --memory 2048 \
+  --cores 2 --net0 virtio,bridge=vmbr0 \
+  --scsihw virtio-scsi-pci --ostype l26 --agent enabled=1
+
+qm set 9000 --scsi0 local-lvm:0,import-from=/var/lib/vz/template/iso/debian-13-genericcloud-amd64.qcow2
+qm set 9000 --ide2 local-lvm:cloudinit
+qm set 9000 --boot order=scsi0
+qm set 9000 --serial0 socket --vga serial0</code></pre>
+<p>What each step does:</p>
+<ul><li><code>qm create</code> makes an empty VM with a VirtIO network card on bridge vmbr0 and the VirtIO SCSI controller that cloud images expect.</li><li><code>import-from</code> copies the downloaded image into a new disk on local-lvm and attaches it as scsi0.</li><li><code>--ide2 local-lvm:cloudinit</code> adds the small cloud-init drive. Proxmox writes the user, network and SSH settings onto it.</li><li><code>--boot order=scsi0</code> boots straight from the disk, skipping the CD-ROM check.</li><li>The serial console is what many cloud images expect as their display. If a particular image does not work with it, switch back to the default display.</li></ul>
+<h2 id="set-the-defaults-every-clone-inherits">Set the defaults every clone inherits</h2>
+<p>Settings made on the template are inherited by every clone, so put the parts that are the same everywhere here:</p>
+<pre><code>qm set 9000 --ciuser admin
+qm set 9000 --sshkeys /root/admin_ed25519.pub
+qm set 9000 --ipconfig0 ip=dhcp
+qm set 9000 --searchdomain home.example.com --nameserver 192.168.20.1</code></pre>
+<p><code>--sshkeys</code> takes a file with one public key per line. Use keys, not <code>--cipassword</code>: the Proxmox documentation itself says passwords are generally not recommended here.</p>
+<h2 id="add-the-guest-agent-on-first-boot">Add the guest agent on first boot</h2>
+<p>The Debian cloud image does not include the QEMU guest agent, and without it Proxmox (and OpenTofu, later in the book) cannot read the VM's address or shut it down cleanly.</p>
+<p>The <code>--cicustom</code> option lets you supply your own files in place of the generated ones. It accepts user, network, meta and vendor files. The catch: replacing <strong>user</strong> throws away the user and SSH key settings above. Add a <strong>vendor</strong> file instead, which cloud-init merges with the generated user data.</p>
+<p>Custom files must live on a storage that allows the snippets content type. On the default local storage that is <code>/var/lib/vz/snippets/</code>; enable the content type under Datacenter &gt; Storage &gt; local &gt; Content, then create the file:</p>
+<pre><code>#cloud-config
+# /var/lib/vz/snippets/debian-vendor.yaml
+package_update: true
+packages:
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable --now qemu-guest-agent</code></pre>
+<p>Attach it and check what a clone will receive:</p>
+<pre><code>qm set 9000 --cicustom "vendor=local:snippets/debian-vendor.yaml"
+qm cloudinit dump 9000 user</code></pre>
+<p>The dump command prints the user data Proxmox will generate, which is the quickest way to see what a clone gets. In a cluster, watch out: custom cloud-init files must be available on every node a VM may migrate to, or the VM will not start there. Use shared storage for snippets or copy the file to every node.</p>
+<h2 id="turn-it-into-a-template-then-clone">Turn it into a template, then clone</h2>
+<pre><code>qm template 9000
+
+qm clone 9000 120 --name docker01
+qm set 120 --ipconfig0 ip=192.168.20.120/24,gw=192.168.20.1
+qm disk resize 120 scsi0 20G
+qm start 120</code></pre>
+<p>After a minute, <code>ssh admin@192.168.20.120</code> should work with your key. The cloud image's disk is small, which is why the clone's disk is grown with <code>qm disk resize</code>; cloud-init grows the root filesystem to fill it on boot.</p>
+<p>By default Proxmox tries to make a linked clone, which depends on the template. For a rebuildable lab the book prefers full clones (pass <code>--full</code>), because the template will be rebuilt whenever a new Debian point release arrives, and full clones do not care.</p>
+<h2 id="keep-the-template-fresh-and-keep-it-in-git">Keep the template fresh, and keep it in Git</h2>
+<p>Cloud images are rebuilt regularly with current packages. Every few months, or when a Debian point release comes out, download the new image and create the template again under the same ID, so new VMs start current. Because every step is a command, the rebuild is a script: save the commands as <code>cloud-init/build-template.sh</code> in your lab's repository, and keep the vendor snippet in the repository's <code>cloud-init/</code> folder too. The copy on the Proxmox host is just a deployment of it.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Download <strong>debian-13-genericcloud-amd64.qcow2</strong>, not the generic image, for Proxmox VMs.</li><li>Create the VM with VirtIO networking, the VirtIO SCSI controller and <code>--agent enabled=1</code>.</li><li>Import the image with <code>import-from</code>, add the cloudinit drive on ide2, boot from scsi0, serial console on.</li><li>Set <code>--ciuser</code>, <code>--sshkeys</code>, <code>--ipconfig0</code> and DNS on the template; skip <code>--cipassword</code>.</li><li>Add qemu-guest-agent through a <strong>vendor</strong> snippet, never by replacing user data.</li><li>Check the result with <code>qm cloudinit dump 9000 user</code> before running <code>qm template 9000</code>.</li><li>Clone with <code>--full</code>, set the clone's address, grow its disk, start it.</li><li>Save the build as <code>cloud-init/build-template.sh</code> and rebuild on each Debian point release.</li></ul><p><a href="https://payhip.com/b/ZcsXi">Go deeper: Automate Your Homelab</a></p>]]></content:encoded></item><item><title>CaptionBurn: burn auto-captions into videos on your phone</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/captionburn-on-device-video-captions/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/captionburn-on-device-video-captions/</guid>
 <pubDate>Sat, 24 Oct 2026 12:30:00 -0400</pubDate><description>CaptionBurn turns speech into captions with on-device AI, can translate them, and burns them permanently into the video so they show on any player.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charlesh.captionburn.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>captions</category><category>video editing</category><category>subtitles</category><category>privacy</category>
@@ -915,110 +976,5 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <p>Nightsay and EventCrew are with Google for review. Each one gets its Play link here and on the channel the day it goes live.</p>
 <h2 id="what-you-will-find-on-the-channel">What you will find on the channel</h2>
 <p>Short promo videos and walkthroughs for each app: what it does, what the screens look like, and who it is for. The first ones are going up now. If you want to know when a new app or a big update lands, subscribing to <a href="https://www.youtube.com/@HartmannStudiosApps">@HartmannStudiosApps</a> is the easiest way to hear about it.</p>
-<p>The homelab side isn't going anywhere: the daily videos, the ebooks and this blog carry on as before. Every link for both lives on the <a href="https://chartmann1590.github.io/homelab-the-right-way/links/">links page</a>.</p><p><a href="https://play.google.com/store/apps/details?id=com.charles.shapeshade">Get Shape &amp; Shade: Face Shape on Google Play</a></p>]]></content:encoded></item><item><title>Snapshots on a schedule, replicas on another box: sanoid and syncoid pull replication for ZFS</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/</guid>
-<pubDate>Sat, 17 Oct 2026 12:30:00 -0400</pubDate><description>ZFS snapshots undo deletions and bad upgrades, but they die with the pool. A sanoid retention policy, syncoid pull replication run from the backup box, and a monthly checksum restore turn snapshots into something you can actually recover from.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>zfs</category><category>truenas</category><category>nas</category><category>snapshots</category><category>sanoid</category><category>syncoid</category><category>backups</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A ZFS snapshot is a read-only picture of a dataset at one instant. It takes about a second to create and costs no space at first. Snapshots on a schedule, thinned automatically and copied to a second machine, are the single biggest upgrade most homelab storage can get. This post builds exactly that with two tools from the same project: sanoid takes and prunes snapshots, syncoid replicates them.</p>
-<h2 id="the-trap">The trap</h2>
-<p>Homelab storage usually fails in one of two opposite ways. The first lab has no snapshots at all, so an accidental <code>rm -rf</code> on a share is permanent. The second takes snapshots every fifteen minutes and never prunes them: ten thousand of them, a pool that is mysteriously full, and a <code>zfs list -t snapshot</code> that takes a minute to answer.</p>
-<p>Both labs also believe the snapshots are their backup. They are not. A snapshot lives in the same pool as the data. If the pool dies (two disks in a RAIDZ1, a controller that writes garbage, a mistaken <code>zpool destroy</code>), the snapshots die with it. Snapshots protect against changes: deletions, overwrites, bad upgrades, ransomware on a share. Backups protect against loss. You need both, and replication to a second box gets you most of the way.</p>
-<h2 id="why-snapshots-are-cheap">Why snapshots are cheap</h2>
-<p>ZFS never overwrites data in place. When a block changes, the new version goes to a new location and the dataset's pointers move to it. A snapshot simply keeps the old pointers, so until something changes the snapshot and the live dataset share every block.</p>
-<p>That also tells you where snapshot space goes. A snapshot grows as the live data moves away from it: delete a 20 GB folder and the space is not freed until every snapshot that still references those blocks is destroyed. When a pool fills up unexpectedly, this command sorts snapshots by the space only they hold, and the culprit is usually at the bottom:</p>
-<pre><code>zfs list -t snapshot -o name,used -s used</code></pre>
-<h2 id="step-1-a-retention-policy-with-sanoid">Step 1: a retention policy with sanoid</h2>
-<p>Debian and Proxmox VE package sanoid, and the package ships a systemd timer that runs it every 15 minutes:</p>
-<pre><code>apt install sanoid
-systemctl enable --now sanoid.timer
-systemctl list-timers | grep sanoid</code></pre>
-<p>The policy lives in <code>/etc/sanoid/sanoid.conf</code>: datasets at the top, templates at the bottom. A trimmed version:</p>
-<pre><code>[tank/documents]
-	use_template = important
-[tank/shares]
-	use_template = standard
-	recursive = yes
-[tank/media]
-	use_template = light
-
-[template_important]
-	frequently = 0
-	hourly = 48
-	daily = 30
-	weekly = 8
-	monthly = 12
-	yearly = 0
-	autosnap = yes
-	autoprune = yes
-
-[template_standard]
-	hourly = 24
-	daily = 14
-	weekly = 4
-	monthly = 3
-	autosnap = yes
-	autoprune = yes
-
-[template_light]
-	hourly = 0
-	daily = 7
-	weekly = 0
-	monthly = 0
-	autosnap = yes
-	autoprune = yes</code></pre>
-<p>Each dataset section names a template, and <code>recursive = yes</code> applies it to every child dataset. The numbers are how many snapshots of each kind to keep. Recent history is dense (48 hourlies) and older history is sparse (12 monthlies), so about a hundred snapshots cover a full year, and sanoid deletes each one when it falls off the end of its rung.</p>
-<p>Anything you leave out comes from <code>/etc/sanoid/sanoid.defaults.conf</code>, which you should not edit, so set every interval explicitly in your own templates.</p>
-<p>Test the policy without touching anything, then take a round of snapshots and look:</p>
-<pre><code>sanoid --cron --readonly --verbose      # simulate
-sanoid --take-snapshots --verbose       # take snapshots now
-zfs list -t snapshot -o name,used -s creation tank/documents | tail -5</code></pre>
-<p>One rule if the box also runs Proxmox guests: pick one snapshot owner per dataset. Proxmox's own VM snapshots and storage replication create and delete snapshots on the same zvols. If Proxmox replication or vzdump with PBS already covers your guests, leave <code>tank/vm</code> out of sanoid, or keep its policy very light.</p>
-<h2 id="step-2-how-incremental-replication-works">Step 2: how incremental replication works</h2>
-<p><code>zfs send</code> turns a snapshot into a stream of bytes; <code>zfs receive</code> turns that stream back into a dataset on another pool. The first send is full. Every later send is incremental: only the blocks that changed between two snapshots travel. Both sides must keep the last common snapshot, or the next incremental has nothing to build on.</p>
-<p>By hand it looks like this, with <code>nas</code> and <code>backup</code> as SSH host aliases with key-based login:</p>
-<pre><code>zfs snapshot tank/documents@rep-1
-zfs send tank/documents@rep-1 | ssh backup zfs receive -u backup/documents
-zfs snapshot tank/documents@rep-2
-zfs send -i @rep-1 tank/documents@rep-2 | ssh backup zfs receive -u backup/documents</code></pre>
-<p><code>zfs receive -u</code> does not mount the received dataset, which avoids mountpoint clashes on the target. Tracking the last common snapshot for every dataset, every night, is the part nobody keeps up with. syncoid does it for you: it finds the newest common snapshot, sends the incremental, resumes interrupted transfers when both sides support it, and cleans up its own snapshots.</p>
-<h2 id="step-3-pull-do-not-push">Step 3: pull, do not push</h2>
-<p>A backup box that pulls from the NAS is safer than a NAS that pushes to the backup box. If the NAS is compromised, an attacker holding its SSH key can delete everything on a push target. With pull replication, the NAS has no credentials for the backup box at all.</p>
-<p>On the backup box, a small script run by cron at 01:30:</p>
-<pre><code>cat &gt; /usr/local/sbin/pull-replicas &lt;&lt;'EOF'
-#!/bin/sh
-S="/usr/sbin/syncoid --recursive --no-sync-snap --quiet"
-$S nas:tank/photos    backup/photos
-$S nas:tank/documents backup/documents
-EOF
-chmod +x /usr/local/sbin/pull-replicas
-echo '30 1 * * * root /usr/local/sbin/pull-replicas' &gt; /etc/cron.d/pull-replicas</code></pre>
-<p>By default syncoid creates its own short-lived <code>syncoid_</code> snapshot for each run. <code>--no-sync-snap</code> tells it to use the snapshots sanoid already took, which keeps the target's history identical to the source. <code>--recursive</code> includes child datasets. For an encrypted dataset, add <code>--sendoptions=w</code> for a raw send: the blocks travel and are stored still encrypted, and the backup box never needs the key. Keep every passphrase somewhere that does not depend on the pool it unlocks.</p>
-<p>The received datasets still need pruning. On the backup box, give them a template that never takes snapshots and only prunes what replication brings in:</p>
-<pre><code>[backup/photos]
-	use_template = backup
-	recursive = yes
-[backup/documents]
-	use_template = backup
-	recursive = yes
-
-[template_backup]
-	autosnap = no
-	autoprune = yes
-	hourly = 48
-	daily = 30
-	weekly = 8
-	monthly = 12</code></pre>
-<p>For tighter security, replicate as a non-root user with ZFS permission delegation: on the NAS, <code>zfs allow -u replicator send,hold,snapshot tank</code>, and run syncoid on the backup box with <code>--no-privilege-elevation</code>. The receiving user needs <code>create,mount,receive</code> on the target dataset. Test the delegation once by hand before relying on it.</p>
-<p>A TrueNAS box works as the target too. It speaks standard ZFS over SSH, so the same syncoid commands work; create the destination parent dataset in the TrueNAS UI first and let TrueNAS own the retention for those datasets.</p>
-<h2 id="step-4-prove-it">Step 4: prove it</h2>
-<p>Replication you have never restored from is a hope, not a plan. Once a month, restore one real file from the replica and compare checksums from both machines:</p>
-<pre><code># On the backup box
-zfs clone backup/documents@autosnap_2026-10-16_00:00:02_daily backup/restore-test
-zfs set mountpoint=/mnt/restore-test backup/restore-test
-sha256sum /mnt/restore-test/taxes/2025.pdf
-ssh nas sha256sum /tank/documents/taxes/2025.pdf
-zfs destroy backup/restore-test</code></pre>
-<p>Matching checksums are the proof.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Every dataset that matters has a sanoid template, and <code>tank/vm</code> has exactly one snapshot owner.</li><li><code>sanoid.timer</code> is enabled and <code>zfs list -t snapshot</code> shows recent autosnaps.</li><li>A second box receives incremental replication, ideally by pulling.</li><li>Encrypted datasets replicate raw, and the keys are stored off the pool.</li><li>The backup box prunes with a <code>backup</code> template (<code>autosnap = no</code>).</li><li>You have restored one file from the replica and compared checksums.</li></ul><p><a href="https://payhip.com/b/d2XuW">Go deeper: Store It Right</a></p>]]></content:encoded></item>
+<p>The homelab side isn't going anywhere: the daily videos, the ebooks and this blog carry on as before. Every link for both lives on the <a href="https://chartmann1590.github.io/homelab-the-right-way/links/">links page</a>.</p><p><a href="https://play.google.com/store/apps/details?id=com.charles.shapeshade">Get Shape &amp; Shade: Face Shape on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
