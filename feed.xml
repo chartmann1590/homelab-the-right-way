@@ -3,7 +3,152 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 25 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Podcast, episode 2: Blue by Sunday — lock down your home network</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-2-lock-down-your-home-network/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-2-lock-down-your-home-network/</guid>
+<item><title>Promtail is dead: ship your homelab logs to Loki with Grafana Alloy</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/promtail-is-dead-grafana-alloy-loki/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/promtail-is-dead-grafana-alloy-loki/</guid>
+<pubDate>Sun, 25 Oct 2026 12:30:00 -0400</pubDate><description>Promtail reached end of life on March 2, 2026. Here is the replacement pipeline from Watch Your Homelab, with Loki 3.7, retention that actually deletes, Grafana Alloy reading the journal and Docker logs, and LogQL queries worth saving.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-02.jpg" type="image/jpeg" length="0"/>
+<category>loki</category><category>grafana alloy</category><category>promtail</category><category>logging</category><category>monitoring</category><category>homelab</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-02.jpg" alt=""></p><p>Metrics tell you that something changed. Logs tell you why. <em>Watch Your Homelab</em> gives logs their own chapter because the usual homelab approach only works until the day you actually need it.</p>
+<h2 id="the-trap-ssh-journalctl-and-a-dead-agent">The trap: SSH, journalctl, and a dead agent</h2>
+<p>The default homelab log strategy is SSH and <code>journalctl</code>, one machine at a time, after the fact. By the time you look, the container was recreated and its logs went with it, or the journal on a small root disk has already rotated.</p>
+<p>The second trap is building a log stack from an old tutorial. Many of them still use Promtail, which reached end of life on March 2, 2026. Grafana's documentation states that it receives no further updates and that future development happens in Grafana Alloy. New setups should start with Alloy.</p>
+<h2 id="how-the-pieces-fit">How the pieces fit</h2>
+<ul><li><strong>Loki</strong> stores logs. Unlike a full-text search engine, it indexes only a small set of labels (host, unit, container) and stores the log lines compressed in chunks. That keeps it light enough for a homelab.</li><li><strong>Alloy</strong> is the agent. It reads the systemd journal and Docker's container logs on each host, attaches labels, and pushes the lines to Loki.</li><li><strong>Grafana</strong> queries Loki with LogQL, from the same place that shows your dashboards.</li></ul>
+<h2 id="run-loki-with-retention-switched-on">Run Loki with retention switched on</h2>
+<p>At the time the book was written (October 2026), Loki is at 3.7. A single Loki process with local filesystem storage is the right size for a homelab. This config is based on the project's own local example, with retention turned on:</p>
+<pre><code># /opt/stacks/logs/loki/config.yaml
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2026-10-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+
+limits_config:
+  retention_period: 30d
+
+analytics:
+  reporting_enabled: false</code></pre>
+<pre><code># /opt/stacks/logs/compose.yaml
+services:
+  loki:
+    image: grafana/loki:3.7.8
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yaml"]
+    ports: ["3100:3100"]
+    volumes:
+      - ./loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+volumes:
+  loki-data:</code></pre>
+<p>Retention is the part people get wrong. In Loki, the compactor does the deleting, and Loki's documentation is explicit on three points:</p>
+<ol><li><code>retention_enabled</code> must be <code>true</code>. Otherwise the compactor only compacts.</li><li><code>delete_request_store</code> must be set when retention is on.</li><li>Retention needs the 24-hour index period used in the schema above.</li></ol>
+<p><code>retention_period</code> in <code>limits_config</code> then applies to every log stream. The last block turns off Loki's anonymous usage reporting, which the example config leaves on by default.</p>
+<h2 id="install-alloy-on-each-host">Install Alloy on each host</h2>
+<p>Alloy runs as a native service, which makes reading the journal straightforward. These steps follow Grafana's Debian instructions (Alloy 1.20 when the book was written). Run them on the Proxmox host and on each Docker host:</p>
+<pre><code>apt install gpg
+mkdir -p /etc/apt/keyrings
+wget -O /etc/apt/keyrings/grafana.asc https://apt.grafana.com/gpg-full.key
+chmod 644 /etc/apt/keyrings/grafana.asc
+echo "deb [signed-by=/etc/apt/keyrings/grafana.asc] \
+https://apt.grafana.com stable main" &gt; /etc/apt/sources.list.d/grafana.list
+apt-get update &amp;&amp; apt-get install alloy
+usermod -aG adm,systemd-journal alloy</code></pre>
+<p>Don't skip the last line. Alloy's documentation warns that without membership in <code>adm</code> and <code>systemd-journal</code>, the journal source starts without an error and collects nothing. That's a silent failure, the worst kind for a logging system.</p>
+<p>On Docker hosts, also add the <code>alloy</code> user to the <code>docker</code> group so it can read container logs through the socket. That comes with a caveat: access to the Docker socket is full control of Docker on that host.</p>
+<h2 id="the-alloy-config">The Alloy config</h2>
+<p>The config lives in <code>/etc/alloy/config.alloy</code>. It's a set of components wired together: sources forward to a writer. This is the book's example for a Docker host named <code>docker1</code>, with Loki on the monitoring guest at 192.168.10.20:</p>
+<pre><code>// /etc/alloy/config.alloy on docker1
+loki.write "default" {
+  endpoint {
+    url = "http://192.168.10.20:3100/loki/api/v1/push"
+  }
+}
+
+// systemd journal, with unit and level as labels
+loki.relabel "journal" {
+  forward_to = []
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+  rule {
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "level"
+  }
+}
+
+loki.source.journal "host" {
+  forward_to    = [loki.write.default.receiver]
+  relabel_rules = loki.relabel.journal.rules
+  labels        = {host = "docker1", job = "journal"}
+}
+
+// Docker containers, labelled by container name
+discovery.docker "local" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.local.targets
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+loki.source.docker "containers" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.containers.output
+  forward_to = [loki.write.default.receiver]
+  labels     = {host = "docker1", job = "docker"}
+}</code></pre>
+<p>On the Proxmox host, keep the <code>loki.write</code> and journal blocks and drop the Docker ones. The journal there carries pvedaemon, pveproxy, pvestatd, backup jobs and the kernel. Restart with <code>systemctl restart alloy</code> and check it with <code>systemctl status alloy</code>. When started with a listen address, Alloy also serves a debugging UI on port 12345 that shows each component and whether it's healthy.</p>
+<h2 id="labels-few-and-boring">Labels: few and boring</h2>
+<p>Loki is fast because its index is small. Every distinct combination of label values creates a new stream, and too many streams make Loki slow and heavy. Keep labels to things with only a handful of values that you filter by: host, job, unit, container, level. Never turn request IDs, user names, IP addresses or full paths into labels. Search for those in the log line instead.</p>
+<h2 id="four-logql-queries-worth-saving">Four LogQL queries worth saving</h2>
+<p>In Grafana, open Explore, pick the Loki data source, start with a label selector, then filter lines:</p>
+<pre><code>{host="pve1", unit="pvedaemon.service"}
+{job="docker", container="immich_server"} |= "error"
+{job="journal", level=~"err|crit|alert|emerg"}
+sum by (host) (count_over_time({level="err"}[1h]))</code></pre>
+<p>In order, these show:</p>
+<ol><li>The Proxmox API daemon's log.</li><li>Only the lines containing "error" from one container.</li><li>Every high-priority journal line across the lab.</li><li>Errors per host per hour. This turns logs into a metric, and it makes a good panel on an overview dashboard.</li></ol>
+<p>Grafana alert rules can run LogQL too. The book's advice is to use that sparingly, for lines that only appear when something is wrong, like a backup job's failure message or repeated authentication failures on a service you expose.</p>
+<h2 id="don-t-forget-the-local-logs">Don't forget the local logs</h2>
+<p>Loki gives you a searchable copy, but Docker still keeps container logs on the host. With the default json-file logging driver, they grow without limit unless you configure them. Set limits in <code>/etc/docker/daemon.json</code> on each Docker host and restart Docker. Existing containers pick up the change when they're recreated.</p>
+<pre><code>{
+    "log-driver": "json-file",
+    "log-opts": { "max-size": "10m", "max-file": "3" }
+}</code></pre>
+<p>Cap the journal too: set <code>SystemMaxUse=500M</code> in <code>/etc/systemd/journald.conf</code>, then run <code>systemctl restart systemd-journald</code>. Loki is now the long memory, so local logs only need to cover a few days.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>No Promtail in new setups: Alloy on every host</li><li>Loki 3.7 with <code>retention_enabled: true</code>, <code>delete_request_store</code> set, a 24h index period and <code>retention_period: 30d</code></li><li>The <code>alloy</code> user in <code>adm</code> and <code>systemd-journal</code> (plus <code>docker</code> on Docker hosts)</li><li>Journal on every host, container logs on every Docker host, <code>systemctl status alloy</code> clean</li><li>Labels limited to host, job, unit, container and level</li><li>The four LogQL queries saved, with the errors-per-host query as a dashboard panel</li><li>Docker log rotation in <code>daemon.json</code> and <code>SystemMaxUse=500M</code> for the journal</li></ul><p><a href="https://payhip.com/b/An62R">Go deeper: Watch Your Homelab</a></p>]]></content:encoded></item><item><title>Podcast, episode 2: Blue by Sunday — lock down your home network</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-2-lock-down-your-home-network/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-2-lock-down-your-home-network/</guid>
 <pubDate>Sun, 25 Oct 2026 12:30:00 -0400</pubDate><description>Episode 2 of the Homelab the Right Way Podcast, 42 minutes with three AI hosts on zones, VLANs, OPNsense rules that mean something, the IoT discovery trap that turns the cast button grey, locking yourself out of your own firewall (and WireGuard as the way back in), plus this week&#x27;s tech news, the LiveCaptionN app and a managed-switch gear break. Player, chapters, sources and links.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>podcast</category><category>networking</category><category>opnsense</category><category>vlan</category><category>home assistant</category><category>wireguard</category><category>security</category>
@@ -856,33 +1001,5 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <p><a href="https://homelab-the-right-way.printful.me/product/and-a-turtle-sticker">...And a Turtle Sticker</a>: episode 1 is titled "backups, networking, self-hosting and a turtle", and the turtle segment (the wire that can fry an ESP32, the DS18B20 reading that is not a temperature) was the hosts' favourite. So: a teal turtle, the episode title, and the podcast tag. Kiss-cut vinyl.</p>
 <p>3 x 3, 4 x 4 and 5.5 x 5.5 in. $4.50 to $5.50 depending on size.</p>
 <h2 id="where-everything-is">Where everything is</h2>
-<p>All seven are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 45 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout. Episode 1 is on <a href="https://redcircle.com/shows/homelab-the-right-way/episodes/55cb28a3-0a54-4fc3-952d-70a2fedea93f">RedCircle</a>, and the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/">show notes</a> carry the chapters and every article mentioned.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item><item><title>Podcast, episode 1: The green check lies</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/</guid>
-<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>The first episode of the Homelab the Right Way Podcast, 46 minutes with three AI hosts on Proxmox backups that actually restore, why a two-node cluster freezes, the six self-hosting traps, Home Assistant motion lights and the turtle tank wire that fries an ESP32. Player, chapters, every article mentioned and the gear.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>podcast</category><category>proxmox</category><category>backups</category><category>networking</category><category>home assistant</category><category>esp32</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The Homelab the Right Way Podcast is here. Three hosts, Maya, Sam and Theo, talk through what the blog and the books keep coming back to: backups you can actually restore, networks that fail safe, self-hosting without the classic traps, and the small hardware details that quietly ruin a weekend.</p>
-<p><strong>A note on the hosts:</strong> Maya, Sam and Theo are fictional AI hosts. Their voices are synthetic, their faces in the clips are generated, and the episode was written with AI and edited by a human. Every fact in the episode comes from the Homelab the Right Way books and the posts linked below, so if something sounds too good to be true, the source is one tap away.</p>
-<h2 id="chapters">Chapters</h2>
-<ul><li>00:04 — Cold open and welcome</li><li>02:39 — Backups: the green check lies</li><li>14:36 — Storage: RAID is not a backup, the NFS trap, and ZFS done right</li><li>19:39 — Gear break: the first switch</li><li>21:09 — Networking: what a /24 means and why your 2-node cluster freezes</li><li>27:04 — Self-hosting your photos, files and passwords the safe way</li><li>32:43 — Home Assistant: the motion light that turns off on you, and the Zigbee fix</li><li>36:17 — Gear break: the smart plug that reboots things</li><li>37:36 — The turtle tank: the wire that fries an ESP32, and the sensor that lies</li><li>44:29 — Three things we'd tell a beginner, and where to find all of this</li></ul>
-<h2 id="what-the-episode-covers-with-the-articles">What the episode covers, with the articles</h2>
-<p><strong>Backups (02:39).</strong> The green check on a Proxmox backup job proves the job wrote some bytes somewhere, nothing more. The hosts walk through the 3-2-1 plan, <code>keep-daily=7</code> and why it is not seven days of history, the backup job that silently skips every guest you created after you made it, Proxmox Backup Server on its own hardware, the four restore drills, the notification system and the dead-man's switch for jobs that stop running.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backups-that-actually-work/">Proxmox backups that actually work: 3-2-1, step by step</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/keep-daily-7-does-not-mean-7-days/">keep-daily=7 doesn't mean 7 days of backups</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-backup-job-skips-new-vms/">Your Proxmox backup job is probably skipping your new VMs</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/backup-job-that-never-runs-never-fails/">A backup job that never runs never fails</a></li></ul>
-<p><strong>Storage (14:36).</strong> The NFS share that drops at boot and lets a backup job fill the hypervisor's root disk, and the two-word fix (<code>is_mountpoint</code>). Why RAID and ZFS mirrors are one copy on resilient disks, why snapshots die with the pool, and the sanoid + syncoid pull-replication setup with a monthly checksum restore.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/nfs-share-drops-backups-fill-root-disk/">When your NFS share drops, Proxmox backups fill your root disk</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/raid-is-not-a-backup-3-2-1/">RAID is not a backup: the 3-2-1 rule, honestly</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/zfs-snapshots-sanoid-syncoid-pull-replication/">Snapshots on a schedule, replicas on another box: sanoid and syncoid pull replication for ZFS</a></li></ul>
-<p><strong>Networking (21:09).</strong> What the <code>/24</code> after an address actually says, why one flat network for the whole house is the trap, the five-zone plan from <em>Lock Down Your Home Network</em>, and why a two-node Proxmox cluster freezes the moment one node goes down (one vote out of two is not more than half). The QDevice fix, the Wi-Fi trap and the <code>pvecm expected 1</code> emergency lever.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/what-a-24-subnet-actually-means/">What a /24 subnet actually means</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/why-your-2-node-proxmox-cluster-freezes/">Why your 2-node Proxmox cluster freezes</a></li></ul>
-<p><strong>Self-hosting (27:04).</strong> Immich, Nextcloud or Syncthing, and Vaultwarden on one small box, and the six traps around them: one disk for everything, the Immich database on a network share, the hand-built Nextcloud, open signups and plain HTTP on Vaultwarden, forwarding ports to everything, and the backup that isn't one.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/self-host-photos-files-passwords-safe-way/">Self-host your photos, files and passwords the safe way</a></li></ul>
-<p><strong>Home Assistant (32:43).</strong> The motion light that turns off while you are still in the hallway (<code>mode: single</code> is the culprit; <code>mode: restart</code> plus a <code>wait_for_trigger</code> with a <code>for:</code> is the fix), and the Zigbee fix that beats any setting: the coordinator on a USB 2.0 extension cable, away from the case and the access point.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/automations-that-just-work-book-6/">New book: Automations That Just Work (Home Assistant without the surprises)</a></li></ul>
-<p><strong>The turtle tank (37:36).</strong> The Seeed XIAO ESP32-C3 water monitor from <em>Smart Turtle Tank</em>: the one wire that can fry the board (the turbidity sensor's 4.5 V output into a 3.3 V pin, and the voltage divider that fixes it), the DS18B20 readings of 85 °C and -127 °C that are not temperatures at all, and the three numbers a tank has to get right before any electronics go near it.</p>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/one-wire-that-can-fry-your-esp32/">The one wire that can fry your ESP32 tank monitor</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/ds18b20-reads-85c-or-minus-127c/">DS18B20 reads 85 °C or -127 °C? Here's why</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/posts/3-numbers-your-turtle-tank-has-to-get-right/">3 numbers your turtle tank has to get right</a></li></ul>
-<h2 id="gear-mentioned-in-this-episode">Gear mentioned in this episode</h2>
-<p>As an Amazon Associate the show earns from qualifying purchases. These are affiliate links; the price you pay is the same.</p>
-<ul><li><a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-port gigabit switch</a>: the first upgrade almost every homelab makes. One cable from the router gives four more full-speed gigabit ports; metal case, fanless, nothing to configure.</li><li><a href="https://www.amazon.com/dp/B091FXQQMQ?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Kasa Smart Plug Ultra Mini EP10 (2-pack)</a>: a Wi-Fi plug with no hub and no subscription. Hard-reboot a frozen mini PC or router from your phone, and it works with Home Assistant.</li></ul>
-<p>Both are also in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
-<h2 id="follow-the-show">Follow the show</h2>
-<p>Full episode on YouTube: https://youtu.be/g12kD9qZ5TU</p>
-<p>Merch from this episode: <a href="https://homelab-the-right-way.printful.me/">The Green Check Lies tee, the Go Restore Something hoodie, the Backups Episode mug and more</a> are in the store, printed to order. The full list is in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-merch/">podcast merch post</a>.</p>
-<p>New episodes get a post like this one with the player, chapters and every link. Listen on the <a href="https://redcircle.com/shows/homelab-the-right-way/episodes/55cb28a3-0a54-4fc3-952d-70a2fedea93f">episode page</a>, follow the <a href="https://redcircle.com/shows/homelab-the-right-way">show page</a>, or add the <a href="https://feeds.redcircle.com/b40a097c-964d-4d5c-820f-a74bbe389dc7">RSS feed</a> to any podcast app (Spotify and Apple Podcasts listings are submitted and will appear once approved). The audio is free, the hosts are AI, and the facts are from the books.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+<p>All seven are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 45 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout. Episode 1 is on <a href="https://redcircle.com/shows/homelab-the-right-way/episodes/55cb28a3-0a54-4fc3-952d-70a2fedea93f">RedCircle</a>, and the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-1-the-green-check-lies/">show notes</a> carry the chapters and every article mentioned.</p><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
 </channel></rss>
