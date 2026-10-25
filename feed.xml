@@ -64,7 +64,20 @@ qm start 120</code></pre>
 <h2 id="keep-the-template-fresh-and-keep-it-in-git">Keep the template fresh, and keep it in Git</h2>
 <p>Cloud images are rebuilt regularly with current packages. Every few months, or when a Debian point release comes out, download the new image and create the template again under the same ID, so new VMs start current. Because every step is a command, the rebuild is a script: save the commands as <code>cloud-init/build-template.sh</code> in your lab's repository, and keep the vendor snippet in the repository's <code>cloud-init/</code> folder too. The copy on the Proxmox host is just a deployment of it.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>Download <strong>debian-13-genericcloud-amd64.qcow2</strong>, not the generic image, for Proxmox VMs.</li><li>Create the VM with VirtIO networking, the VirtIO SCSI controller and <code>--agent enabled=1</code>.</li><li>Import the image with <code>import-from</code>, add the cloudinit drive on ide2, boot from scsi0, serial console on.</li><li>Set <code>--ciuser</code>, <code>--sshkeys</code>, <code>--ipconfig0</code> and DNS on the template; skip <code>--cipassword</code>.</li><li>Add qemu-guest-agent through a <strong>vendor</strong> snippet, never by replacing user data.</li><li>Check the result with <code>qm cloudinit dump 9000 user</code> before running <code>qm template 9000</code>.</li><li>Clone with <code>--full</code>, set the clone's address, grow its disk, start it.</li><li>Save the build as <code>cloud-init/build-template.sh</code> and rebuild on each Debian point release.</li></ul><p><a href="https://payhip.com/b/ZcsXi">Go deeper: Automate Your Homelab</a></p>]]></content:encoded></item><item><title>Pantry Tracker is live on Google Play: scan it, date it, never waste it</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/pantry-tracker-expiry-alerts-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/pantry-tracker-expiry-alerts-android-app/</guid>
+<ul><li>Download <strong>debian-13-genericcloud-amd64.qcow2</strong>, not the generic image, for Proxmox VMs.</li><li>Create the VM with VirtIO networking, the VirtIO SCSI controller and <code>--agent enabled=1</code>.</li><li>Import the image with <code>import-from</code>, add the cloudinit drive on ide2, boot from scsi0, serial console on.</li><li>Set <code>--ciuser</code>, <code>--sshkeys</code>, <code>--ipconfig0</code> and DNS on the template; skip <code>--cipassword</code>.</li><li>Add qemu-guest-agent through a <strong>vendor</strong> snippet, never by replacing user data.</li><li>Check the result with <code>qm cloudinit dump 9000 user</code> before running <code>qm template 9000</code>.</li><li>Clone with <code>--full</code>, set the clone's address, grow its disk, start it.</li><li>Save the build as <code>cloud-init/build-template.sh</code> and rebuild on each Debian point release.</li></ul><p><a href="https://payhip.com/b/ZcsXi">Go deeper: Automate Your Homelab</a></p>]]></content:encoded></item><item><title>Symptom Diary is live on Google Play: check in fast, see your month</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/symptom-diary-migraine-ibs-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/symptom-diary-migraine-ibs-android-app/</guid>
+<pubDate>Sat, 24 Oct 2026 12:30:00 -0400</pubDate><description>Symptom Diary, a private migraine and IBS diary for Android, is now on Google Play. Fast check-ins, a 30-day severity strip, trigger insights, IBS low-FODMAP mode, no account.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.chartmann.symptomdiary.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>apps</category><category>health</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.chartmann.symptomdiary.jpg" alt=""></p><p>Symptom Diary, a new Android app from Hartmann Studios, is now live on Google Play. It is a private migraine and IBS diary built for the moment you feel bad: log an episode in seconds, and your patterns, triggers and trends build up on their own, all on your phone.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Quick check-in:</strong> a 1 to 10 severity dial, one-tap duration, trigger and medication chips, and an optional note.</li><li><strong>Today at a glance:</strong> today's peak or your symptom-free streak, a 30-day severity heat strip and your weekly intensity trend.</li><li><strong>Journal:</strong> every entry grouped by day with intensity, duration, triggers and medications.</li><li><strong>Insights:</strong> severity over time, episodes per week and your most-noted triggers.</li><li><strong>IBS / low-FODMAP mode:</strong> log meals with suggested FODMAP groups.</li><li><strong>Medication notes:</strong> rate how well a medication worked and keep notes.</li><li><strong>A home-screen widget</strong> with today's check-in at a glance and a Check in button.</li><li>Light and dark themes.</li></ul>
+<h2 id="private-by-design">Private by design</h2>
+<p>Your diary is stored on your device. No account is needed, and backups go only where you save them.</p>
+<h2 id="free-and-diary-pro">Free and Diary Pro</h2>
+<p>Free covers unlimited logging, the Today view, the journal, charts, the widget and on-device backup, with a small banner ad. Diary Pro (monthly or yearly subscription) removes ads and adds sleep and activity pattern insights (from Health Connect, or logged by hand), food pattern insights in IBS mode, doctor-ready PDF and text reports, and an encrypted backup file with your own passphrase, saved wherever you choose.</p>
+<h2 id="in-your-language">In your language</h2>
+<p>Pick your language on first launch. The app translates its screens on your phone, and you can change it any time in Settings.</p>
+<p>Symptom Diary is a personal diary, not a diagnostic tool, and it does not give medical advice. Talk to a healthcare professional about your symptoms.</p><p><a href="https://play.google.com/store/apps/details?id=com.chartmann.symptomdiary">Get Symptom Diary on Google Play</a></p>]]></content:encoded></item><item><title>Pantry Tracker is live on Google Play: scan it, date it, never waste it</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/pantry-tracker-expiry-alerts-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/pantry-tracker-expiry-alerts-android-app/</guid>
 <pubDate>Sat, 24 Oct 2026 12:30:00 -0400</pubDate><description>Pantry Tracker, a free offline-first pantry and expiry tracker for Android, is now on Google Play. Barcode scan, use-in-3-days alerts, a shopping list that restocks the pantry, no account.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.chartmann.pantrytracker.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>apps</category><category>food</category><category>offline</category>
@@ -883,68 +896,5 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <h2 id="what-it-does-not-do">What it does not do</h2>
 <p>10,000 mAh is not a laptop's worth of battery. Expect a partial laptop top-up, not a full charge, and a big gaming laptop that wants 100 W or more will not run from it. If you need several full laptop charges, look at a bigger 20,000 to 25,000 mAh bank instead.</p>
 <p>More picks like this one are in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
-<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B0CB1FW5FC?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">INIU 10,000 mAh 45W Power Bank</a></p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Gemini Nano in your app without the guesswork: design for &#x27;unavailable&#x27; first</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/gemini-nano-design-for-unavailable-first/</guid>
-<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>Gemini Nano only runs on some phones. Here is how to check its status before every call, what each of the four states means, and the surprises that trip people up once.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>gemini nano</category><category>ml kit</category><category>on-device ai</category><category>kotlin</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Gemini Nano is the language model that ships with the phone. But only <em>some</em> phones. Build the feature as if it is always there and most of your users get an error, or a button that does nothing.</p>
-<p>This post covers how to plan for that, using Chapter 3 (Gemini Nano Without the Guesswork) of <em>On-Device AI for Android</em>.</p>
-<h2 id="how-it-works-in-one-paragraph">How it works, in one paragraph</h2>
-<p>Gemini Nano runs inside AICore, an Android system service. AICore keeps the model updated, applies Google's safety filters and lets every app on the device share one copy. You never bundle or host the base model. You reach it through ML Kit's GenAI APIs, which come in two shapes:</p>
-<ul><li><strong>Feature APIs</strong> for common jobs: Summarization, Proofreading, Rewriting, Image description and Speech recognition. Each one is tuned for its task and needs no prompt writing.</li><li><strong>The Prompt API</strong> for everything else: your own text prompt, or an image plus text, with optional settings such as temperature and maximum output tokens.</li></ul>
-<h2 id="the-trap-assuming-the-model-is-there">The trap: assuming the model is there</h2>
-<p>Google's ML Kit GenAI overview page publishes the supported device list, and it differs by API. At the time of writing (October 2026) the feature APIs list recent flagships from Google (Pixel 9, 10 and 11 families), Samsung (Galaxy S25 and S26 families and recent foldables) and models from other makers. The Prompt API has its own list, grouped by Gemini Nano version. The list grows, so check it on developers.google.com/ml-kit/genai before you promise a feature.</p>
-<p>Two more conditions from the same documentation:</p>
-<ul><li>The GenAI APIs need Android API level 26 or higher.</li><li>They are not supported on devices with an unlocked bootloader.</li></ul>
-<p>The book's advice is blunt: design for "unavailable" first. On most of your users' phones today, the Gemini Nano path will report that it cannot run. That has to lead somewhere useful.</p>
-<h2 id="the-fix-every-call-starts-with-a-status-check">The fix: every call starts with a status check</h2>
-<p>Each GenAI client can report one of four states. Each one has a clear next step:</p>
-<div class="table"><table><thead><tr><th>State</th><th>What it means</th><th>What to do</th></tr></thead><tbody><tr><td>AVAILABLE</td><td>You can run inference now</td><td>Run it</td></tr><tr><td>DOWNLOADABLE</td><td>The phone supports it, but the model or the feature's adapter is not on the device yet</td><td>Download, with progress</td></tr><tr><td>DOWNLOADING</td><td>A download is in progress</td><td>Wait or queue the request</td></tr><tr><td>UNAVAILABLE</td><td>This device cannot run it, or AICore has not fetched its latest configuration yet</td><td>Use another backend</td></tr></tbody></table></div>
-<p>Only UNAVAILABLE sends the user elsewhere. The other three end in AVAILABLE.</p>
-<h3 id="the-prompt-api-behind-an-interface">The Prompt API, behind an interface</h3>
-<p>The Prompt API is version 1.0.0-beta4 at the time of writing. Its Kotlin API is coroutine-first: <code>checkStatus()</code> is a suspend function, <code>download()</code> returns a Flow, and <code>generateContentStream()</code> streams chunks.</p>
-<pre><code>dependencies {
-    implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
-}</code></pre>
-<p>The book wraps it in a <code>TextGenerator</code> interface, so the status maps to an availability the rest of the app understands:</p>
-<pre><code>class NanoGenerator : TextGenerator {
-    private val model = Generation.getClient()
-    override val label = "On this phone (Gemini Nano)"
-
-    override suspend fun availability(): Availability =
-        when (model.checkStatus()) {
-            FeatureStatus.AVAILABLE -&gt; Availability.Ready
-            FeatureStatus.DOWNLOADABLE,
-            FeatureStatus.DOWNLOADING -&gt; Availability.NeedsDownload(null)
-            else -&gt; Availability.Unavailable("Gemini Nano is not supported here")
-        }
-
-    suspend fun downloadModel(onProgress: (Long) -&gt; Unit) {
-        model.download().collect { s -&gt;
-            if (s is DownloadStatus.DownloadProgress)
-                onProgress(s.totalBytesDownloaded)
-            if (s is DownloadStatus.DownloadFailed) throw s.e
-        }
-    }
-
-    override fun generate(messages: List&lt;ChatMessage&gt;): Flow&lt;String&gt; {
-        val prompt = messages.toPlainPrompt()     // see below
-        return model.generateContentStream(prompt)
-            .map { chunk -&gt; chunk.candidates[0].text }
-    }
-}</code></pre>
-<p>The point of the interface is the fallback. When <code>availability()</code> says Unavailable, the app's chooser moves on to a local LiteRT-LM model or a home server, and the screen does not change.</p>
-<p>The Prompt API takes one prompt, not a structured chat history, so <code>toPlainPrompt()</code> is yours to write: a short instruction line, then the last few turns as "User:" and "Assistant:" lines. Keep it well under the input limit below.</p>
-<h2 id="the-easiest-win-summarization">The easiest win: Summarization</h2>
-<p>If your feature is "summarize this", start with the Summarization feature API (1.0.0-beta1 at the time of writing). It needs no prompt engineering. The feature APIs return Guava ListenableFutures, so add the coroutines Guava adapter to await them:</p>
-<pre><code>dependencies {
-    implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.11.0")
-}</code></pre>
-<p>Create the client once with the input type, the output length (one, two or three bullets) and the language. Check its status with <code>checkFeatureStatus()</code>, and download with <code>downloadFeature()</code> when it reports DOWNLOADABLE. Close the client when the screen goes away; the documentation suggests <code>onCleared()</code> in your ViewModel.</p>
-<p>Input must be under 4000 tokens, roughly 3000 English words, for both Summarization and the Prompt API. For longer text, the summarization docs suggest summarizing the first 4000 tokens or turning on automatic truncation with <code>setLongInputAutoTruncationEnabled</code>.</p>
-<h2 id="things-that-surprise-people-once">Things that surprise people once</h2>
-<ul><li><strong>Fresh devices are not ready.</strong> Right after a phone is set up or AICore's data is cleared, AICore may still be initializing and fetching its configuration. The documentation advises retrying later. Treat these errors as "try again in a moment", not as "unsupported forever".</li><li><strong>There is a per-app quota.</strong> AICore enforces an inference quota per app. Do not fire a request on every keystroke. Trigger generation on a deliberate action.</li><li><strong>Long output is a bad fit.</strong> The docs advise against use cases that need more than 4K tokens of output.</li><li><strong>It is beta.</strong> Pin the version, read the release notes on each upgrade, and keep this code behind your interface.</li></ul>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Check the supported device list for the specific API you use.</li><li>Require API level 26+, and expect UNAVAILABLE on unlocked bootloaders.</li><li>Call the status check before every use, and handle all four states.</li><li>Give UNAVAILABLE a real fallback behind one interface.</li><li>Show download progress for DOWNLOADABLE.</li><li>Keep input under 4000 tokens and output use cases short.</li><li>Generate on a deliberate action, not per keystroke.</li><li>Pin the beta versions: genai-prompt 1.0.0-beta4, genai-summarization 1.0.0-beta1.</li></ul><p><a href="https://payhip.com/b/J9jlp">Go deeper: On-Device AI for Android</a></p>]]></content:encoded></item>
+<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B0CB1FW5FC?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">INIU 10,000 mAh 45W Power Bank</a></p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item>
 </channel></rss>
