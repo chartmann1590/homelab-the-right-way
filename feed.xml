@@ -3,7 +3,87 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Mon, 26 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Looki L1 mount v9: snug holder + slide-in collar clips (free STL)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</guid>
+<item><title>Real HTTPS for your homelab without opening a single port</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/real-https-homelab-caddy-dns-01-wildcard/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/real-https-homelab-caddy-dns-01-wildcard/</guid>
+<pubDate>Mon, 26 Oct 2026 12:30:00 -0400</pubDate><description>Self-signed warnings, a private CA nobody can install, or port forwarding? None of them. Here is the fix from Containers Without the Chaos - Caddy, a DNS-01 wildcard certificate and split DNS, so every internal app gets a real padlock and nothing is exposed.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-04.jpg" type="image/jpeg" length="0"/>
+<category>caddy</category><category>https</category><category>dns-01</category><category>wildcard certificate</category><category>reverse proxy</category><category>split dns</category><category>docker</category><category>homelab</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-04.jpg" alt=""></p><p>You want <code>https://notes.home.example.com</code> to open with a padlock and no warning on every device in the house, including the phones of guests you will never install a certificate on. And you want it without opening a single port to the internet. <em>Containers Without the Chaos</em> covers this in two chapters: a reverse proxy done right, then real HTTPS for internal names.</p>
+<h2 id="the-trap-three-half-solutions">The trap: three half-solutions</h2>
+<p>There are three common ways people try this, and each one fails in its own way:</p>
+<ul><li><strong>Self-signed certificates.</strong> Every browser warns, every family member learns to click "continue anyway", and that habit is the real security problem.</li><li><strong>A private certificate authority.</strong> It works, but every device needs the CA installed, and many phones, TVs and apps make that hard.</li><li><strong>Port forwarding 80 and 443</strong> so the normal HTTP challenge works. Now your internal apps are reachable from the internet, which is the opposite of the goal.</li></ul>
+<h2 id="the-fix-the-dns-01-challenge">The fix: the DNS-01 challenge</h2>
+<p>To issue a certificate, a public certificate authority such as Let's Encrypt has to check that you control the name. With the DNS challenge, the CA does an authoritative DNS lookup for a special TXT record, and if it sees the expected value, it issues the certificate. No open ports, and the server asking for the certificate never has to be reachable from outside.</p>
+<p>You need two things:</p>
+<ol><li>A real domain you own, with its DNS hosted at a provider that has an API and a Caddy DNS module (Cloudflare and many others have one; the module list is on caddyserver.com/download).</li><li>An API token that lets Caddy create and delete TXT records in that zone.</li></ol>
+<p>Names under <code>.local</code>, <code>.internal</code> and <code>.home.arpa</code> cannot get publicly trusted certificates. Use a subdomain of a real domain you own, such as <code>home.example.com</code>.</p>
+<h2 id="one-wildcard-for-everything">One wildcard for everything</h2>
+<p>Instead of one certificate per app, ask for one wildcard: <code>*.home.example.com</code>. It covers <code>notes.home.example.com</code>, <code>photos.home.example.com</code> and anything you add later. Wildcards require the DNS challenge, and a certificate may have only one wildcard, as the left-most label.</p>
+<p>There is a privacy bonus. Certificates are published in public Certificate Transparency logs, so per-app certificates would list every internal app name for anyone to read. A wildcard reveals only <code>*.home.example.com</code>.</p>
+<h2 id="build-caddy-with-a-dns-module">Build Caddy with a DNS module</h2>
+<p>The standard Caddy image does not include DNS provider modules, so build your own with the official builder image and xcaddy. Create <code>/srv/stacks/proxy/Dockerfile</code> (Cloudflare shown; use your provider's module):</p>
+<pre><code>FROM caddy:2.11-builder AS builder
+RUN xcaddy build \
+    --with github.com/caddy-dns/cloudflare
+
+FROM caddy:2.11
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy</code></pre>
+<p>Point the proxy stack at it instead of the plain image. Ports, volumes and networks stay as in the proxy chapter (80, 443 and 443/udp; the <code>./conf</code> folder mounted at <code>/etc/caddy</code>; <code>./data</code> for certificates; the external <code>proxy</code> network):</p>
+<pre><code>services:
+  caddy:
+    build: .
+    image: local/caddy-dns:2.11
+    restart: unless-stopped
+    env_file: ./caddy.env</code></pre>
+<p>Build, start and confirm the module is in:</p>
+<pre><code>docker compose build --pull
+docker compose up -d
+docker compose exec caddy caddy list-modules | grep dns</code></pre>
+<h2 id="the-api-token">The API token</h2>
+<p>Create a token at your DNS provider that can edit DNS records in this one zone and nothing else. Put it in <code>caddy.env</code>, readable only by you, and keep the file out of Git:</p>
+<pre><code>CF_API_TOKEN=paste-the-token-here</code></pre>
+<pre><code>chmod 600 /srv/stacks/proxy/caddy.env</code></pre>
+<p>That token can change DNS for your whole domain. Scope it to the single zone and to DNS edit only. If it leaks, revoke it at the provider and create a new one.</p>
+<h2 id="the-wildcard-caddyfile">The wildcard Caddyfile</h2>
+<p>Put every internal site inside one wildcard site block and pick the app with a host matcher. This is the pattern from Caddy's "Common Caddyfile Patterns" page:</p>
+<pre><code>*.home.example.com {
+    tls {
+        dns cloudflare {env.CF_API_TOKEN}
+    }
+
+    @notes host notes.home.example.com
+    handle @notes {
+        reverse_proxy notes:8080
+    }
+
+    @photos host photos.home.example.com
+    handle @photos {
+        reverse_proxy photos:2283
+    }
+
+    handle {
+        abort
+    }
+}</code></pre>
+<p>The last <code>handle</code> block catches any name you have not defined and closes the connection, so a typo does not land on some other app. Since Caddy 2.10, separate site blocks per app also use an automated wildcard certificate; the single block just keeps the <code>tls</code> settings in one place.</p>
+<p>Reload without downtime and watch for the certificate:</p>
+<pre><code>docker compose exec -w /etc/caddy caddy caddy reload
+docker compose logs caddy | grep -i -E "certificate|obtain"</code></pre>
+<p>While testing, add <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> inside the <code>tls</code> block. Staging certificates are not trusted by browsers, but staging has much looser rate limits. Remove the line once it works. And never delete <code>./data</code> to "start fresh": it holds every certificate Caddy has obtained, and certificate authorities enforce rate limits.</p>
+<h2 id="split-dns-names-that-only-exist-at-home">Split DNS: names that only exist at home</h2>
+<p>The certificate proves the names are yours. Now your network has to answer them. Your public DNS zone does not need any record for <code>*.home.example.com</code> at all; only your local resolver answers it, pointing every name at the Docker VM.</p>
+<p>On OPNsense with Unbound, add one host override: host <code>*</code>, domain <code>home.example.com</code>, address <code>192.168.20.10</code>. If your resolver does not support wildcard overrides, add one override per app. In plain Unbound configuration it looks like this:</p>
+<pre><code>server:
+  local-zone: "home.example.com." redirect
+  local-data: "home.example.com. 300 IN A 192.168.20.10"</code></pre>
+<p>Check from a laptop on the LAN:</p>
+<pre><code>dig +short notes.home.example.com
+# 192.168.20.10
+curl -I https://notes.home.example.com</code></pre>
+<p>If a name resolves on the Docker VM but not on a laptop, suspect DNS rebinding protection. Some resolvers and routers refuse answers that point a public domain at a private address. Check the resolver's rebind settings and allow your internal domain.</p>
+<h2 id="away-from-home">Away from home</h2>
+<p>Nothing here is reachable from the internet, by design. To use these names away from home, connect to your network over WireGuard or Tailscale and make sure the VPN hands out your local resolver. The same names and the same certificate then work everywhere.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>A subdomain of a real domain you own, never <code>.local</code>, <code>.internal</code> or <code>.home.arpa</code></li><li>Caddy built with your DNS provider's module, and <code>caddy list-modules | grep dns</code> shows it</li><li>An API token scoped to one zone and DNS edit only, in <code>caddy.env</code> with <code>chmod 600</code>, kept out of Git</li><li>One <code>*.home.example.com</code> block with a host matcher per app and a final <code>handle { abort }</code></li><li>Staging CA while testing, removed once the certificate arrives; <code>./data</code> kept and backed up</li><li>A local DNS override pointing <code>*.home.example.com</code> at the Docker VM, nothing in the public zone</li><li>Rebind protection allows your internal domain; <code>dig</code> and <code>curl -I</code> pass from a laptop</li><li>Remote access through WireGuard or Tailscale, handing out your local resolver</li><li>No ports 80 or 443 forwarded from the internet</li></ul><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item><item><title>Looki L1 mount v9: snug holder + slide-in collar clips (free STL)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</guid>
 <pubDate>Mon, 26 Oct 2026 12:30:00 -0400</pubDate><description>Version 9 of the free 3D-printed Looki L1 wearable camera mount. A snug holder sized for the bare camera and two collar clips that slide in on dovetail rails and click locked. STL downloads, the exact ABS print settings and the real print timelapse.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-hero.jpg" type="image/jpeg" length="0"/>
 <category>3d printing</category><category>looki</category><category>camera mount</category><category>abs</category><category>maker</category>
@@ -999,22 +1079,5 @@ pct exec 120 -- sh -c 'ip route; ping -c2 10.30.0.1'</code></pre>
 <h2 id="45-tp-link-ue306-usb-3-0-to-gigabit-ethernet-adapter">45. TP-Link UE306 USB 3.0 to gigabit Ethernet adapter</h2>
 <p>A small USB 3.0 Type-A to RJ45 adapter that adds a 10/100/1000 Mbps wired port to a laptop, tablet or Nintendo Switch, with no external power needed. TP-Link says it needs no driver on Windows 11/10, Linux or the Switch, and the USB plug folds for travel. Handy for a laptop with no Ethernet port, or for wiring into a switch when Wi-Fi is the problem. <a href="https://www.amazon.com/dp/B09GRL3VCN?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">See it on Amazon</a></p>
 <h2 id="how-we-pick">How we pick</h2>
-<p>A product makes this list when it sits near the top of its Amazon Best Sellers category, has a long record of reviews over several years, and is the kind of thing people in the homelab and desk-setup corners of YouTube, TikTok and Reddit keep making videos about. The list is refreshed as new videos go up; the newest picks are at the top of the channel's Shorts.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>TP-Link TL-SG105: the 5-port gigabit switch most homelabs start with</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/tp-link-tl-sg105-5-port-gigabit-switch/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/tp-link-tl-sg105-5-port-gigabit-switch/</guid>
-<pubDate>Sun, 18 Oct 2026 12:30:00 -0400</pubDate><description>What the TP-Link TL-SG105 unmanaged 5-port gigabit switch does, where it fits in a homelab, and what it does not do. With the short video and the Amazon link.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>amazon finds</category><category>networking</category><category>switch</category><category>homelab</category><category>gear</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>As an Amazon Associate I earn from qualifying purchases. The Amazon link on this page supports the blog at no extra cost to you.</p>
-<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-Port Gigabit Switch</a></p>
-<p>The short video on this page uses a fictional AI-generated presenter (AI face, voice and lip-sync). We have not personally tested this switch; the details below come from TP-Link's own product information. No price or rating is quoted because both change; check the listing.</p>
-<h2 id="the-problem-it-solves">The problem it solves</h2>
-<p>Most home routers have four Ethernet ports on the back. A homelab fills them fast: a server or mini PC, a NAS, a Raspberry Pi, a desktop. A small unmanaged switch fixes that with one cable: plug one of its ports into the router and the other four become extra wired ports on the same network.</p>
-<h2 id="what-it-is">What it is</h2>
-<ul><li>5 gigabit Ethernet ports (10/100/1000 Mbps, auto-negotiation on every port)</li><li>Metal case, no fan, so it is silent</li><li>Unmanaged and plug-and-play: no app, no web page, nothing to configure</li><li>Energy-efficient design, which matters for a box that runs 24/7 on a shelf</li><li>Sits on a desk or mounts on a wall</li><li>Works behind any router, including an OPNsense or pfSense box</li></ul>
-<h2 id="where-it-fits-in-a-homelab">Where it fits in a homelab</h2>
-<ul><li><strong>Under the desk:</strong> one cable from the router, four wired devices next to you.</li><li><strong>Next to the server shelf:</strong> the mini PC running Proxmox, the NAS and the Pi all get wired gigabit links instead of Wi-Fi.</li><li><strong>Behind the TV:</strong> a console, a streaming box and a smart TV on one wall jack.</li></ul>
-<h2 id="what-it-does-not-do">What it does not do</h2>
-<p>It is unmanaged, so there are no VLANs, no port settings and no traffic graphs. If you want to split IoT devices onto their own VLAN, you need a managed or "easy smart" switch instead (TP-Link sells those under other model numbers). If you only need more ports, unmanaged is simpler and there is nothing to misconfigure. There is also an 8-port version if five is not enough.</p>
-<h2 id="watch-the-49-second-version">Watch the 49-second version</h2>
-<p>The Short above covers the same ground. More picks like this one are in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/viral-amazon-tech-finds/">viral Amazon tech finds roundup</a>.</p>
-<p><strong>Get it on Amazon:</strong> <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-Port Gigabit Switch</a></p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item>
+<p>A product makes this list when it sits near the top of its Amazon Best Sellers category, has a long record of reviews over several years, and is the kind of thing people in the homelab and desk-setup corners of YouTube, TikTok and Reddit keep making videos about. The list is refreshed as new videos go up; the newest picks are at the top of the channel's Shorts.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item>
 </channel></rss>
