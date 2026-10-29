@@ -3,7 +3,83 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 29 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Merch drop 7: spite, YAML, a third-try build and the best status code</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/</guid>
+<item><title>Proxmox VE 9 high availability: HA rules, fencing and a failover you have actually tested</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-ve-9-high-availability-ha-rules-fencing/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-ve-9-high-availability-ha-rules-fencing/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Proxmox VE HA restarts a dead node&#x27;s guests elsewhere, but only on a cluster that is ready for it. How the CRM, LRM and watchdog fence a node, the new node and resource affinity rules that replaced HA groups in Proxmox VE 9, the shutdown policy, maintenance mode, and a pulled-power test.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>proxmox</category><category>high availability</category><category>cluster</category><category>homelab</category><category>ha-manager</category><category>proxmox ve 9</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>High availability is the feature most people build a Proxmox VE cluster for: a node dies at 3 a.m. and its important guests are running again on another node before anyone wakes up. Proxmox VE does this with two daemons, a watchdog and a set of rules. This post explains how those pieces fit together, adds guests to HA, writes placement rules (which changed in Proxmox VE 9), walks through a node failure step by step, and covers planned shutdowns and maintenance.</p>
+<h2 id="the-trap">The trap</h2>
+<p>HA gets switched on for a cluster that is not ready for it: two nodes and no QDevice, or guests whose disks live on local storage with no replica. When a node fails, nothing restarts, or the surviving node fences itself.</p>
+<p>The second trap is using HA as a substitute for backups. HA restarts the guest. It does not undo whatever was wrong with it.</p>
+<p>The documented requirements are short: at least three cluster nodes (or two plus a QDevice) for reliable quorum, shared storage for the guests (or replicated storage, with a data-loss window back to the last replica), hardware redundancy, and a watchdog.</p>
+<h2 id="the-ha-stack-in-two-daemons">The HA stack in two daemons</h2>
+<p>Every node runs:</p>
+<ul><li><strong>pve-ha-lrm</strong>, the local resource manager. It starts and stops HA guests on its own node, following the state the CRM requests.</li><li><strong>pve-ha-crm</strong>, the cluster resource manager. One node's CRM is the active master at any time. It tells the LRMs what to run, moves guests when something fails and handles fencing.</li></ul>
+<p>Both rely on locks in the cluster file system and on a <strong>watchdog</strong>. While a node is healthy and quorate, its daemons keep resetting the watchdog timer. If the node loses quorum or the HA daemons stop working, the timer runs out and the watchdog resets the node.</p>
+<h3 id="why-fencing-matters">Why fencing matters</h3>
+<p>Before a guest from a failed node can start somewhere else, the cluster must be certain the failed node is not still running it, perhaps cut off from the network but still writing to shared storage. Starting a second copy would corrupt the disk. Making sure the node is really off is called fencing.</p>
+<p>Proxmox VE fences with watchdog timers. A node outside the quorate part of the cluster cannot reset its watchdog, so the watchdog resets it. Once the CRM master can take the failed node's lock, it knows the node has fenced itself and can recover its guests.</p>
+<p>Without a configured hardware watchdog, Proxmox VE uses the Linux kernel's <strong>softdog</strong>, which the docs describe as reliable but not independent of the server's hardware. Hardware watchdog modules are blocked by default; to use one, name its module and reboot:</p>
+<pre><code># /etc/default/pve-ha-manager
+WATCHDOG_MODULE=iTCO_wdt</code></pre>
+<p>One warning from the docs worth repeating: never kill <code>pve-ha-crm</code>, <code>pve-ha-lrm</code> or <code>watchdog-mux</code> by hand. They manage the watchdog, and killing them can cause an immediate reset of the node.</p>
+<h2 id="adding-guests-to-ha">Adding guests to HA</h2>
+<p>An HA resource is a type and an ID: <code>vm:100</code>, <code>ct:110</code>.</p>
+<pre><code>ha-manager add vm:100
+ha-manager add ct:110 --state started --max_restart 1 --max_relocate 1
+ha-manager config
+ha-manager status</code></pre>
+<p>In the web interface it is <strong>Datacenter → HA → Resources → Add</strong>, or <strong>More → Manage HA</strong> on a guest.</p>
+<p><code>--state</code> is the requested state: <code>started</code>, <code>stopped</code>, <code>disabled</code> or <code>ignored</code>. Once HA manages a guest, ordinary <code>qm start</code> and <code>qm stop</code> simply change its requested state. <code>max_restart</code> is how often HA retries starting it on the same node after a failed start, and <code>max_relocate</code> how often it tries another node; both default to 1.</p>
+<pre><code>ha-manager set vm:100 --state stopped     # stop and keep stopped
+ha-manager migrate vm:100 pve2            # live migration
+ha-manager relocate vm:100 pve2           # stop, move, start
+ha-manager remove vm:100                  # stop managing (does not stop it)</code></pre>
+<p>Before you add a guest, check it can run on every node HA might pick: disks on shared or replicated storage, bridges with the same names on every node, and no passthrough devices. If a dependency exists on only some nodes, restrict the guest to them with a strict node affinity rule.</p>
+<h2 id="ha-groups-became-ha-rules-in-proxmox-ve-9">HA groups became HA rules in Proxmox VE 9</h2>
+<p>Earlier releases used <strong>HA groups</strong> to say which nodes a guest prefers. Proxmox VE 9.0 deprecated them in favour of <strong>HA rules</strong>, stored in <code>/etc/pve/ha/rules.cfg</code>. Existing groups are migrated to node affinity rules automatically once every node runs Proxmox VE 9; if anything looks wrong afterwards, the upgrade guide points to the active CRM's log, <code>journalctl -eu pve-ha-crm</code>.</p>
+<h3 id="node-affinity-which-nodes-a-guest-runs-on">Node affinity: which nodes a guest runs on</h3>
+<pre><code># Prefer pve1 for the firewall VM; any node is fine if pve1 is down
+ha-manager rules add node-affinity fw-on-pve1 --resources vm:100 \
+  --nodes pve1
+# Make it a hard requirement instead
+ha-manager rules set node-affinity fw-on-pve1 --strict 1
+# Ordered preference: pve1 first, then pve2 or pve3 equally
+ha-manager rules add node-affinity ha-core \
+  --resources vm:101,ct:110 --nodes "pve1:2,pve2:1,pve3:1"
+# Keep these guests off pve3 (the small node)
+ha-manager rules add node-affinity not-pve3 --affinity negative \
+  --resources ct:200,vm:300 --nodes pve3</code></pre>
+<p>Node affinity rules are <strong>not strict by default</strong>: if none of the listed nodes is available, the guest may run elsewhere. With <code>--strict 1</code> it is restricted to the listed nodes and stopped if none of them is up. Priorities are relative; higher numbers win, and nodes without a number get 0. <code>failback</code>, a per-resource property that defaults to on, moves a guest back to its highest-priority node when that node returns.</p>
+<h3 id="resource-affinity-guests-together-or-apart">Resource affinity: guests together or apart</h3>
+<pre><code># Two DNS servers should never share a node
+ha-manager rules add resource-affinity dns-apart --affinity negative \
+  --resources ct:120,ct:121
+# An app and its database should stay together
+ha-manager rules add resource-affinity app-with-db --affinity positive \
+  --resources vm:130,vm:131</code></pre>
+<p>Resource affinity rules are the opposite: strict by default. A negative rule cannot list more resources than there are nodes.</p>
+<p>Rules are checked for conflicts before they apply. A resource can be in only one node affinity rule, for example, and two resources cannot be kept both together and apart. A conflicting rule is disabled until you resolve it, so run <code>ha-manager rules config</code> after every edit.</p>
+<h2 id="what-happens-when-a-node-dies">What happens when a node dies</h2>
+<ol><li>Node <code>pve2</code> loses power. Corosync on <code>pve1</code> and <code>pve3</code> stops hearing from it and forms a new membership without it. Two of three votes: still quorate.</li><li>The CRM master marks <code>pve2</code>'s HA guests as waiting for fencing (state <code>fence</code>).</li><li>If <code>pve2</code> were still running but cut off, it would be in a minority without quorum and unable to reset its watchdog, and the watchdog (60 seconds, per the docs) would reset it. A node with no power is already fenced in practice.</li><li>Once the CRM can take <code>pve2</code>'s lock, the node counts as fenced and its guests move to <code>recovery</code>.</li><li>The CRM picks a node for each guest from the online, quorate nodes, narrowed by the affinity rules, and chooses the one with the lowest load. The guests start there.</li><li>When <code>pve2</code> comes back it rejoins the cluster, and guests with failback move back if a rule prefers it.</li></ol>
+<p>With Ceph or shared storage the guests start with every completed write intact. With ZFS replication they start from the last replica. And every guest that ran on the failed node now runs on fewer nodes, which the docs warn can overload small clusters: size each node so the others can carry its HA guests, or mark only what truly matters as HA.</p>
+<h3 id="test-it-with-the-power-cord">Test it with the power cord</h3>
+<p>Before you trust HA with the firewall, test it with a disposable VM: add it to HA, then pull the power cord (not a clean shutdown) of the node running it. Watch <code>ha-manager status</code> on another node until the VM shows as started on its new home. A clean shutdown tests something else, the shutdown policy.</p>
+<h2 id="planned-shutdowns-pick-a-shutdown-policy">Planned shutdowns: pick a shutdown policy</h2>
+<p>A planned shutdown is not a failure, and HA handles it according to the cluster's shutdown policy, set in <strong>Datacenter → Options → HA Settings</strong> or in <code>datacenter.cfg</code>:</p>
+<pre><code>ha: shutdown_policy=migrate</code></pre>
+<ul><li><code>conditional</code> (the default): on shutdown, stop the guests and let other nodes take them over; on reboot, freeze them and start them again on the same node.</li><li><code>migrate</code>: mark the node unavailable and live-migrate its HA guests away first; they return when it is back.</li><li><code>failover</code>: stop the guests and recover them elsewhere if the node is not back soon.</li><li><code>freeze</code>: stop and freeze the guests; nothing moves until the node returns.</li></ul>
+<p>The docs note that <code>conditional</code> is the default for backward compatibility and that some users find <code>migrate</code> behaves more as expected. One catch with <code>migrate</code>: a guest restricted by a strict node affinity rule to unavailable nodes makes the shutdown hang until you step in.</p>
+<h2 id="maintenance-mode-for-one-node">Maintenance mode for one node</h2>
+<p>For work on a single node, maintenance mode is the cleanest tool. It migrates the node's HA guests away and brings them back when you disable it:</p>
+<pre><code>ha-manager crm-command node-maintenance enable pve2
+ha-manager status          # wait until no HA guests remain on pve2
+# ... patch, reboot, replace hardware ...
+ha-manager crm-command node-maintenance disable pve2</code></pre>
+<p>It can run from any node. The LRM shows maintenance as soon as the request is picked up, before every guest has moved, so watch the guest list rather than the status word. Maintenance mode survives a reboot and ends only when you disable it.</p>
+<p>For work that could briefly break quorum everywhere, such as re-cabling the corosync network, Proxmox VE 9.2 added a cluster-wide switch: <code>ha-manager crm-command disarm-ha freeze</code>, then <code>ha-manager crm-command arm-ha</code> when you are done. While HA is disarmed it protects nothing, so keep the window short.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Quorum survives one node down (three nodes, or two plus a QDevice).</li><li>Every HA guest's disks are on shared, Ceph or replicated storage.</li><li>Every rule in <code>ha-manager rules config</code> is enabled (no conflicts).</li><li>The shutdown policy is a deliberate choice, not the default by accident.</li><li>A pulled-power failover test of a disposable VM succeeded.</li><li>Each node can carry the HA guests of any one failed node.</li></ul><p><a href="https://payhip.com/b/cb4j1">Go deeper: Cluster Without Fear</a></p>]]></content:encoded></item><item><title>Merch drop 7: spite, YAML, a third-try build and the best status code</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/</guid>
 <pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Five new items in the Homelab the Right Way merch store - the Powered by Spite and YAML tee, the BUILD SUCCESSFUL (on the third try) hoodie, the 0 7 * * * brew coffee mug, the Powered by E-Waste sticker and the 200 OK dad hat.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-hero.jpg" type="image/jpeg" length="0"/>
 <category>merch</category><category>homelab</category><category>selfhosted</category><category>android</category><category>store</category>
@@ -24,7 +100,435 @@
 <p><a href="https://homelab-the-right-way.printful.me/product/200-ok-dad-hat">200 OK Dad Hat</a>: the best status code there is, embroidered in two thread colours on a classic Yupoong 6245CM dad cap. Quiet enough to wear anywhere; anyone who reads HTTP will get it.</p>
 <p>Black, Navy, Dark Grey and Spruce. $28.</p>
 <h2 id="where-everything-is">Where everything is</h2>
-<p>All five are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 52 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Fieldkey is live on Google Play: identify plants, rocks and coins offline</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</guid>
+<p>All five are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 52 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Will this model fit on your GPU? Size a local LLM on paper before you pull it</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/local-llm-gpu-sizing-quantization-kv-cache/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/local-llm-gpu-sizing-quantization-kv-cache/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>When ollama ps shows a CPU/GPU split, your model did not fit and everything runs at the speed of system RAM. Parameters, quantization and the KV cache turn sizing into arithmetic: weights + context + overhead, worked through for Llama 3.1 8B, then checked against ollama ps.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>ollama</category><category>llm</category><category>local ai</category><category>gpu</category><category>quantization</category><category>homelab</category><category>self-hosted ai</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>You download the biggest model your disk can hold, ask it a question, and wait. The answer arrives a word at a time, the CPU fans spin up, and <code>ollama ps</code> says <code>45%/55% CPU/GPU</code>. The model did not fit in the card's memory, so part of it runs from system RAM, and the whole thing moves at the speed of that slow part. The opposite mistake is just as common: a tiny model that fits easily but cannot follow a two-step instruction.</p>
+<p>Sizing is arithmetic, not guesswork. Three numbers decide whether a model fits: its parameters, its quantization, and the context you give it.</p>
+<h2 id="parameters-what-the-8b-means">Parameters: what the "8b" means</h2>
+<p>A model's name usually carries its size: <code>llama3.1:8b</code>, <code>qwen3:14b</code>, <code>gemma3:27b</code>. The number is the parameter count in billions, the weights the model learned during training. More parameters generally means more knowledge and better reasoning, and always means more memory and slower answers on the same hardware.</p>
+<p>At full 16-bit precision each parameter takes 2 bytes, so an 8-billion-parameter model is about 16 GB of weights. That is why the Ollama library lists <code>llama3.1:8b-instruct-fp16</code> at 16 GB.</p>
+<p>Mixture-of-experts models such as <code>qwen3:30b</code> or <code>gpt-oss:20b</code> hold all their parameters in memory but use only part of them for each word, so they can answer faster than a dense model of the same size. For sizing, what matters is the full size of the file you load.</p>
+<h2 id="quantization-smaller-numbers-smaller-model">Quantization: smaller numbers, smaller model</h2>
+<p>Quantization stores each weight with fewer bits. A model quantized to about 4 bits per weight is roughly a quarter the size of the 16-bit original, and in practice loses surprisingly little quality on most tasks. Ollama and llama.cpp use the <strong>GGUF</strong> file format, and the quantization is part of the tag:</p>
+<ul><li><strong>Q8_0</strong>: about 8 bits per weight. Closest to the original, twice the size of Q4.</li><li><strong>Q6_K</strong>, <strong>Q5_K_M</strong>: the middle ground.</li><li><strong>Q4_K_M</strong>: about 4 to 5 bits per weight. The common default, and what Ollama gives you for a plain tag like <code>llama3.1:8b</code>.</li><li><strong>Q3_K_M</strong>, <strong>Q2_K</strong>: smaller still, with a visible quality cost.</li><li><strong>fp16</strong> or <strong>bf16</strong>: no quantization at all.</li></ul>
+<p>Start at Q4_K_M. Move up only if you have memory to spare and can see a difference on your own prompts. Dropping to Q3 or Q2 to squeeze in a bigger model is usually worse than running a smaller model at Q4.</p>
+<h2 id="context-the-memory-everyone-forgets">Context: the memory everyone forgets</h2>
+<p>The <strong>context window</strong> is how many tokens the model can see at once: the system prompt, the conversation so far, any retrieved documents and the answer it is writing. Ollama picks a default from the card's memory; its context-length page lists 4k tokens below 24 GiB of VRAM, 32k from 24 to 48 GiB and 256k at 48 GiB or more.</p>
+<p>Context costs memory because the model keeps a <strong>KV cache</strong>: for every token in the window it stores a key and a value vector in every layer. The size per token comes straight from the model's architecture:</p>
+<pre><code>KV bytes per token = 2 (key and value) x layers x KV heads x head size x bytes per number</code></pre>
+<p>Llama 3.1 8B's published configuration has 32 layers, 8 key-value heads and a head size of 128. With a 16-bit cache:</p>
+<pre><code>2 x 32 x 8 x 128 x 2 bytes = 131,072 bytes, about 0.13 MB per token
+  4,096 tokens  -&gt;  about 0.54 GB
+  8,192 tokens  -&gt;  about 1.07 GB
+ 32,768 tokens  -&gt;  about 4.29 GB
+131,072 tokens  -&gt;  about 17.2 GB</code></pre>
+<p>That last line is the full context Llama 3.1 supports, and its cache alone is bigger than the 16-bit model. Long context is not free.</p>
+<p>Two settings change the picture. Ollama can store the cache in 8-bit numbers: its FAQ lists <code>f16</code> as the default, <code>q8_0</code> as about half the memory with a very small loss in precision, and <code>q4_0</code> as smaller still with a more noticeable loss. A quantized cache needs flash attention, which Ollama enables automatically where the hardware supports it. And parallel requests multiply context: with <code>OLLAMA_NUM_PARALLEL=4</code>, the FAQ says required memory scales with the number of parallel requests times the context length, so four parallel 8K conversations reserve as much cache as one 32K conversation.</p>
+<h2 id="the-estimate">The estimate</h2>
+<p>Add three things:</p>
+<ol><li><strong>Weights</strong>: the file size of the tag you pull.</li><li><strong>KV cache</strong>: per-token size times context length (times parallel requests).</li><li><strong>Overhead</strong>: compute buffers, the CUDA runtime and whatever else sits on the card. It varies by model, backend and driver; the examples below assume about 1 GB, and you confirm the real number on your own machine.</li></ol>
+<p>Llama 3.1 8B with an 8,192-token context, using the library's file sizes. These are estimates, rounded to a tenth of a gigabyte:</p>
+<div class="table"><table><thead><tr><th>Tag</th><th>Weights</th><th>KV cache (8K, f16)</th><th>Overhead (assumed)</th><th>Estimate</th></tr></thead><tbody><tr><td>8b-instruct-q4_K_M</td><td>4.9 GB</td><td>1.1 GB</td><td>1.0 GB</td><td>about 7.0 GB</td></tr><tr><td>8b-instruct-q5_K_M</td><td>5.7 GB</td><td>1.1 GB</td><td>1.0 GB</td><td>about 7.8 GB</td></tr><tr><td>8b-instruct-q8_0</td><td>8.5 GB</td><td>1.1 GB</td><td>1.0 GB</td><td>about 10.6 GB</td></tr><tr><td>8b-instruct-fp16</td><td>16 GB</td><td>1.1 GB</td><td>1.0 GB</td><td>about 18.1 GB</td></tr></tbody></table></div>
+<p>The same model at Q4_K_M as the context grows:</p>
+<div class="table"><table><thead><tr><th>Context</th><th>KV cache</th><th>Estimate (f16 cache)</th><th>Estimate (q8_0 cache)</th></tr></thead><tbody><tr><td>4,096</td><td>0.5 GB</td><td>about 6.4 GB</td><td>about 6.2 GB</td></tr><tr><td>8,192</td><td>1.1 GB</td><td>about 7.0 GB</td><td>about 6.4 GB</td></tr><tr><td>32,768</td><td>4.3 GB</td><td>about 10.2 GB</td><td>about 8.0 GB</td></tr></tbody></table></div>
+<p>Read the tables against your card. An 8 GB card runs the Q4_K_M model comfortably at the default context and gets tight at 8K. A 12 GB card has room for 8K at Q5_K_M, or 32K with a quantized cache. A 16 GB card can hold Q8_0 at 8K. Leave a margin: if the estimate is within a gigabyte of the card's total, expect Ollama to spill part of the model to system RAM.</p>
+<h2 id="check-it-against-reality">Check it against reality</h2>
+<p>An estimate is a starting point. Load the model with the context you plan to use, then:</p>
+<pre><code>ollama ps</code></pre>
+<p>The SIZE column is what Ollama actually allocated, the CONTEXT column is the context it used, and the PROCESSOR column must say <code>100% GPU</code>. If it shows a CPU/GPU split, pick a smaller quantization, a smaller context or a smaller model, and check again.</p>
+<h2 id="picking-the-file">Picking the file</h2>
+<p>The Ollama library at ollama.com/library lists every model's sizes, context window and capabilities, and each tags page lists every quantization with its file size. <code>ollama pull qwen3:8b</code> downloads the default quantization; <code>ollama pull llama3.1:8b-instruct-q5_K_M</code> asks for a specific one.</p>
+<p>Hugging Face hosts many more GGUF files, and Ollama can run them directly:</p>
+<pre><code># Q4_K_M is used by default when the repository has it
+ollama run hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF
+
+# Ask for a specific quantization by its tag
+ollama run hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF:Q8_0</code></pre>
+<p>Stick to repositories from the model's publisher or well-known quantizers, and read the model card, including the license, before you build anything on top. "Open" models come with very different licenses: as listed on Hugging Face in October 2026, Llama 3.1 uses the Llama 3.1 Community License and Gemma 3 the Gemma Terms of Use, while Qwen3, gpt-oss and Mistral 7B are Apache 2.0.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>You know your card's memory before you pick a model.</li><li>You start at Q4_K_M and move up only with memory to spare.</li><li>You estimate weights + KV cache + overhead before you pull.</li><li>You know the context you need, and that parallel requests multiply it.</li><li><code>ollama ps</code> shows the SIZE you expected and <code>100% GPU</code> after loading.</li><li>You have read the license of every model you build on.</li></ul><p><a href="https://payhip.com/b/71LQ2">Go deeper: Private AI at Home</a></p>]]></content:encoded></item><item><title>Real HTTPS for your homelab Kubernetes apps without opening a port: k3s Traefik, cert-manager and a DNS-01 wildcard</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/k3s-traefik-cert-manager-dns01-wildcard/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/k3s-traefik-cert-manager-dns01-wildcard/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Self-signed warnings on every app, or port 80 open to the internet for Let&#x27;s Encrypt? Neither. A DNS-01 wildcard from cert-manager, served as Traefik&#x27;s default certificate on k3s, gives every internal app a trusted certificate while nothing on your network is reachable from outside.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>kubernetes</category><category>k3s</category><category>traefik</category><category>cert-manager</category><category>lets encrypt</category><category>homelab</category><category>tls</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Every web app in a homelab cluster should answer at a proper hostname with a certificate your browser trusts, and you should not have to forward a single port from the internet to get there. On k3s you already have most of the pieces: the Traefik ingress controller ships with it. Add cert-manager, one DNS-01 issuer and one wildcard certificate, and every app you route gets real HTTPS automatically.</p>
+<h2 id="the-trap">The trap</h2>
+<p>There are two traps, one on each side.</p>
+<p>The first is living with certificate warnings: self-signed certificates on every app, a browser you have trained to click "proceed anyway", and a password manager that refuses to autofill. That habit is exactly what an attacker on your network would rely on.</p>
+<p>The second is fixing it the obvious way: opening port 80 to the internet so Let's Encrypt can run an HTTP-01 challenge. That publishes your lab to every scanner on the internet for the sake of a padlock icon.</p>
+<p>The DNS-01 challenge avoids both. You prove you control the domain by creating a DNS record through your DNS provider's API. Nothing on your network has to be reachable from outside.</p>
+<h2 id="how-a-request-reaches-a-pod">How a request reaches a pod</h2>
+<p>When something does not load, walk this path in order:</p>
+<ol><li>Your browser asks LAN DNS for <code>paperless.home.example.com</code> and gets the private address of Traefik's LoadBalancer Service (for example <code>192.168.40.200</code>, handed out by MetalLB).</li><li>The node that holds that address receives the connection and hands it to a Traefik pod.</li><li>Traefik terminates TLS, matches the hostname against its routes, and forwards the request to the app's ClusterIP Service.</li><li>The Service sends it to one of the app's ready pods.</li></ol>
+<h2 id="step-1-check-the-traefik-that-k3s-installed">Step 1: check the Traefik that k3s installed</h2>
+<p>k3s installs Traefik from a bundled Helm chart into <code>kube-system</code> and registers an IngressClass called <code>traefik</code>. Because it is the only ingress controller in the cluster, it picks up standard Ingress objects without being told.</p>
+<pre><code>kubectl get ingressclass
+kubectl -n kube-system get deploy,svc traefik
+kubectl -n kube-system get helmchart traefik -o yaml | grep -i version</code></pre>
+<p>Change Traefik's settings with a <code>HelmChartConfig</code> named <code>traefik</code>, never by editing the generated chart manifest. One gotcha when you copy older snippets: the chart version k3s ships moved the Service type from <code>service.type</code> to <code>service.spec.type</code>, and the k3s documentation warns that the old key is silently ignored.</p>
+<p>While you are there, redirect plain HTTP to HTTPS everywhere:</p>
+<pre><code>apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      web:
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true</code></pre>
+<pre><code>kubectl apply -f traefik-config.yaml
+kubectl -n kube-system get pods -l app.kubernetes.io/name=traefik -w</code></pre>
+<p>k3s re-runs the chart with the merged values and Traefik restarts.</p>
+<p>A note if you are following an older tutorial that installs ingress-nginx first: in November 2025 Kubernetes SIG Network and the Security Response Committee announced the retirement of ingress-nginx, with best-effort maintenance until March 2026 and no releases or security fixes after that. k3s already gives you Traefik. Translate those guides' Ingress objects to the <code>traefik</code> class, and review any <code>nginx.ingress.kubernetes.io/*</code> annotations, because Traefik ignores them.</p>
+<h2 id="step-2-install-cert-manager">Step 2: install cert-manager</h2>
+<p>cert-manager watches <code>Certificate</code> objects, gets certificates from an issuer such as Let's Encrypt, stores them in Secrets and renews them before they expire. The project publishes its Helm chart in an OCI registry (v1.21.3 at the time of writing; check for the current release):</p>
+<pre><code>helm install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+  --version v1.21.3 \
+  --namespace cert-manager --create-namespace \
+  --set crds.enabled=true
+kubectl -n cert-manager get pods</code></pre>
+<p><code>crds.enabled=true</code> lets the chart install and upgrade cert-manager's CustomResourceDefinitions.</p>
+<h2 id="step-3-a-dns-01-issuer">Step 3: a DNS-01 issuer</h2>
+<p>You need a domain you own, hosted at a DNS provider cert-manager can talk to. It supports several directly (Cloudflare, Route 53, Google Cloud DNS, Azure DNS, DigitalOcean and others) and many more through webhooks. With Cloudflare, follow cert-manager's documentation: create an API <strong>token</strong>, not the global API key, with <strong>Zone - DNS - Edit</strong> and <strong>Zone - Zone - Read</strong>, limited to your zone.</p>
+<pre><code>kubectl -n cert-manager create secret generic cloudflare-api-token \
+  --from-literal=api-token='PASTE-THE-TOKEN'</code></pre>
+<p>Then a ClusterIssuer:</p>
+<pre><code>apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: you@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-account
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token</code></pre>
+<p>Create a second issuer named <code>letsencrypt-staging</code> with the server <code>https://acme-staging-v02.api.letsencrypt.org/directory</code>. Staging has much more generous rate limits, so get everything working there first. The token secret lives in the <code>cert-manager</code> namespace because, for a ClusterIssuer, cert-manager looks for referenced secrets in its own namespace by default.</p>
+<h2 id="step-4-one-wildcard-for-every-internal-name">Step 4: one wildcard for every internal name</h2>
+<p>You could request one certificate per app. A single wildcard for <code>*.home.example.com</code> is simpler and has a privacy benefit: every certificate Let's Encrypt issues is published in public Certificate Transparency logs, and a wildcard publishes <code>*.home.example.com</code> instead of a list of every app you run. Wildcards can only be issued through DNS-01, which is one more reason to use it.</p>
+<pre><code>apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-home
+  namespace: kube-system
+spec:
+  secretName: wildcard-home-tls
+  issuerRef:
+    name: letsencrypt-staging        # switch to letsencrypt-prod when it works
+    kind: ClusterIssuer
+  dnsNames:
+    - "home.example.com"
+    - "*.home.example.com"</code></pre>
+<pre><code>kubectl apply -f wildcard.yaml
+kubectl -n kube-system get certificate wildcard-home -w     # READY becomes True
+kubectl describe certificaterequest -n kube-system          # if it does not</code></pre>
+<p>Once the staging certificate shows <code>Ready</code>, change <code>issuerRef.name</code> to <code>letsencrypt-prod</code>, apply again, and delete the old secret so cert-manager issues a fresh one.</p>
+<h2 id="step-5-make-it-traefik-s-default-certificate">Step 5: make it Traefik's default certificate</h2>
+<p>The certificate lives in <code>kube-system</code>, but an Ingress can only reference Secrets in its own namespace. Instead of copying the secret into every namespace, make it Traefik's default. Traefik serves the default certificate for any TLS connection that no more specific certificate matches:</p>
+<pre><code>apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  defaultCertificate:
+    secretName: wildcard-home-tls</code></pre>
+<p>Now any Ingress under <code>home.example.com</code> that asks for TLS gets the wildcard automatically, with no <code>secretName</code> at all:</p>
+<pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami
+  namespace: whoami
+spec:
+  tls:
+    - hosts: ["whoami.home.example.com"]
+  rules:
+    - host: whoami.home.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80</code></pre>
+<p>Plain Ingress is a fine choice here. The k3s documentation states that the traditional Ingress API is still supported and not planned for deprecation, and most Helm charts still generate it.</p>
+<h2 id="keep-internal-names-internal">Keep internal names internal</h2>
+<p>DNS-01 means the certificate is public but the service is not. Nothing in public DNS points at your lab; the only public record cert-manager creates is a temporary TXT record during issuance. <code>*.home.example.com</code> resolves only through your LAN resolver's override to a private address, so from outside your network the names do not resolve and the address is unreachable.</p>
+<p>For access from outside the house, use a VPN instead of a port forward. Once your phone is connected, it uses the LAN resolver and every app works exactly as it does at home.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li><code>kubectl get ingressclass</code> shows <code>traefik</code>, and Traefik settings live in one <code>HelmChartConfig</code>.</li><li>Plain HTTP redirects to HTTPS.</li><li>cert-manager is installed with <code>crds.enabled=true</code>.</li><li>The DNS provider credential is a scoped API token, stored in the <code>cert-manager</code> namespace.</li><li>Staging and production ClusterIssuers exist, and you proved the setup on staging first.</li><li>One wildcard <code>Certificate</code> is <code>Ready</code> and set as Traefik's default in a <code>TLSStore</code>.</li><li>No port is forwarded from the internet; remote access goes through a VPN.</li></ul><p><a href="https://payhip.com/b/uyY03">Go deeper: Kubernetes Without the Overwhelm</a></p>]]></content:encoded></item><item><title>Test your Compose ViewModels in milliseconds: fakes, runTest, the Main dispatcher and Turbine</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-viewmodel-unit-tests-fakes-runtest-turbine/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-viewmodel-unit-tests-fakes-runtest-turbine/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>The ViewModel holds a Compose screen&#x27;s behavior and runs on the plain JVM, which makes it the best-value test in an Android app. A hand-written fake, a MainDispatcherRule, runTest&#x27;s virtual time, Turbine for state sequences, and the StateFlow and stateIn traps that make these tests fail for the wrong reason.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>kotlin</category><category>testing</category><category>jetpack compose</category><category>coroutines</category><category>viewmodel</category><category>turbine</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The ViewModel is where a Compose screen's behavior lives: what the screen shows while loading, what happens when the user saves, which error appears when the network fails. It is plain Kotlin and runs on the JVM, so its tests take milliseconds and need no emulator. That makes it the best-value test in an Android app. This post tests a small note editor's ViewModel with a fake repository, coroutine test dispatchers, Turbine and <code>SavedStateHandle</code>.</p>
+<h2 id="the-code-under-test">The code under test</h2>
+<p>The editor loads a note by id, lets the user change the title and body, and saves. Its state is a single <code>StateFlow&lt;EditorUiState&gt;</code>, and the important parts look like this:</p>
+<pre><code>class EditorViewModel(
+    private val repository: NotesRepository,
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+
+    private val noteId: Long? = savedStateHandle.get&lt;Long&gt;("noteId")
+    private val _state = MutableStateFlow(EditorUiState())
+    val state: StateFlow&lt;EditorUiState&gt; = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val note = noteId?.let { repository.getNote(it) }
+            _state.update {
+                it.copy(
+                    title = savedStateHandle["draftTitle"] ?: note?.title.orEmpty(),
+                    body = note?.body.orEmpty(),
+                    isLoading = false,
+                )
+            }
+        }
+    }
+
+    fun save() {
+        val current = _state.value
+        if (current.title.isBlank()) {
+            _state.update { it.copy(error = "Title is required") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true) }
+            when (val result = repository.save(noteId, current.title, current.body)) {
+                is SaveResult.Ok -&gt; _state.update { it.copy(isSaving = false, saved = true) }
+                is SaveResult.Failed -&gt; _state.update {
+                    it.copy(isSaving = false, error = result.message)
+                }
+            }
+        }
+    }
+    // onTitleChange() also writes savedStateHandle["draftTitle"]
+}</code></pre>
+<p><code>NotesRepository</code> is an interface. That one decision makes the ViewModel testable: a test can hand it anything that implements the interface.</p>
+<h2 id="fakes-not-mocks-by-default">Fakes, not mocks, by default</h2>
+<p>A <strong>mock</strong> (MockK, for example) is configured per test: you tell it what to return and afterwards verify which calls were made. A <strong>fake</strong> is a small, real implementation written by hand, usually backed by a map in memory. Google's testing guidance recommends fakes as the default test double, for practical reasons:</p>
+<ul><li>A fake behaves like the real thing, so tests check behavior ("after saving, the note is in the repository") rather than implementation details ("<code>save</code> was called once with these arguments").</li><li>A fake is written once and reused by every test. Mocks are configured again in every test.</li><li>Refactoring the ViewModel does not break tests that use a fake, as long as the behavior stays the same.</li></ul>
+<p>Keep mocks for the edges: a third-party class you cannot implement easily, or a check that something was <em>not</em> called.</p>
+<pre><code>class FakeNotesRepository : NotesRepository {
+    private val notes = mutableMapOf&lt;Long, Note&gt;()
+    private var nextId = 1L
+    var failNextSave: String? = null
+    var saveDelayMs = 0L
+
+    fun seed(vararg seed: Note) {
+        seed.forEach { notes[it.id] = it }
+        nextId = (notes.keys.maxOrNull() ?: 0L) + 1
+    }
+
+    override suspend fun getNote(id: Long): Note? = notes[id]
+
+    override suspend fun save(id: Long?, title: String, body: String): SaveResult {
+        delay(saveDelayMs)                 // virtual time in tests
+        failNextSave?.let { failNextSave = null; return SaveResult.Failed(it) }
+        val note = Note(id ?: nextId++, title, body)
+        notes[note.id] = note
+        return SaveResult.Ok(note.id)
+    }
+
+    fun all(): List&lt;Note&gt; = notes.values.toList()
+}</code></pre>
+<h2 id="step-1-replace-the-main-dispatcher">Step 1: replace the Main dispatcher</h2>
+<p><code>viewModelScope</code> launches on <code>Dispatchers.Main</code>. On the JVM there is no Android main looper, so a test that creates this ViewModel fails with an error about the Main dispatcher missing. The fix is <code>Dispatchers.setMain</code> and <code>Dispatchers.resetMain</code> from kotlinx-coroutines-test, and the Android Developers coroutine testing guide recommends wrapping them in a JUnit rule so no test forgets:</p>
+<pre><code>class MainDispatcherRule(
+    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+) : TestWatcher() {
+    override fun starting(description: Description) {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    override fun finished(description: Description) {
+        Dispatchers.resetMain()
+    }
+}</code></pre>
+<p>Every ViewModel test then starts with one line: <code>@get:Rule val mainDispatcherRule = MainDispatcherRule()</code>.</p>
+<h2 id="step-2-understand-runtest-and-the-two-dispatchers">Step 2: understand runTest and the two dispatchers</h2>
+<p><code>runTest</code> runs the test body as a coroutine with <strong>virtual time</strong>: a <code>delay(5_000)</code> inside it completes instantly, while the test still sees five seconds pass. There are two test dispatchers, and the difference matters:</p>
+<ul><li><code>StandardTestDispatcher</code> queues new coroutines. They do not run until the test yields, with <code>advanceUntilIdle()</code>, <code>advanceTimeBy()</code>, <code>runCurrent()</code> or by suspending. It is the default in <code>runTest</code>, and it lets you check intermediate states such as "saving is in progress".</li><li><code>UnconfinedTestDispatcher</code> starts new coroutines eagerly until their first suspension. Simple tests read shorter, but you cannot observe the state between "launched" and "finished".</li></ul>
+<p>When <code>MainDispatcherRule</code> installs a test dispatcher as Main, <code>runTest</code> reuses its scheduler, so <code>advanceUntilIdle()</code> in the test also drives coroutines launched in <code>viewModelScope</code>.</p>
+<h2 id="step-3-the-first-tests">Step 3: the first tests</h2>
+<pre><code>class EditorViewModelTest {
+
+    @get:Rule val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
+
+    private val repository = FakeNotesRepository()
+
+    private fun viewModel(noteId: Long? = null) = EditorViewModel(
+        repository,
+        SavedStateHandle(mapOf("noteId" to noteId)),
+    )
+
+    @Test fun saving_blank_note_shows_error_and_saves_nothing() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onTitleChange("   ")
+        vm.save()
+        advanceUntilIdle()
+
+        assertThat(vm.state.value.error).isEqualTo("Title is required")
+        assertThat(repository.all()).isEmpty()
+    }
+
+    @Test fun saving_shows_progress_then_marks_saved() = runTest {
+        repository.saveDelayMs = 2_000
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.onTitleChange("Groceries")
+
+        vm.save()
+        runCurrent()                       // the save starts, then suspends in delay()
+        assertThat(vm.state.value.isSaving).isTrue()
+
+        advanceUntilIdle()                 // two virtual seconds pass instantly
+        assertThat(vm.state.value.saved).isTrue()
+    }
+}</code></pre>
+<p>The classic mistake is asserting before advancing. With <code>StandardTestDispatcher</code>, the coroutine launched in <code>init</code> has not run when the constructor returns, so a test that reads <code>state.value.title</code> straight away sees the default empty title and fails, or worse, passes for the wrong reason.</p>
+<h2 id="step-4-sequences-of-states-with-turbine">Step 4: sequences of states with Turbine</h2>
+<p>When the order of states is the behavior, Turbine collects the flow and lets you await each item:</p>
+<pre><code>@Test fun save_emits_saving_then_saved() = runTest {
+    repository.saveDelayMs = 1_000         // a suspension between the two updates
+    val vm = viewModel()
+    advanceUntilIdle()
+    vm.onTitleChange("Packing list")
+
+    vm.state.test {
+        assertThat(awaitItem().isSaving).isFalse()   // current state
+        vm.save()
+        assertThat(awaitItem().isSaving).isTrue()
+        assertThat(awaitItem().saved).isTrue()
+        cancelAndIgnoreRemainingEvents()
+    }
+}</code></pre>
+<p><code>StateFlow</code> is <strong>conflated</strong>: if two updates happen before the collector runs, it sees only the latest, and equal consecutive values are dropped. A test that expects a state that was immediately replaced waits and times out. That is why the fake has a delay: the suspension between "saving" and "saved" lets the collector see both. Assert on the states that matter, and make sure something suspends between them.</p>
+<h2 id="the-statein-trap">The stateIn trap</h2>
+<p>A flow exposed with <code>stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())</code> runs its upstream only while someone collects it. Reading <code>.value</code> in a test with nobody collecting returns the initial empty list forever. Collect it in <code>backgroundScope</code>, which <code>runTest</code> cancels for you at the end:</p>
+<pre><code>backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+    vm.notes.collect()
+}</code></pre>
+<h2 id="process-death-at-the-viewmodel-level">Process death, at the ViewModel level</h2>
+<p><code>SavedStateHandle</code> has a public constructor that takes a map, so you can simulate the system recreating the ViewModel: write a value through the first instance, build a second one with a handle holding the same values, and assert the state comes back.</p>
+<pre><code>val restored = EditorViewModel(repository, SavedStateHandle(mapOf(
+    "noteId" to null,
+    "draftTitle" to handle.get&lt;String&gt;("draftTitle"),
+)))
+advanceUntilIdle()
+assertThat(restored.state.value.title).isEqualTo("Half-typed")</code></pre>
+<h2 id="checklist">Checklist</h2>
+<ul><li>The ViewModel depends on interfaces, and each has a reusable fake.</li><li>A <code>MainDispatcherRule</code> replaces <code>Dispatchers.Main</code> in every ViewModel test.</li><li>Tests advance (<code>advanceUntilIdle()</code>, <code>runCurrent()</code>) before asserting.</li><li>Turbine tests have a real suspension between the states they expect.</li><li><code>stateIn</code> flows are collected in <code>backgroundScope</code> before reading <code>.value</code>.</li><li>Saved state is tested by rebuilding the ViewModel from a <code>SavedStateHandle</code>.</li></ul><p><a href="https://payhip.com/b/Fpyu8">Go deeper: Test It Before They Do</a></p>]]></content:encoded></item><item><title>Your fingerprint prompt is a speed bump, not a lock: Android biometrics with a CryptoObject</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-biometric-prompt-cryptoobject-keystore/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-biometric-prompt-cryptoobject-keystore/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Most Android biometric prompts just flip a boolean that a patched APK can flip too, while the data sits unencrypted behind it. Bind a Keystore key to BIOMETRIC_STRONG, pass a CryptoObject, and the prompt releases a key the Keystore guards outside your process. Authenticator classes, key settings and KeyPermanentlyInvalidatedException.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>security</category><category>biometrics</category><category>keystore</category><category>kotlin</category><category>androidx biometric</category><category>encryption</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A fingerprint prompt feels like security. The user touches the sensor, a little animation plays, the app opens. But look at what most implementations do with the result: <code>onAuthenticationSucceeded()</code> sets a boolean, and the boolean opens the screen. Anyone who can change that boolean, with a debugger on a rooted phone or by patching the APK, opens the screen without a fingerprint. Worse, the data behind the screen was never protected at all; it was sitting in storage the whole time.</p>
+<p>A biometric check is only as strong as what it unlocks. This post shows the difference between a prompt that decides a branch in your code and a prompt that releases a cryptographic key, and how to build the second kind with <code>androidx.biometric</code>.</p>
+<h2 id="the-library">The library</h2>
+<p>Use the Jetpack Biometric library rather than the platform <code>BiometricPrompt</code> directly. It works back to older Android versions, handles device differences and gives you one API.</p>
+<pre><code>dependencies {
+    implementation("androidx.biometric:biometric:1.1.0")
+}</code></pre>
+<p>1.1.0 is the stable release in October 2026. The 1.4.0 alpha line adds an activity-result API, a <code>biometric-compose</code> artifact and <code>KeyAgreement</code> support in <code>CryptoObject</code>; everything below uses the stable <code>BiometricPrompt</code> API, which the alpha keeps.</p>
+<h2 id="strong-weak-and-the-screen-lock">Strong, weak and the screen lock</h2>
+<p><code>BiometricManager.Authenticators</code> defines three types, and the difference between the first two is the whole story:</p>
+<ul><li><strong>BIOMETRIC_STRONG</strong>: a Class 3 biometric under the Android Compatibility Definition. Strong enough to unlock Keystore keys.</li><li><strong>BIOMETRIC_WEAK</strong>: a Class 2 biometric. Can confirm presence, cannot unlock keys.</li><li><strong>DEVICE_CREDENTIAL</strong>: the screen lock (PIN, pattern or password).</li></ul>
+<p>The device maker decides which sensor is Class 2 or Class 3, not you. Many face unlock implementations are Class 2 and many fingerprint sensors are Class 3, but do not assume; ask the system.</p>
+<p>A few rules from the documentation shape everything:</p>
+<ul><li>You cannot call <code>setNegativeButtonText()</code> together with <code>DEVICE_CREDENTIAL</code>; when the screen lock is allowed, the system provides its own fallback button.</li><li>On Android 10 (API level 29) and lower, <code>DEVICE_CREDENTIAL</code> alone and <code>BIOMETRIC_STRONG or DEVICE_CREDENTIAL</code> are not supported combinations. Check for a screen lock with <code>KeyguardManager.isDeviceSecure()</code> instead.</li><li>Crypto-based authentication is incompatible with Class 2 biometrics, and before Android 11 with the device credential too. Passing a <code>CryptoObject</code> with those authenticators throws <code>IllegalArgumentException</code>.</li></ul>
+<h2 id="check-before-you-prompt">Check before you prompt</h2>
+<p>Call <code>canAuthenticate()</code> with exactly the combination you will pass to the prompt:</p>
+<pre><code>fun biometricState(context: Context, allowed: Int): BiometricState {
+    val manager = BiometricManager.from(context)
+    return when (manager.canAuthenticate(allowed)) {
+        BiometricManager.BIOMETRIC_SUCCESS -&gt; BiometricState.Ready
+        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -&gt; BiometricState.NeedsEnrollment
+        else -&gt; BiometricState.Unavailable    // no hardware, unavailable, update needed
+    }
+}</code></pre>
+<p>When nothing is enrolled, on Android 11 (API level 30) and higher you can send the user to <code>Settings.ACTION_BIOMETRIC_ENROLL</code>, passing the authenticators you accept in <code>Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED</code>. When biometrics are unavailable, fall back to your normal sign-in rather than hiding the feature.</p>
+<h2 id="the-prompt-without-crypto-and-what-it-proves">The prompt without crypto, and what it proves</h2>
+<p>The common version calls <code>showNotes()</code> from <code>onAuthenticationSucceeded()</code>. A successful callback proves only that the system said the user passed, and your code then trusts a callback inside your own process. With a patched APK, or on a device where an attacker controls your process, that callback can be faked, and the notes were readable all along. It is fine for confirming that the person holding an already-unlocked phone is probably the owner before showing something mildly sensitive. It is not a lock.</p>
+<h2 id="the-prompt-with-crypto-unlocking-a-key">The prompt with crypto: unlocking a key</h2>
+<p>The fix is to make the prompt release something the app cannot get any other way. Create a key in the Android Keystore that can only be used after a strong biometric check, and encrypt the sensitive data with it. Now the only way to decrypt is to pass the prompt, because the Keystore enforces the check outside your process, often in secure hardware.</p>
+<h3 id="step-1-an-authentication-bound-key">Step 1: an authentication-bound key</h3>
+<pre><code>private const val KEY_ALIAS = "fieldnotes_vault"
+
+fun createVaultKey() {
+    val spec = KeyGenParameterSpec.Builder(
+        KEY_ALIAS,
+        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+    )
+        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+        .setKeySize(256)
+        .setUserAuthenticationRequired(true)
+        // 0 = authenticate for every use; API 30+ form of the setting
+        .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
+        .setInvalidatedByBiometricEnrollment(true)
+        .build()
+    KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
+        init(spec)
+        generateKey()
+    }
+}</code></pre>
+<ul><li><code>setUserAuthenticationRequired(true)</code> makes the key unusable until the user authenticates.</li><li><code>setUserAuthenticationParameters(timeout, type)</code>, added in API level 30, sets how long a successful authentication keeps the key usable (0 means every operation needs its own prompt) and which kinds count. <code>AUTH_BIOMETRIC_STRONG</code> accepts only Class 3 biometrics; add <code>or KeyProperties.AUTH_DEVICE_CREDENTIAL</code> to accept the screen lock too. Below API 30, the older <code>setUserAuthenticationValidityDurationSeconds()</code> does the same job, with <code>-1</code> meaning per-use.</li><li><code>setInvalidatedByBiometricEnrollment(true)</code> (the default, API 24 and higher) permanently invalidates the key when the user enrolls a new fingerprint or face. Someone who learns the PIN cannot add their own finger and then decrypt.</li></ul>
+<h3 id="step-2-prompt-with-a-cryptoobject">Step 2: prompt with a CryptoObject</h3>
+<p>Initialize a <code>Cipher</code> with the key, wrap it in a <code>CryptoObject</code> and pass it to <code>authenticate()</code>. On success, the cipher in the result is authorized for one operation:</p>
+<pre><code>val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    .apply { init(Cipher.ENCRYPT_MODE, vaultKey()) }
+
+val prompt = BiometricPrompt(activity, ContextCompat.getMainExecutor(activity),
+    object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationSucceeded(
+            result: BiometricPrompt.AuthenticationResult,
+        ) {
+            val c = result.cryptoObject?.cipher ?: return
+            onDone(EncryptedBlob(iv = c.iv, data = c.doFinal(plaintext)))
+        }
+    })
+prompt.authenticate(
+    BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Protect your vault")
+        .setAllowedAuthenticators(BIOMETRIC_STRONG)
+        .setNegativeButtonText("Cancel")
+        .build(),
+    BiometricPrompt.CryptoObject(cipher),
+)</code></pre>
+<p>Decryption is the same with <code>Cipher.DECRYPT_MODE</code> and a <code>GCMParameterSpec(128, blob.iv)</code>. Store the IV next to the ciphertext; it is not secret, but GCM needs it, and the Keystore generates a fresh random IV for each encryption by default.</p>
+<h3 id="step-3-handle-a-dead-key">Step 3: handle a dead key</h3>
+<p>When the user adds a new fingerprint or removes the screen lock, the key is gone for good and <code>cipher.init()</code> throws <code>KeyPermanentlyInvalidatedException</code>. That is the system doing its job. Catch it, delete the key alias and the ciphertext it protected, and ask the user to sign in again the normal way. Never treat it as a crash:</p>
+<pre><code>fun cipherOrNull(mode: Int, iv: ByteArray? = null): Cipher? = try {
+    Cipher.getInstance("AES/GCM/NoPadding").apply {
+        if (iv == null) init(mode, vaultKey())
+        else init(mode, vaultKey(), GCMParameterSpec(128, iv))
+    }
+} catch (e: KeyPermanentlyInvalidatedException) {
+    KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(KEY_ALIAS)
+    vaultStore.clear()
+    null   // caller falls back to a full sign-in
+}</code></pre>
+<h2 id="where-it-belongs">Where it belongs</h2>
+<p>Good uses: unlocking a stored refresh token so a returning user signs in with a fingerprint; confirming a sensitive action such as deleting the account, where the strongest version signs a server nonce with a biometric-bound private key; and a private vault inside the app with its own authentication-bound key.</p>
+<p>Bad uses: a prompt in front of the whole app while the data sits unencrypted behind it, or a prompt treated as a replacement for server-side authentication. After too many failed attempts the system locks biometrics out and reports it through <code>onAuthenticationError()</code>; offer the screen lock or your normal sign-in instead of looping the prompt. And if what you want is "sign in with my fingerprint", passkeys are the better answer, since the credential provider already uses the screen lock and biometrics.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li><code>canAuthenticate()</code> is called with the same authenticators the prompt uses.</li><li>Anything sensitive is encrypted with a Keystore key that requires <code>BIOMETRIC_STRONG</code>.</li><li>The prompt passes a <code>CryptoObject</code>, and only the authorized cipher touches the data.</li><li>Keys are invalidated by new biometric enrollment.</li><li><code>KeyPermanentlyInvalidatedException</code> leads to a clean re-sign-in, not a crash.</li><li>A failed or locked-out prompt falls back to the screen lock or normal sign-in.</li></ul><p><a href="https://payhip.com/b/oZl1J">Go deeper: Sign-In and Security Done Right</a></p>]]></content:encoded></item><item><title>Fieldkey is live on Google Play: identify plants, rocks and coins offline</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</guid>
 <pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Fieldkey is a new Android app from Hartmann Studios that identifies plants, rocks, minerals and US coins right on your phone, with no account, no upload and no internet needed. Now free on Google Play.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>privacy</category><category>offline</category><category>apps</category>
@@ -393,6 +897,10 @@ sum by (host) (count_over_time({level="err"}[1h]))</code></pre>
 <h2 id="meet-the-hosts-45-second-promo">Meet the hosts (45-second promo)</h2>
 <figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/posts/podcast-promo.jpg" alt="Maya, Sam and Theo, the AI hosts of Homelab the Right Way, in their studio" loading="lazy"></figure>
 <p>Maya, Sam and Theo introduce the show in 45 seconds: <a href="https://youtube.com/shorts/33hybLbwTTw">watch it on YouTube</a> or <a href="https://bsky.app/profile/homelabtherightway.bsky.social/post/3mysgvqy7ik2k">on Bluesky</a>. New episodes every Sunday, free on podcast apps and YouTube.</p>
+<h2 id="watch-the-clips">Watch the clips</h2>
+<p>Short clips from this episode on YouTube, with the hosts in the studio:</p>
+<ul><li><a href="https://youtube.com/shorts/Lc0f7_nw5Lw">Why would the smart plug want to log into my firewall?</a></li><li><a href="https://youtube.com/shorts/VLvlveHCJX4">How to find out what the TV is actually doing</a></li></ul>
+<p>The full episode is also on YouTube: <a href="https://youtu.be/3Ik6etgd8wU">Ep. 2: Lock down your home network</a>.</p>
 <h2 id="chapters">Chapters</h2>
 <ul><li>00:04 — Cold open: the cast button is grey, and welcome</li><li>01:49 — New tech this week: TP-Link lawsuits, OPNsense 26.7.7, Home Assistant 2026.10</li><li>06:22 — Think in zones, then lock the front door</li><li>13:22 — VLANs from the wire up, and rules that mean something</li><li>21:36 — IoT that still works: why the cast button goes grey, and the Home Assistant leg</li><li>28:29 — App spot: LiveCaptionN, live captions that can run on your own server</li><li>30:53 — Gear break: the managed switch</li><li>32:13 — Listener question: I locked myself out of my own firewall. How do I never do that again?</li><li>39:04 — Merch, the ebooks, and the free weekly email</li><li>40:18 — Three takeaways, and where everything lives</li></ul>
 <h2 id="new-tech-this-week-with-sources-01-49">New tech this week, with sources (01:49)</h2>
@@ -744,210 +1252,5 @@ services:
 <ul><li>SkyPulse is free to download, and the listing describes it as free with optional premium.</li><li>The free features listed are basic flight tracking, airport information, 7-day flight history and standard alerts.</li><li>Google Play marks the app as containing ads.</li><li>It is rated Everyone and sits in the Travel and Local category.</li></ul>
 <p>If you only need occasional lookups and standard alerts, the free tier covers that. The listing does not spell out exactly what premium adds beyond the free list, so check inside the app before you decide whether you need it.</p>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You often look up at planes and want to know what they are.</li><li>You pick people up from the airport and want a notification instead of refreshing a page.</li><li>You want airport arrivals, departures and weather next to the live map.</li><li>You like dark mode and a clean layout, on a phone or a tablet.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app">Get SkyPulse: Live Flight Tracker on Google Play</a></p>]]></content:encoded></item><item><title>Three probes, one XIAO: the turtle-tank water monitor, from pin map to calibration</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/turtle-tank-water-monitor-three-probes-one-xiao/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/turtle-tank-water-monitor-three-probes-one-xiao/</guid>
-<pubDate>Wed, 21 Oct 2026 12:30:00 -0400</pubDate><description>The three-sensor water monitor from Smart Turtle Tank in one page: the six XIAO ESP32-C3 pins, the firmware that reads a DS18B20, a TDS probe and a turbidity probe without lying to you, why the maths lives on the server, and the one-time calibration routine.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-18.jpg" type="image/jpeg" length="0"/>
-<category>esp32</category><category>turtle tank</category><category>sensors</category><category>arduino</category><category>diy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-18.jpg" alt=""></p><p>A turtle tank changes slowly, and the three things that go wrong with it (water too cold, water getting dirty, water going cloudy) are all things a cheap probe can turn into a number. The build in <em>Smart Turtle Tank</em> uses a Seeed XIAO ESP32-C3 and three sensors: a DS18B20 waterproof temperature probe, a Keyestudio TDS probe and a Keyestudio turbidity probe. This post is the whole build on one page, the way the three new video tutorials walk through it: pin map, firmware, server maths, calibration.</p>
-<h2 id="the-six-pins">The six pins</h2>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/dp/B0DRNSV5CS?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Seeed Studio XIAO ESP32C3</a> · <a href="https://www.amazon.com/dp/B09NVWNGLQ?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">BOJACK DS18B20 waterproof temperature sensor module kit</a> · <a href="https://www.amazon.com/dp/B08DGLY3J2?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">KEYESTUDIO TDS Meter Probe V1 sensor module</a> · <a href="https://www.amazon.com/dp/B07Q657288?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">KEYESTUDIO Turbidity Sensor Module V1</a> · <a href="https://www.amazon.com/dp/B01HTC4XKY?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">HiLetgo DC 0-25V voltage sensor module</a> · <a href="https://www.amazon.com/dp/B082VYXDF1?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">REXQualis 400-point solderless breadboards</a> · <a href="https://www.amazon.com/dp/B01EV70C78?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">ELEGOO 120 pcs Dupont jumper wires</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
-<p>The XIAO has one GND pin and one 3V3 pin, and four boards need each of them, so the breadboard in the parts list is a power strip and nothing more: a black jumper from GND into the minus rail, an orange jumper from 3V3 into the plus rail, and a strip of tape by the plus rail that says "3V3, not 5V".</p>
-<div class="table"><table><thead><tr><th>XIAO pin</th><th>GPIO</th><th>Connects to</th><th>Device</th></tr></thead><tbody><tr><td>3V3</td><td>-</td><td>+ line, then VCC / +</td><td>Temp adapter, TDS board</td></tr><tr><td>GND</td><td>-</td><td>- line, then all grounds</td><td>Temp, TDS, turbidity, divider</td></tr><tr><td>5V</td><td>-</td><td>V</td><td>Turbidity board only</td></tr><tr><td>D4</td><td>GPIO6</td><td>DAT</td><td>Temp adapter</td></tr><tr><td>D1</td><td>GPIO3 (analog)</td><td>A</td><td>TDS board</td></tr><tr><td>D2</td><td>GPIO4 (analog)</td><td>S (output)</td><td>Voltage divider</td></tr></tbody></table></div>
-<p>The rule behind the table: a sensor's power can come from 5V if it needs it, but anything that goes back into a D pin must be at or under 3.3 V. The temperature adapter and the TDS board run on 3V3 and stay under the limit on their own. The turbidity board needs 5 V and outputs up to about 4.5 V, which is why its S pin goes into a divide-by-5 module and the module's output goes to D2. That one wire gets its own post and its own video; the short version is "never straight into the XIAO".</p>
-<p>Keep the USB-C cable unplugged the whole time you wire. It goes in last.</p>
-<h2 id="the-firmware-in-the-pieces-you-will-change">The firmware, in the pieces you will change</h2>
-<p>A PlatformIO project for the XIAO needs three libraries and two build flags:</p>
-<pre><code>[env:xiao_c3]
-platform = espressif32
-board = seeed_xiao_esp32c3
-framework = arduino
-monitor_speed = 115200
-build_flags =
-  -DARDUINO_USB_MODE=1
-  -DARDUINO_USB_CDC_ON_BOOT=1
-lib_deps =
-  paulstoffregen/OneWire
-  milesburton/DallasTemperature
-  bblanchon/ArduinoJson@^7</code></pre>
-<p>The board name picks the pin names; with a different board, D4 means a different pin. The two build flags make Serial work over the XIAO's own USB-C port.</p>
-<p>The pin map in code matches the table:</p>
-<pre><code>#define TEMP_PIN D4        // GPIO6, DS18B20 DAT (adapter has the pull-up)
-#define TDS_PIN D1         // GPIO3, ADC1
-#define TURB_PIN D2        // GPIO4, ADC1, through the /5 divider module
-#define TURB_RATIO 5.0f    // 2.0f if you used the two-resistor divider</code></pre>
-<p>Both analog pins are on ADC1 on purpose: on an ESP32, ADC2 stops working while Wi-Fi is on, and ADC1 does not. Read them with <code>analogReadMilliVolts()</code>, which applies the chip's factory calibration and returns millivolts.</p>
-<p>The reading loop takes the two analog probes as a median of 32 reads, not an average:</p>
-<pre><code>static float medianMv(int pin) {     // 32 reads, keep the median
-  uint16_t v[32];
-  for (int i = 0; i &lt; 32; i++) { v[i] = analogReadMilliVolts(pin); delay(10); }
-  std::sort(v, v + 32);
-  return (v[15] + v[16]) / 2.0f;
-}</code></pre>
-<p>The filter pump and the lamp's timer put spikes on the water and on the supply. Two spikes in 32 reads pull an average up by a lot and the median not at all.</p>
-<p>The temperature probe needs a different kind of care. The Dallas library returns -127 when the probe is not connected and 85.0 at power-on before the first conversion finishes. Both are "no reading", not readings:</p>
-<pre><code>static void sampleOnce() {
-  temp.requestTemperatures();        // ~750 ms at 12-bit
-  float t = temp.getTempCByIndex(0);
-  if (t &gt; -100 &amp;&amp; t != 85.0f) { accT += t; nT++; } // drop -127 and 85
-  accTds += medianMv(TDS_PIN) / 1000.0f;
-  accTurb += medianMv(TURB_PIN) / 1000.0f * TURB_RATIO;
-  nA++;
-}</code></pre>
-<p>Read one probe at a time. The TDS and turbidity probes both put a small voltage into the same water, and reading them together can make the TDS number jumpy.</p>
-<p>Every 30 seconds the board samples; every five minutes it averages the good samples into one reading and sends it as JSON over HTTPS, with raw volts for TDS and turbidity and degrees C for temperature. A reading that could not be sent stays in a RAM ring buffer of 96 readings and goes out, oldest first, when the network is back.</p>
-<h2 id="why-the-maths-is-on-the-server">Why the maths is on the server</h2>
-<p>The firmware never turns volts into ppm or into a clarity percentage. The server does, with calibration constants stored as settings. A recalibration is then a settings change, not a reflash, and every old reading can be reinterpreted because the raw volts were stored too.</p>
-<p>TDS, temperature-compensated, is the formula the Keyestudio and DFRobot boards document:</p>
-<pre><code>coeff = 1 + 0.02 * (T - 25)
-Vc    = V / coeff
-ppm   = (133.42*Vc^3 - 255.86*Vc^2 + 857.39*Vc) * 0.5 * K</code></pre>
-<p>Turbidity is reported as a clarity percentage rather than NTU, because the cheap probe is not accurate enough for real NTU. It is a straight line between two points you measure yourself:</p>
-<pre><code>sensorV   = adcV * 5           (the divider ratio)
-clarity % = 100 * (V - V_dirty) / (V_clear - V_dirty), clamped to 0-100</code></pre>
-<p>Both TDS and clarity are trend meters. The app labels them that way, and a liquid test kit is still the answer when either of them moves.</p>
-<h2 id="calibrating-once">Calibrating once</h2>
-<p>Write the numbers down somewhere that survives; they are settings on the server and nowhere else.</p>
-<ol><li>Temperature: the DS18B20 and a reference aquarium thermometer in the same cup of water for five minutes. The difference is <code>temp_offset_c</code>. Expect a few tenths of a degree; the probe is rated +/-0.5 C.</li><li>TDS: a cup of tank water, the probe in it, a handheld TDS pen in it. Set K so the server's ppm matches the pen, or use a 342 ppm calibration solution.</li><li>Turbidity: a dark cup of clean tap water gives V_clear. The same cup with a pinch of soil stirred in gives V_dirty. The probe reads higher in clear water, so V_clear is the bigger number.</li><li>Baseline: with the tank freshly changed, press Water changed in the app. That stores the current TDS as the baseline the alerts work from, because an absolute TDS number depends on your tap water and what matters is how far it has climbed since the last change.</li></ol>
-<p>Set the send interval to one minute from the server while you do this, then back to five.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=stick+on+aquarium+thermometer+strip&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Stick-on aquarium thermometer</a> · <a href="https://www.amazon.com/s?k=freshwater+liquid+test+kit+ammonia+nitrite+nitrate&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Liquid test kit for ammonia, nitrite and nitrate</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p>
-<h2 id="the-readings-that-mean-a-wiring-mistake">The readings that mean a wiring mistake</h2>
-<ul><li>Temperature shows null, -127 or 85: a probe wire is loose on DAT, VCC or GND. Re-seat them and check the adapter is on 3V3. 85 is the power-on value, which means the probe never got a successful read.</li><li>TDS reads 0 in the tank, or jumps around: the probe cable is unplugged, or both probes are being read together. Read one at a time.</li><li>Turbidity near 0 V, or reading over 3.3 V at D2: is the switch on A? Is S going into the divider's VCC terminal? Are the divider's minus pin and GND terminal on the rail? A switch left on D gives a flat reading no matter what the water does.</li><li>Nothing arrives at the server: serial monitor first. Is Wi-Fi up, is NTP time set? A 401 is the wrong key, a 400 is bad JSON.</li><li>Clarity drifts every time the lamp switches: the probe is in the lamp's beam. Move the carrier or shade the probe.</li></ul>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Power strip: GND to the minus rail, 3V3 to the plus rail, tape that says "3V3, not 5V".</li><li>Temperature: probe wires into the adapter by letter; VCC and GND from the rails; DAT to D4.</li><li>TDS: cable to the rails (red to 3V3); A to D1; probe plugged in.</li><li>Turbidity: switch on A; V from the XIAO's 5V pin; G to the minus rail; S into the divider's VCC terminal; divider GND terminal and minus pin to the minus rail; divider S pin to D2; plus pin empty.</li><li>Serial-only sketch first: temperature sensible, TDS near zero in air, turbidity higher in clear water.</li><li>Then the real firmware, then the four calibration steps, then Water changed.</li></ul>
-<h2 id="watch-the-series">Watch the series</h2>
-<p>The first video (the temperature probe) is embedded above. The TDS probe video is at https://youtube.com/shorts/Z3tRstZTqas and the turbidity probe video (the 5V trap and the divider) is at https://youtube.com/shorts/4EJy9Svk83Q.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>Your firewall works. Is it hardened? The OPNsense pass most setups skip</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/opnsense-hardening-kill-switch-suricata-updates/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/opnsense-hardening-kill-switch-suricata-updates/</guid>
-<pubDate>Wed, 21 Oct 2026 12:30:00 -0400</pubDate><description>OPNsense out of the box is a solid firewall. A deliberate hardening pass makes it a great one: ISP DNS that can&#x27;t sneak back in, modest blocklists, a VPN kill switch that really fails closed, Suricata sized to your RAM, and an update routine with a rollback.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-29.jpg" type="image/jpeg" length="0"/>
-<category>opnsense</category><category>firewall</category><category>vpn</category><category>wireguard</category><category>suricata</category><category>dns</category><category>homelab</category><category>networking</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-29.jpg" alt=""></p><p>OPNsense out of the box is a solid firewall. It routes, it NATs, it blocks inbound traffic, and the dashboard is green. That is "works." Hardened is a different list: private DNS that stays private, ad and malware blocking that doesn't break half the internet, a VPN that fails closed, an IPS that doesn't eat all your RAM, and updates you can roll back.</p>
-<p>Each of those has a trap where the setting looks done and isn't. This is the pass, in the order the <em>Homelab the Right Way</em> book does it.</p>
-<h2 id="before-you-change-anything">Before you change anything</h2>
-<p>Snapshot the firewall VM. On the Proxmox host:</p>
-<pre><code>qm snapshot 100 pre-hardening</code></pre>
-<p>It takes seconds and turns a lockout into a two-minute rollback. Then make sure you have a way into the console that doesn't depend on the firewall itself: the Proxmox web UI's noVNC console works even when OPNsense's LAN rules are broken.</p>
-<h2 id="dns-the-isp-servers-that-sneak-back-in">DNS: the ISP servers that sneak back in</h2>
-<p>By default your DNS questions go to your ISP in plain text. The fix lives in <strong>Services → Unbound DNS</strong>: enable Unbound, turn on DNSSEC support, and add at least two DNS over TLS upstreams with their TLS hostnames, for example Quad9 (<code>9.9.9.9</code>, port 853, <code>dns.quad9.net</code>) and Cloudflare (<code>1.1.1.1</code>, port 853, <code>cloudflare-dns.com</code>).</p>
-<p>The trap is the step after it. In <strong>System → Settings → General</strong>, remove the ISP DNS servers and uncheck <strong>Allow DNS server list to be overridden by DHCP/PPP on WAN</strong>. Leave that box checked and your ISP's servers come back on their own.</p>
-<p>The second leak is devices that ignore the firewall entirely. Some devices, smart TVs mostly, hard-code <code>8.8.8.8</code>. A port-forward on LAN that redirects any outbound TCP/UDP 53 to the firewall's own address catches them.</p>
-<p>Verify from a LAN client:</p>
-<pre><code>dig +dnssec example.com @&lt;firewall-ip&gt;    # look for the "ad" flag
-dig dnssec-failed.org @&lt;firewall-ip&gt;      # deliberately broken: should SERVFAIL</code></pre>
-<h2 id="blocklists-start-modest">Blocklists: start modest</h2>
-<p><strong>Services → Unbound DNS → Blocklist</strong> has built-in feeds. The tempting move is to enable everything. Huge combined lists cause more breakage than benefit. Start with one ads/tracking list and one malware list, whitelist domains as complaints arrive, and keep a note of why each whitelist entry exists.</p>
-<h2 id="guests-get-the-internet-and-nothing-else">Guests get the internet and nothing else</h2>
-<p>Give guests (and IoT gear you don't trust) their own interface or VLAN, and block that network from every private range with an <code>RFC1918</code> alias. The full five-rule table, in order, is in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/">guest Wi-Fi post</a>.</p>
-<h2 id="the-vpn-kill-switch-that-doesn-t-kill">The VPN kill switch that doesn't kill</h2>
-<p>Sending a network's traffic through a WireGuard VPN is easy: a firewall rule on that interface with the Gateway set to the VPN gateway. Making it fail closed is the part most guides skip.</p>
-<p>Here is the trap. By default, if a gateway is down, OPNsense creates the rule <em>without</em> the gateway, so traffic falls through to your normal WAN. Your "VPN-only" network leaks the moment the tunnel drops.</p>
-<p>Close it with three layers:</p>
-<ol><li><strong>Firewall → Settings → Advanced:</strong> check <strong>Skip rules when gateway is down</strong>. A policy rule with a dead gateway is now skipped instead of silently rerouted.</li><li><strong>Outbound NAT (Hybrid or Manual):</strong> add a rule that NATs the VPN network out the WireGuard interface, and a <strong>Do not NAT</strong> rule (or simply no rule) for that network on WAN. Without NAT on WAN, any packet that tries to escape that way just dies.</li><li><strong>A block rule right after the policy rule</strong> on that interface: block the VPN network to any. If the policy rule is skipped, this catches everything.</li></ol>
-<p>For belt and suspenders, tag the policy rule's traffic (<strong>Advanced options → Set local tag</strong>) and add a floating rule on WAN that blocks anything carrying the tag. It survives rule reordering.</p>
-<p>Then test it like you mean it: disable the WireGuard instance and try to load a page from a client on that network. It should fail. Re-enable it, and it should work again. A kill switch you have never seen kill is a guess.</p>
-<h2 id="suricata-the-fastest-way-to-slow-your-network">Suricata: the fastest way to slow your network</h2>
-<p><strong>Services → Intrusion Detection</strong> runs Suricata. In IPS mode it can drop malicious traffic inline. It is also the easiest way to make a firewall VM slow or crash. If memory runs short, Suricata restarts or the box swaps, and your whole network stutters.</p>
-<p>The book's rules of thumb:</p>
-<ul><li><strong>RAM:</strong> at least 4 GB for the firewall VM with a moderate ruleset; 8 GB if you want large rule categories on several interfaces.</li><li><strong>Rules:</strong> a handful of ET Open categories that matter (malware, exploit, C2/botnet, compromised IP lists), not "enable all." Every category costs memory and CPU.</li><li><strong>Interfaces:</strong> watch the internal ones (LAN, servers) rather than WAN. You see real internal IPs in alerts and don't waste cycles on internet background noise the firewall drops anyway.</li><li><strong>Offloading:</strong> IPS mode uses netmap. Disable hardware CRC, TSO and LRO under <strong>Interfaces → Settings</strong>, or IPS can misbehave. On a VM with VirtIO NICs, this matters too.</li><li><strong>IDS first:</strong> run in IDS mode (alert only) for a week. Read the alerts, disable the noisy false positives, then switch to IPS.</li></ul>
-<h2 id="updates-with-a-way-back">Updates with a way back</h2>
-<p>OPNsense ships two major releases a year (the .1 and .7 versions) with minor updates in between. The safe routine:</p>
-<ol><li>Read the release notes. Look for "plugin removed," "deprecated" and anything about the features you use.</li><li>Snapshot the VM: <code>qm snapshot 100 pre-update-$(date +%F)</code></li><li>Download a configuration backup (<strong>System → Configuration → Backups</strong>) to a different machine.</li><li>Update from the console or UI, then reboot if asked.</li><li>Check: WAN up, DNS resolves, VPN tunnel connected, guest network isolated.</li><li>After a week without problems, delete the snapshot. Old snapshots grow and slow the disk.</li></ol>
-<p>Step 6 is the one people forget. A snapshot is a rollback, not an archive.</p>
-<h2 id="checklist-opnsense-hardening">Checklist: OPNsense hardening</h2>
-<ul><li>☐ <code>qm snapshot 100 pre-hardening</code> taken, noVNC console reachable</li><li>☐ Unbound with DNSSEC and at least two DNS over TLS upstreams</li><li>☐ ISP DNS removed, "Allow DNS server list to be overridden by DHCP/PPP on WAN" unchecked</li><li>☐ LAN port-forward redirecting outbound TCP/UDP 53 to the firewall</li><li>☐ One ads/tracking list and one malware list, whitelist entries noted with a reason</li><li>☐ Guest network on its own interface or VLAN, blocked from RFC1918</li><li>☐ Kill switch: "Skip rules when gateway is down", no NAT for the VPN network on WAN, block rule after the policy rule</li><li>☐ Kill switch tested with the WireGuard instance disabled</li><li>☐ Suricata: 4 GB+ RAM, a few ET Open categories, internal interfaces, CRC/TSO/LRO off, a week in IDS first</li><li>☐ Update routine: release notes, snapshot, config backup, check, delete the snapshot after a week</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Photobooth: run an event photo booth from an Android phone or tablet</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/photobooth-event-camera-android/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/photobooth-event-camera-android/</guid>
-<pubDate>Wed, 21 Oct 2026 12:30:00 -0400</pubDate><description>Photobooth turns an Android phone or tablet into an event photo booth with strip layouts, effects, printing, QR sharing and a live slideshow.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.photobooth.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>photography</category><category>events</category><category>weddings</category><category>diy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.photobooth.jpg" alt=""></p><p>Renting a photo booth for a wedding or a party is an expense many hosts skip. Photobooth: Event Camera offers a do-it-yourself alternative: set up an Android phone or tablet, and it runs the booth for your guests, from the countdown to the photo strip to sharing and printing.</p>
-<h2 id="what-it-does">What it does</h2>
-<h3 id="booth-mode">Booth mode</h3>
-<ul><li>A full-screen camera interface.</li><li>An automatic capture timer.</li><li>Photo strip layouts with 2, 3 or 4 photos.</li><li>Custom backgrounds and frames.</li></ul>
-<h3 id="effects">Effects</h3>
-<ul><li>Filters and overlays.</li><li>Stickers and text.</li><li>Green screen support.</li><li>Photo booth props.</li></ul>
-<h3 id="printing-and-sharing">Printing and sharing</h3>
-<ul><li>Direct printing to compatible printers.</li><li>Sharing to social media, by email and by text.</li><li>Cloud backup options.</li></ul>
-<h3 id="event-features">Event features</h3>
-<ul><li>A guest book mode for weddings.</li><li>QR code sharing, so guests can get their photos.</li><li>A live slideshow of the photos taken.</li><li>Multiple event templates.</li></ul>
-<h3 id="customization">Customization</h3>
-<ul><li>Adjustable photo size and quality.</li><li>Custom branding and logos.</li><li>Support for multiple cameras.</li><li>Portrait and landscape modes.</li></ul>
-<h2 id="planning-a-booth-with-it">Planning a booth with it</h2>
-<p>The app covers the software side. The rest is setup, and the features listed point to a straightforward plan:</p>
-<ol><li><strong>Pick the device.</strong> A tablet gives guests a bigger screen to see themselves, while a phone is easier to mount. Choose portrait or landscape to match how it is mounted.</li><li><strong>Choose a layout.</strong> Decide on 2, 3 or 4 photos per strip, and pick a template for the event.</li><li><strong>Brand it.</strong> Add the couple's names, a birthday, or a company logo with the branding option, plus a background or frame.</li><li><strong>Decide on prints.</strong> If you want physical strips, connect a compatible printer and test a print before guests arrive.</li><li><strong>Set up sharing.</strong> QR code sharing lets guests take photos home on their own phones, and the live slideshow can run on a second screen.</li><li><strong>Test the timer.</strong> Run through the countdown a few times so you know how long guests have to pose.</li></ol>
-<h3 id="green-screen">Green screen</h3>
-<p>Green screen support opens up themed backgrounds. It needs a green backdrop behind the booth and even lighting, so plan the space for it if you want to use it.</p>
-<h2 id="where-it-fits">Where it fits</h2>
-<p>The listing names weddings and receptions, birthday parties, corporate events, and school dances and reunions. The guest book mode is the wedding-specific feature; custom logos are what make it work for a company event.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing; the Play listing also notes in-app purchases.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Printing:</strong> works with compatible printers, so check yours before the event.</li><li><strong>Category:</strong> Photography, rated Everyone.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You are hosting a wedding, party or event and want a booth without renting one.</li><li>You have a spare Android phone or tablet and a way to mount it.</li><li>You want guests to get their photos by QR code, print or text.</li><li>You want the booth branded for the occasion.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.photobooth">Get Photobooth: Event Camera on Google Play</a></p>]]></content:encoded></item><item><title>Guest Wi-Fi that can&#x27;t reach your servers: 5 OPNsense rules, in order</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/guest-wifi-cant-reach-your-servers/</guid>
-<pubDate>Tue, 20 Oct 2026 12:30:00 -0400</pubDate><description>A guest network that only gets the internet takes one alias and five firewall rules on the GUEST interface, in a specific order. DNS and DHCP to the firewall, block every private range, block the firewall itself, then allow the internet. Here is the full table and how to test it from a phone.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-26.jpg" type="image/jpeg" length="0"/>
-<category>opnsense</category><category>firewall</category><category>guest wifi</category><category>vlan</category><category>homelab</category><category>networking</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-26.jpg" alt=""></p><p>Your guests can see your server. If visiting phones, a friend's laptop and the smart plug you don't really trust all land on the same network as your NAS and your Proxmox host, every one of them can reach those web pages. A separate Wi-Fi name doesn't change that on its own. The firewall rules behind it do.</p>
-<p>The good news: on OPNsense, a guest network that gets the internet and nothing else is one alias and five rules. The order of those rules is the whole job.</p>
-<h2 id="the-trap-a-guest-network-that-is-only-a-name">The trap: a guest network that is only a name</h2>
-<p>Giving guests their own interface or VLAN is step one, and it's easy to stop there. Without rules that block the private ranges, the guest network looks separate and isn't: the separation comes from the rules, not from the interface.</p>
-<p>There's a second, quieter leak: the firewall itself. Even when guests can't reach the NAS, they can often still load the firewall's login page or try SSH on it. Nobody on guest Wi-Fi needs either.</p>
-<h2 id="before-you-touch-a-rule">Before you touch a rule</h2>
-<p>Snapshot the firewall VM first. On a Proxmox host:</p>
-<pre><code>qm snapshot 100 pre-hardening</code></pre>
-<p>It takes seconds and turns a lockout into a two-minute rollback. Also keep a way into the console that doesn't depend on the firewall: the Proxmox web UI's noVNC console still works when OPNsense's rules are broken.</p>
-<h2 id="the-fix-part-1-one-alias-for-every-private-range">The fix, part 1: one alias for every private range</h2>
-<p>Go to <strong>Firewall → Aliases</strong> and create:</p>
-<ul><li><strong>Name:</strong> <code>RFC1918</code></li><li><strong>Type:</strong> Network(s)</li><li><strong>Content:</strong> <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li></ul>
-<p>Those three ranges are the private address space your home networks live in: the main LAN, a servers network, and the firewall's own addresses on them. One alias means one rule can block them all.</p>
-<h2 id="the-fix-part-2-five-rules-on-the-guest-interface">The fix, part 2: five rules on the GUEST interface</h2>
-<p>Give guests (and any IoT gear you don't trust) their own interface or VLAN. Then, on the <strong>GUEST</strong> interface, add these rules in exactly this order:</p>
-<div class="table"><table><thead><tr><th>#</th><th>Action</th><th>Source</th><th>Destination</th><th>Port</th><th>Purpose</th></tr></thead><tbody><tr><td>1</td><td>Pass</td><td>GUEST net</td><td>GUEST address</td><td>53 (TCP/UDP)</td><td>DNS to the firewall</td></tr><tr><td>2</td><td>Pass</td><td>GUEST net</td><td>GUEST address</td><td>67-68 (UDP)</td><td>DHCP</td></tr><tr><td>3</td><td>Block</td><td>GUEST net</td><td>RFC1918</td><td>any</td><td>No private networks, including the firewall's other IPs</td></tr><tr><td>4</td><td>Block</td><td>GUEST net</td><td>This Firewall</td><td>any</td><td>No web UI or SSH from guests</td></tr><tr><td>5</td><td>Pass</td><td>GUEST net</td><td>any</td><td>any</td><td>Internet</td></tr></tbody></table></div>
-<p>Read it top to bottom and it tells the story:</p>
-<ol><li><strong>DNS to the firewall.</strong> Guests still need names to resolve, so they ask the firewall's address on their own network, and nothing else.</li><li><strong>DHCP.</strong> Guests still need an address. Ports 67-68 UDP to the GUEST address.</li><li><strong>Block every private range.</strong> This is the rule that does the heavy lifting. Guests can't reach the NAS, the Proxmox host, the house LAN, or any other private network, and that includes the firewall's IPs on those other networks.</li><li><strong>Block the firewall itself.</strong> No web UI and no SSH from guest devices.</li><li><strong>Allow the internet.</strong> With the private ranges and the firewall already blocked, guests get the internet and nothing else.</li></ol>
-<p>The two pass rules sit above the blocks on purpose: DNS and DHCP are the only two things a guest is allowed to ask the firewall for. The internet rule comes last, after everything private has already been ruled out.</p>
-<h2 id="make-guest-dns-private-too">Make guest DNS private too</h2>
-<p>Rule 1 sends guest DNS to the firewall, so it gets whatever the firewall does. Worth making that good while you're in there: in <strong>Services → Unbound DNS</strong>, enable Unbound with DNSSEC, and add at least two DNS over TLS upstreams, for example Quad9 (<code>9.9.9.9</code>, port 853, hostname <code>dns.quad9.net</code>) and Cloudflare (<code>1.1.1.1</code>, port 853, hostname <code>cloudflare-dns.com</code>). Verify from a client:</p>
-<pre><code>dig +dnssec example.com @&lt;firewall-ip&gt;    # look for the "ad" flag
-dig dnssec-failed.org @&lt;firewall-ip&gt;      # deliberately broken: should SERVFAIL</code></pre>
-<h2 id="test-it-like-a-guest">Test it like a guest</h2>
-<p>A rule you didn't test is a rule you hope works. Join the guest Wi-Fi with a phone and try two things:</p>
-<ul><li><strong>Your NAS's web page.</strong> It shouldn't load.</li><li><strong>The firewall's login page.</strong> It shouldn't load either.</li></ul>
-<p>Then load any normal website. It should work. If a private page does load, check the alias content and the rule order against the table above.</p>
-<p>Keep that test in your update routine. After every OPNsense update, the checks are: WAN up, DNS resolves, VPN tunnel connected, guest network isolated.</p>
-<h2 id="if-you-add-a-servers-network-later">If you add a servers network later</h2>
-<p>The same thinking runs the other way. When your servers move to their own network behind OPNsense, block SERVERS → GUEST on the servers interface, and allow only the specific house-LAN access you need, such as your desktop to the servers' web UIs.</p>
-<h2 id="checklist-guest-network">Checklist: guest network</h2>
-<ul><li>☐ Firewall VM snapshot taken (<code>qm snapshot 100 pre-hardening</code>), noVNC console reachable</li><li>☐ Guests (and untrusted IoT) on their own interface or VLAN</li><li>☐ <code>RFC1918</code> alias: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></li><li>☐ GUEST rules in order: DNS, DHCP, block RFC1918, block This Firewall, pass any</li><li>☐ Unbound with DNSSEC and DNS over TLS upstreams</li><li>☐ Tested from a phone on guest Wi-Fi: NAS page and firewall login page both fail, the internet works</li><li>☐ "Guest network isolated" is on your after-update checklist</li></ul><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>Free 3D-printed Looki camera mount: snap-in cradle + hoodie collar clip (STL download)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/</guid>
-<pubDate>Tue, 20 Oct 2026 12:30:00 -0400</pubDate><description>A free, two-part 3D-printed mount for the Looki L1 wearable camera: a snap-in cradle and a collar clip. STL and OpenSCAD downloads, the exact ABS print settings that worked, and the print timelapse.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-hero.jpg" type="image/jpeg" length="0"/>
-<category>3d printing</category><category>looki</category><category>openscad</category><category>abs</category><category>maker</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-hero.jpg" alt=""></p><p><strong>Update, Oct 26 2026: v9 is out.</strong> A new snug holder and two slide-in collar clips that click locked. <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/">Get the v9 files and print settings here</a>.</p>
-<p>The Looki L1 is a small wearable camera, and the stock way to wear it does not suit every hoodie. This is a free two-part mount for it: a <strong>cradle</strong> the Looki snaps into, and a <strong>clip</strong> that slides down over a hoodie collar or hood edge. Both parts are below as STL files, with the OpenSCAD source so the fit can be changed for a different collar or a different unit.</p>
-<p>The design went through four revisions before the fit was right. The version here is <strong>v4</strong>, the one that printed cleanly and holds the camera.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-01-looki-l1-in-printed-cradle.jpg" alt="Looki L1 sitting in the printed ABS cradle" loading="lazy"></figure>
-<h2 id="printed-and-assembled">Printed and assembled</h2>
-<p>The photos on this page are the real v4 parts, printed in black ABS and assembled with the two M3 screws: the Looki snapped into the cradle, the back of the cradle with its screw holes and charging window, and the collar clip screwed on behind it.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-02-cradle-back-screw-holes.jpg" alt="Back of the printed cradle: screw holes and the charging window" loading="lazy"></figure>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/real-03-collar-clip-assembled.jpg" alt="Collar clip screwed onto the back of the cradle" loading="lazy"></figure>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/hero.jpg" alt="Looki mount v4 render: cradle, Looki and clip" loading="lazy"></figure>
-<h2 id="downloads">Downloads</h2>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/looki_cradle_v4.stl">looki_cradle_v4.stl</a> (925 KB): the frame the Looki snaps into</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/looki_clip_v4.stl">looki_clip_v4.stl</a> (125 KB): the collar clip</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/looki_mount_v4.scad">looki_mount_v4.scad</a>: the editable OpenSCAD source</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/abs_profile.ini">abs_profile.ini</a>: the PrusaSlicer profile the test prints used</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/looki-mount-v4.zip">Everything as one zip</a></li></ul>
-<p>Also on <a href="https://www.printables.com/model/1884139-looki-l1-camera-mount-hoodie-collar-cradle-clip-sn">Printables</a>. License: CC BY 4.0, Charles Hartmann / Homelab the Right Way.</p>
-<h2 id="what-the-two-parts-do">What the two parts do</h2>
-<p><strong>Cradle (looki_cradle_v4.stl).</strong> An open-faced frame with a 3 mm back plate and 2.5 mm walls. The Looki drops in from the top; four small ramped bumps reach 0.8 mm over its widest edge and click it in place. The back has a rectangular window over the Looki's magnetic charging pins, a round pocket for an optional magnet, a gap on the left side for the buttons, and the lens opening at the top. Outer size about 57.5 x 56 x 12.5 mm.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/cradle_v4.png" alt="Cradle render" loading="lazy"></figure>
-<p><strong>Clip (looki_clip_v4.stl).</strong> A spring-free U-clip for a collar or hood edge about 12 mm thick when folded. Teeth on the inside let it slide on easily and bite when it is pulled up. 40 x 26 x 20 mm.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/clip_v4.png" alt="Clip render" loading="lazy"></figure>
-<p>The two parts are held together with <strong>2x M3 x 8 mm countersunk screws (ISO 10642 / DIN 7991) and 2x M3 hex nuts</strong>. The screw holes sit 15 mm either side of centre and 12 mm below the top edge on both parts, so they line up when the top edges are flush.</p>
-<h2 id="print-settings-that-worked">Print settings that worked</h2>
-<p>These parts were printed in <strong>ABS</strong> on a da Vinci printer with a 0.4 mm nozzle, and the settings below are the ones from the successful prints, not a guess:</p>
-<ul><li>Nozzle 240 °C, bed 100 °C, part cooling fan off</li><li>0.2 mm layers, no supports (the retention bumps have 45-degree undersides)</li><li><strong>Raft: 3 layers, 0.2 mm contact gap, 1.5 mm expansion.</strong> No brim, no skirt. Both parts stayed flat on the bed with it.</li><li>Cradle: 4 perimeters, 40 percent gyroid infill. About 2 h 30 min, about 13.6 g of filament.</li><li>Clip: 6 perimeters, 6 top and bottom layers, 100 percent infill. About 1 h 40 min, about 10 g.</li><li>Orientation: print as exported. The cradle lies flat on its back. The clip lies on its side with the U profile flat on the bed, so the layer lines run around the bend and the arm flexes instead of snapping.</li></ul>
-<p>The included <code>abs_profile.ini</code> has all of this. PETG should also work (it flexes more and does not mind a warm hoodie); set <code>material = "PETG"</code> at the top of the .scad to get the slightly tighter pocket clearance, then export a fresh STL. Only ABS has been test-printed.</p>
-<h2 id="assembly">Assembly</h2>
-<ol><li>Press the 2 nuts into the hex pockets on the inside face of the clip's front arm (the side that touches the fabric).</li><li>Line the clip up behind the cradle, top edges flush, with the U opening downward.</li><li>Put the screws in from inside the cradle and tighten. The heads sit flush, so the Looki lies flat on them.</li></ol>
-<p>Optional: glue an 8 x 1.5 mm steel disc or a small neodymium magnet into the round pocket in the cradle floor with CA. It sits under the Looki's built-in magnet and adds pull. If you use a magnet, check that it attracts the Looki before gluing it in.</p>
-<h2 id="using-it">Using it</h2>
-<ul><li><strong>Snap the Looki in:</strong> buttons go on the open left side, lens at the top. Hook the right edge under the right-hand bump, then press the left and bottom down until it clicks.</li><li><strong>Take it out:</strong> push on the Looki's back through the rectangular window.</li><li><strong>Wear it:</strong> slide the clip straight down over the collar or hood edge with the cradle on the outside.</li><li><strong>Charging:</strong> the window sits over the charging pins. If the magnetic cable head does not fit under the clip, pop the Looki out to charge.</li></ul>
-<h2 id="changing-the-fit-openscad">Changing the fit (OpenSCAD)</h2>
-<p>Everything adjustable is at the top of <code>looki_mount_v4.scad</code>. Edit, press F6, export the STL.</p>
-<ul><li><code>dev_w</code>, <code>dev_h</code>, <code>dev_t</code>: the Looki's size. Defaults are the published 50.53 x 48.02 x 16.84 mm.</li><li><code>clr</code>: clearance around the pocket (1.0 mm). Too tight: 1.3. Rattles: lower <code>dev_h</code> slightly or raise <code>bump_ov</code>.</li><li><code>collar_t</code>: folded collar thickness, 10 to 15 mm. <code>squeeze</code> makes the mouth that many millimetres tighter than the fold (3 by default; 4 if it slides, 2 if it is hard to push on).</li><li><code>tilt</code>: 5, 10 or 15 points the lens down that many degrees, for a collar that leans back.</li><li><code>clip_len</code>: clip depth, 26 mm by default. Longer grips more fabric but covers more of the charging window.</li><li><code>screws = false</code> removes the screw holes if you would rather glue the clip on.</li></ul>
-<h2 id="how-it-was-made">How it was made</h2>
-<p>The pocket outline was traced from the Looki's published size and the FCC filing photos, then adjusted after real prints: v1 had the width and height swapped, v2 was rotated, v3 had its retention bumps too low to touch the camera. v4 moved the bumps up to the camera's real widest edge and added 3 mm to the walls. If your unit is a slightly different size, the .scad takes calipers measurements directly.</p>
-<p>Not affiliated with Looki. The Looki L1 is a product of looki.ai; this is an independent, free accessory.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item>
+<ul><li>You often look up at planes and want to know what they are.</li><li>You pick people up from the airport and want a notification instead of refreshing a page.</li><li>You want airport arrivals, departures and weather next to the live map.</li><li>You like dark mode and a clean layout, on a phone or a tablet.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app">Get SkyPulse: Live Flight Tracker on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
