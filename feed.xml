@@ -3,7 +3,25 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 29 Oct 2026 12:30:00 -0400</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>AuraCast Weather: your forecast as an on-device spoken briefing</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/auracast-weather-ai-narrated-forecast/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/auracast-weather-ai-narrated-forecast/</guid>
+<item><title>Fieldkey is live on Google Play: identify plants, rocks and coins offline</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</guid>
+<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Fieldkey is a new Android app from Hartmann Studios that identifies plants, rocks, minerals and US coins right on your phone, with no account, no upload and no internet needed. Now free on Google Play.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>privacy</category><category>offline</category><category>apps</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Snap it. Know it.</p>
+<p>Fieldkey, a new Android app from Hartmann Studios, is now live on Google Play. It identifies plants, rocks, minerals and US coins right on your phone, with no account, no upload and no internet needed.</p>
+<h2 id="three-modes-in-one-app">Three modes in one app</h2>
+<ul><li><strong>Plants:</strong> about 2,100 wild and garden species, plus 100 popular houseplants and garden plants, with light, water and pet-safety notes.</li><li><strong>Rocks:</strong> about 130 rocks, minerals, crystals and gemstones, with hardness, streak, crystal system and simple tests you can do at home.</li><li><strong>Coins:</strong> 22 US coin types. Fieldkey also reads the year and mint mark from your photo and flags silver content and well-known key dates.</li></ul>
+<h2 id="honest-by-design">Honest by design</h2>
+<p>Every result shows how confident the model is and the next-best matches. When it is not sure, it says so and asks for another angle.</p>
+<p>Coin values are only ever given as an estimated range, so check a dealer before you sell anything. Plant safety notes are general information, not medical or veterinary advice. Never eat a plant or mushroom because an app said so.</p>
+<h2 id="private-and-offline">Private and offline</h2>
+<p>All identification runs on your phone. Your photos never leave the device. There is no account and no analytics, and it works without a connection.</p>
+<p>You can save finds to your collection with the photo, date and your own notes, and share a find card with friends.</p>
+<h2 id="free-and-pro">Free and Pro</h2>
+<p>The free version gives you 3 identifications a day, plus one more by watching a short video. Pro removes the limit and the ads and adds collection export. It comes as a monthly or yearly subscription (with a free trial) or a one-time lifetime purchase.</p>
+<p>Fieldkey is built on open models and open data: the Google AIY plant classifier, photos from iNaturalist and Wikimedia Commons contributors, and descriptions from Wikipedia and Wikidata.</p>
+<h2 id="get-it">Get it</h2>
+<p>Fieldkey is free on Google Play: <a href="https://play.google.com/store/apps/details?id=com.charles.fieldkey">Fieldkey: Plant Rock Coin ID</a>. More details are on the app's site: <a href="https://chartmann1590.github.io/fieldkey-site/">https://chartmann1590.github.io/fieldkey-site/</a>.</p><p><a href="https://play.google.com/store/apps/details?id=com.charles.fieldkey">Get Fieldkey: Plant Rock Coin ID on Google Play</a></p>]]></content:encoded></item><item><title>AuraCast Weather: your forecast as an on-device spoken briefing</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/auracast-weather-ai-narrated-forecast/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/auracast-weather-ai-narrated-forecast/</guid>
 <pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>AuraCast Weather turns your forecast into a spoken briefing made on your phone, with live radar, alerts, widgets and offline translation.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.auracast.weather.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>weather</category><category>radar</category><category>on-device ai</category><category>open source</category>
@@ -937,55 +955,5 @@ dig dnssec-failed.org @&lt;firewall-ip&gt;      # deliberately broken: should SE
 <h2 id="good-to-know">Good to know</h2>
 <ul><li><strong>Price:</strong> free to download, with an optional premium upgrade mentioned in the listing.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>Category:</strong> Tools, rated Everyone.</li><li><strong>Storage:</strong> video takes space; loop recording is there to manage it.</li><li><strong>A tool, not a guarantee:</strong> collision detection and incident save help keep footage, but set it up and test it before relying on it.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You want dashcam footage without buying a separate device.</li><li>You want speed and GPS data on your recordings.</li><li>You want footage to stay on your phone instead of a cloud service.</li><li>You want parking mode with motion detection for when the car is stopped.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.drivevault.dashcam">Get DriveVault: Dashcam on Google Play</a></p>]]></content:encoded></item><item><title>Verified isn&#x27;t restored: what each check proves</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/verified-is-not-restored/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/verified-is-not-restored/</guid>
-<pubDate>Mon, 19 Oct 2026 12:30:00 -0400</pubDate><description>A job that reports OK, zstd -t, a PBS verify job and rclone check each prove one thing, and none of them proves the guest boots. What every layer proves, what it doesn&#x27;t, and the quarterly four-restore drill that actually answers the question.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-25.jpg" type="image/jpeg" length="0"/>
-<category>proxmox</category><category>backups</category><category>pbs</category><category>restore</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-10-25.jpg" alt=""></p><p>A backup job that reports success has proved one thing: it wrote some bytes somewhere. Whether those bytes become a working Home Assistant on a Tuesday morning is a separate question, and the only way to answer it is to do it.</p>
-<p>Most backup setups pile up green checks: the job status, an archive test, a PBS verify job, an off-site comparison. Each one is worth running. None of them answers the question you actually care about.</p>
-<h2 id="the-trap-verified-means-something-different-at-every-layer">The trap: "verified" means something different at every layer</h2>
-<p>The word "verified" shows up all over a backup stack, and it never means "it works." A PBS verify job proves the chunks on disk still match their hashes. <code>zstd -t</code> proves an archive is not truncated. Neither proves the guest boots, the database opens, or the one file you need is actually in there.</p>
-<p>Here is what each check really buys you:</p>
-<div class="table"><table><thead><tr><th>Check</th><th>What it proves</th><th>What it doesn't</th></tr></thead><tbody><tr><td>Job reports OK</td><td>The job finished writing</td><td>That the data was good when it was read</td></tr><tr><td><code>zstd -t</code> on a vzdump archive</td><td>The file is complete and decompresses</td><td>That the guest inside it boots</td></tr><tr><td>PBS verify job</td><td>Chunks match their hashes; no bit rot</td><td>That the backup was consistent when taken</td></tr><tr><td><code>rclone check</code></td><td>Off-site matches local</td><td>That local was any good</td></tr><tr><td>A restore drill</td><td>The guest starts and the data is there</td><td>Only what you looked at</td></tr></tbody></table></div>
-<p>Every layer is worth running; only the last one answers the question.</p>
-<h2 id="keep-the-cheap-checks-running">Keep the cheap checks running</h2>
-<p>The lower layers are cheap and catch real problems, so leave them on:</p>
-<ul><li><strong>Archive test.</strong> <code>zstd -t &lt;archive.zst&gt;</code> works on a container's <code>.tar.zst</code> and on a VM's <code>.vma.zst</code> alike. It tells you the file is whole.</li><li><strong>PBS verify jobs.</strong> Weekly, with "skip verified" on and "re-verify after" set to 30 days. A verify reads every chunk, so it is disk-heavy; schedule it for a quiet morning.</li><li><strong>Off-site comparison.</strong> <code>rclone check b2:dump /mnt/backups/dump</code> compares what is in the bucket against the source without transferring anything, and <code>rclone cryptcheck</code> does the same through the crypt layer. Run one after the first sync and once a month after that.</li></ul>
-<p>Then add the one check that proves something.</p>
-<h2 id="the-fix-a-quarterly-restore-drill">The fix: a quarterly restore drill</h2>
-<p>Four times a year, one evening, four restores. Two rules for every one of them: <strong>restore to a new ID, never over the original</strong>, and <strong>keep the network unplugged until you have looked</strong>.</p>
-<h3 id="drill-1-a-vm-from-pbs">Drill 1: a VM from PBS</h3>
-<p>Pick the guest that would hurt most to lose. In the Proxmox GUI, open the PBS storage, then Backups, select the newest backup of the guest, Restore, and give it a new ID and a storage. Or from the shell:</p>
-<pre><code>qmrestore pbs01:backup/vm/101/2026-10-08T01:30:00Z 9101 \
-  --storage local-zfs --unique 1
-qm set 9101 --net0 virtio,bridge=vmbr0,link_down=1
-qm start 9101</code></pre>
-<p><code>--unique</code> gives the restored VM fresh MAC addresses so it can sit next to the original without a fight, and <code>link_down=1</code> keeps its network unplugged.</p>
-<p>Open the console. Does it boot? Log in. Is last night's data there? For Home Assistant, that means the dashboard loads and the most recent automation you wrote exists. Then clean up:</p>
-<pre><code>qm destroy 9101 --purge</code></pre>
-<h3 id="drill-2-a-container-from-a-vzdump-archive">Drill 2: a container from a vzdump archive</h3>
-<p>Same idea with <code>pct restore</code>, from the NAS copy:</p>
-<pre><code>pct restore 9143 \
-  /mnt/pve/nas-backup/dump/vzdump-lxc-143-2026_10_08-02_30_01.tar.zst \
-  --storage local-zfs</code></pre>
-<p>This tests the second tool and the second storage at the same time.</p>
-<h3 id="drill-3-a-single-file-from-pbs">Drill 3: a single file from PBS</h3>
-<p>In the GUI, pick a backup, File Restore, browse into the disk and download one file. Pick something small and recent, like yesterday's Immich database dump. This is the restore you will actually do most often, so it deserves practice.</p>
-<h3 id="drill-4-something-from-off-site">Drill 4: something from off-site</h3>
-<p>Pull one archive back from the bucket and test it:</p>
-<pre><code>rclone copy b2:dump/vzdump-lxc-143-2026_10_08-02_30_01.tar.zst /tmp/restore-test/
-zstd -t /tmp/restore-test/vzdump-lxc-143-2026_10_08-02_30_01.tar.zst</code></pre>
-<p>Or restore it the same way as drill 2. If you sync to a friend's PBS instead, restore one guest from their datastore. This is the only drill that proves the copy that survives the house.</p>
-<h2 id="once-a-year-the-full-rebuild">Once a year: the full rebuild</h2>
-<p>Make drill 1 a full rebuild once a year: a fresh Proxmox install on a spare disk or a VM, restore <code>/etc/pve</code> from the host backup, re-add the PBS storage with the saved encryption key, restore a guest.</p>
-<p>This is where the surprises live. The storage names in the restored configs may not exist yet on the fresh install, and every guest shows greyed out until you recreate them. Far better to find that out on a spare disk than on the real one.</p>
-<h2 id="home-assistant-and-opnsense-drills">Home Assistant and OPNsense drills</h2>
-<p><strong>Home Assistant:</strong> create a fresh HAOS VM, and on the onboarding screen choose Restore from backup, upload yesterday's backup and enter the encryption key. Give it fifteen minutes. If the dashboard comes back with your automations, you have proved the whole chain: backup, encryption key, off-site location, restore.</p>
-<p><strong>OPNsense:</strong> a fresh VM from the ISO, assign interfaces at the console, then restore the encrypted <code>config.xml</code> through the GUI. Keep the new VM's WAN unplugged so you do not end up with two DHCP servers on the house network.</p>
-<h2 id="write-it-down">Write it down</h2>
-<p>A drill nobody wrote down did not happen. Keep a table at the bottom of your backup inventory with the date, what you restored, where it came from, the result and the time taken, plus a notes column.</p>
-<p>The notes column is where the real value lives. "Took 38 minutes from B2" tells you what a bad day would look like. "Had to recreate storage names" is a line in next year's rebuild plan.</p>
-<p>Put the drill on your calendar as a repeating event with the four steps in the description. Alerts tell you when a job fails loudly; the drill catches what the alerts missed, such as an off-site job that has been quietly failing for weeks.</p>
-<h2 id="checklist-restore-testing">Checklist: restore testing</h2>
-<ul><li>A quarterly calendar event with the four drills in it</li><li>Every drill restores to a new ID with the network unplugged, then is destroyed</li><li>One file-level restore and one off-site restore every quarter</li><li>A Home Assistant restore onto a fresh VM done at least once, with the encryption key</li><li>A yearly rebuild of a node from the host backup, on spare hardware or a VM</li><li>A log with date, source, result and time taken</li></ul><p><a href="https://payhip.com/b/1iHXQ">Go deeper: Never Lose Your Data</a></p>]]></content:encoded></item>
+<ul><li>You want dashcam footage without buying a separate device.</li><li>You want speed and GPS data on your recordings.</li><li>You want footage to stay on your phone instead of a cloud service.</li><li>You want parking mode with motion detection for when the car is stopped.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.drivevault.dashcam">Get DriveVault: Dashcam on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
