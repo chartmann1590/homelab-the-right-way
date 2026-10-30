@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/</loc><lastmod>2026-10-29</lastmod><changefreq>daily</changefreq><priority>1.0</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/about/</loc><lastmod>2026-10-29</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/links/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/newsletter/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/apps/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/merch/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/</loc><lastmod>2026-10-30</lastmod><changefreq>daily</changefreq><priority>1.0</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/about/</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/links/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/newsletter/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/apps/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/merch/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/dreamloom-private-ai-dream-journal/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.app.dreamloom.jpg</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/proxmox-ve-9-high-availability-ha-rules-fencing/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-hero.jpg</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/local-llm-gpu-sizing-quantization-kv-cache/</loc><lastmod>2026-10-29</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
