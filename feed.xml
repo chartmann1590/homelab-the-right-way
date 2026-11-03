@@ -1,9 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Mon, 02 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 03 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>NUT shutdown on a timer: upssched, secondaries first, and HOSTSYNC explained</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</guid>
+<item><title>Leaving Google Photos for Immich: keep your dates, keep backups running, share with family</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</guid>
+<pubDate>Tue, 03 Nov 2026 12:30:00 -0500</pubDate><description>The move from Google Photos to Immich goes wrong in four quiet places. Takeout imports that land ten years of photos on today&#x27;s date, phone backups that stall, one shared family login, and a reverse proxy that chokes on big videos. Here is the fix for each, plus a checklist.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>immich</category><category>google photos</category><category>self-hosting</category><category>photos</category><category>backup</category><category>homelab</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Getting Immich running is the easy part. The library is up, the timeline looks like Google Photos, and the first test photo shows up from your phone. The move itself is where it quietly goes wrong, and none of these problems throw an error. Ten years of photos land on today's date. The phone stops backing up and nobody notices for a month. The whole family shares one login, so face recognition and memories turn into a mess. A long video from your phone fails to upload through the proxy for no obvious reason.</p>
+<p>This post walks through the migration in order. It assumes Immich is already installed the documented way, with the library on the data disk and the database on local SSD.</p>
+<h2 id="before-the-first-upload-storage-template-and-a-normal-account">Before the first upload: storage template and a normal account</h2>
+<p>Two settings have to happen before anything goes in, because they are painful to change later.</p>
+<p><strong>The storage template.</strong> By default Immich stores files in folders named by internal IDs. Go to Administration → Settings → Storage Template and turn it on with a pattern like year/month/day. Your library on disk becomes a readable folder tree, which matters a lot the day you want to browse it without Immich or move to something else.</p>
+<p><strong>A normal account.</strong> The first user you create is the administrator. Use a strong, unique password for it, save it somewhere safe, and then create a separate, normal account for daily use. The phone app logs in with the normal account, never the admin one.</p>
+<h2 id="trap-1-uploading-the-raw-takeout-files">Trap 1: uploading the raw Takeout files</h2>
+<p>Google Takeout exports Google Photos as the original files plus JSON sidecar files. Those sidecars hold the dates and descriptions Google stripped from the photos themselves. If you unzip the archives and upload the raw files directly, the dates are lost and a decade of photos gets dumped onto today's date.</p>
+<p><strong>The fix:</strong> use a tool that reads the sidecars. A community tool called immich-go reads Takeout archives, matches each photo to its sidecar, and uploads everything with the right dates. Read its README and do a test run with one archive first. Check that a handful of old photos land on the right day in the timeline before you feed it the rest.</p>
+<p>Then the order of the exit matters:</p>
+<ol><li>Import everything and compare counts between Google Photos and Immich.</li><li>Run one full backup of your Immich library (on Proxmox, that means the Docker VM on your backup server, plus the off-site copy).</li><li>Only then delete anything from Google.</li><li>Cancel the subscription last.</li></ol>
+<h2 id="trap-2-a-phone-backup-that-silently-stalls">Trap 2: a phone backup that silently stalls</h2>
+<p>The phone app is what replaces Google's automatic backup, and it only works if the phone lets it run. Install the Immich app from the App Store or Google Play, enter your server URL, log in with your normal account, and then:</p>
+<ol><li>Open the backup settings and choose which albums to back up. "Recents" or "Camera" covers most phones.</li><li>Turn on background backup.</li><li>On Android, exclude the app from battery optimization in the system settings. On iPhone, leave Background App Refresh on for Immich.</li><li>Leave the app open on Wi-Fi for the first big upload. Background uploads are throttled by the phone and will take days for a 50 GB library.</li></ol>
+<p>Even set up right, background backup on phones is best effort, because the operating system decides when apps may run. The habit that catches a stall: open the app once a week and glance at the backup count. It takes two seconds and it is the only way you'll notice.</p>
+<p>There is a second, slower way backups stop: the version. Immich moved to v3 in July 2026, and the server only talks to mobile apps of a compatible major version. Pin the server in <code>.env</code> so a major upgrade never happens by surprise:</p>
+<pre><code>IMMICH_VERSION=v3</code></pre>
+<p>When you do update, update the phone apps first, then the server.</p>
+<h2 id="trap-3-one-login-for-the-whole-family">Trap 3: one login for the whole family</h2>
+<p>Sharing one account feels simpler, and it breaks the parts of Immich people actually like. Every phone backs up into the same library, and face recognition and memories mix everyone together.</p>
+<p><strong>The fix:</strong> give every person their own Immich account, so each phone backs up into its owner's library. Then use the two sharing tools Immich gives you:</p>
+<ul><li><strong>Partner sharing</strong>, in each user's account settings, lets a spouse see your whole timeline, and optionally show it mixed into their own. This is the "our photos" feeling people miss from Google.</li><li><strong>Shared albums</strong> work like Google's: add people by their Immich account, and everyone can add photos. For relatives without an account, a shared link works too, but only if that link is reachable from the internet. That is an exposure decision, not a default.</li></ul>
+<p>If the data disk is small, set a storage quota per user under Administration → Users. One 4K video habit can fill a terabyte faster than you'd expect.</p>
+<h2 id="trap-4-the-proxy-that-drops-big-videos">Trap 4: the proxy that drops big videos</h2>
+<p>Photos upload fine through a reverse proxy; long phone videos are what fail. Behind Nginx Proxy Manager, two settings save hours of confusion. Turn on <strong>Websockets Support</strong> on the proxy host, and add this to the host's Advanced tab so large videos upload:</p>
+<pre><code>client_max_body_size 50000M;
+proxy_request_buffering off;
+proxy_read_timeout 600s;
+proxy_send_timeout 600s;
+send_timeout 600s;</code></pre>
+<p>One more rule from the Immich docs: Immich must be served at the root of its own subdomain, like <code>photos.example.com</code>, not under a path like <code>example.com/photos</code>. Putting it under a path fails in confusing ways.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Storage template (year/month/day) switched on before the first upload</li><li>A normal account for daily use, separate from the admin</li><li>Takeout imported with immich-go after a one-archive test run, sidecar dates intact</li><li>Counts match, and one full backup of Immich done, before anything is deleted from Google</li><li>Phone background backup on; battery optimization off (Android) or Background App Refresh on (iPhone)</li><li>First big upload done with the app open on Wi-Fi</li><li>Backup count glanced at once a week</li><li><code>IMMICH_VERSION=v3</code> pinned; phone apps updated before the server</li><li>One Immich account per person; partner sharing and shared albums instead of a shared login</li><li>Per-user storage quotas if the disk is small</li><li>Websockets on and the large-upload settings in the proxy's Advanced tab</li><li>Immich on its own subdomain, never under a path</li></ul><p><a href="https://payhip.com/b/Ut72a">Go deeper: Self-Host Your Life</a></p>]]></content:encoded></item><item><title>The BUILD SUCCESSFUL (on the third try) hoodie</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/build-successful-on-the-third-try-hoodie/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/build-successful-on-the-third-try-hoodie/</guid>
+<pubDate>Tue, 03 Nov 2026 12:30:00 -0500</pubDate><description>The BUILD SUCCESSFUL (on the third try) hoodie from merch drop 7, for Android developers and anyone who has watched attempt 3 of 3. Colours, sizes and prices.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-h9.jpg" type="image/jpeg" length="0"/>
+<category>merch</category><category>android</category><category>androiddev</category><category>gradle</category><category>hoodie</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-h9.jpg" alt=""></p><p>Every Android developer knows the ritual. Clean. Rebuild. Invalidate caches and restart. Then the build goes green and nobody asks which of those actually fixed it. The <a href="https://homelab-the-right-way.printful.me/product/build-successful-on-the-third-try-hoodie">Build Successful (On the Third Try) Hoodie</a> is a hoodie about that moment.</p>
+<h2 id="the-design">The design</h2>
+<p>A release build task, a full progress bar, "100% • attempt 3 of 3", then BUILD SUCCESSFUL in big type with the honest part on an amber pill: on the third try. The line along the bottom is the usual recipe: clean, rebuild, invalidate caches, pray.</p>
+<h2 id="colours-sizes-and-price">Colours, sizes and price</h2>
+<ul><li>Gildan 18500 heavy blend hoodie</li><li>Black, Navy, Dark Heather and Forest Green</li><li>$47.50 to $64 depending on size, before shipping (Printful calculates shipping at checkout)</li><li>Printed to order by Printful</li></ul>
+<h2 id="getting-to-green-on-the-first-try">Getting to green on the first try</h2>
+<p>A build that goes green is not the same as an app that works. The bugs that reach users are usually the ones no test looked at. <a href="https://payhip.com/b/Fpyu8">Test It Before They Do</a> covers ViewModel tests with coroutines and Flow, Compose UI tests through the semantics tree, screenshot tests and running it all in CI, so a green build means something. The <a href="https://payhip.com/b/I905N">free sample</a> is the full chapter on Compose UI tests.</p>
+<h2 id="get-it">Get it</h2>
+<p>The hoodie is in the <a href="https://homelab-the-right-way.printful.me/product/build-successful-on-the-third-try-hoodie">merch store</a> with the rest of <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/">drop 7</a> and every earlier design on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>.</p><p><a href="https://payhip.com/b/Fpyu8">Go deeper: Test It Before They Do</a></p>]]></content:encoded></item><item><title>QR Scanner: a fast QR and barcode reader that keeps scans local</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/qr-scanner-code-reader-android/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/qr-scanner-code-reader-android/</guid>
+<pubDate>Tue, 03 Nov 2026 12:30:00 -0500</pubDate><description>QR Scanner reads QR codes and barcodes from the camera or gallery, keeps a searchable history on your phone and can generate QR codes from text.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.qrcode.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>qr code</category><category>barcode</category><category>tools</category><category>open source</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.qrcode.jpg" alt=""></p><p>QR codes are everywhere now: menus, tickets, Wi-Fi details, posters, packaging. Plenty of scanner apps handle them, and plenty of those want an account for a job that should take a second. QR Scanner is a simple, fast reader for QR codes and barcodes that keeps your scans on your phone.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Fast scanning.</strong> Instant detection of QR codes and barcodes in all major formats, with auto-focus and zoom.</li><li><strong>Camera or gallery.</strong> Scan live with the camera or from an image already on your phone.</li><li><strong>Scan history.</strong> Every scan is saved automatically, and you can search, bookmark, delete or export your history.</li><li><strong>Copy and share.</strong> Copy scanned text instantly, share it through any app, or open links directly.</li><li><strong>Make QR codes.</strong> Generate a QR code from any text.</li><li><strong>Extras.</strong> A batch scan mode, custom scan results, sound and vibration feedback, a flashlight for low light, and accessibility support.</li></ul>
+<h2 id="useful-features-you-might-miss">Useful features you might miss</h2>
+<h3 id="scanning-from-the-gallery">Scanning from the gallery</h3>
+<p>Someone sends you a screenshot with a QR code, or you saved a photo of a poster. Instead of pointing a second phone at your screen, open the image from your gallery and scan it there.</p>
+<h3 id="batch-mode">Batch mode</h3>
+<p>When you have a stack of codes to read, such as items on a shelf, batch mode lets you scan them one after another without stopping after each result.</p>
+<h3 id="the-history">The history</h3>
+<p>The automatic history is handy when you need a link or a code again later. Search it, bookmark the scans worth keeping, and export the list if you want it somewhere else.</p>
+<h3 id="generating-codes">Generating codes</h3>
+<p>Need to share a piece of text as a QR code? Type it in and the app creates the code for someone else to scan.</p>
+<h2 id="privacy">Privacy</h2>
+<p>The listing describes a privacy-first design:</p>
+<ul><li>The only permission it asks for is the camera, to scan codes.</li><li>Internet access is used only for ads.</li><li>Scans stay on your device.</li><li>No account is needed.</li></ul>
+<p>The app reads the code and shows you the result, and opening a link is your choice.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li>QR Scanner is free to download and is described as open source.</li><li>Google Play's listing labels the app as containing ads.</li><li>It has dark mode and a layout optimized for tablets.</li><li>It is rated Everyone, in the Tools category.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You scan QR codes and barcodes often and want it to be instant.</li><li>You want a history you can search and export.</li><li>You sometimes need to scan a code from a screenshot or photo.</li><li>You prefer a scanner that keeps scans on your phone and does not need an account.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.qrcode">Get QR Scanner: Code Reader on Google Play</a></p>]]></content:encoded></item><item><title>NUT shutdown on a timer: upssched, secondaries first, and HOSTSYNC explained</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</guid>
 <pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Network UPS Tools can shut your homelab down after N minutes on battery instead of waiting for &quot;low battery&quot;. How a NUT shutdown runs, a Debian secondary client, TrueNAS as a client, an upssched timer with its script and tmpfiles rule, and the timing settings that matter.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>ups</category><category>nut</category><category>network ups tools</category><category>proxmox</category><category>truenas</category><category>homelab</category>
@@ -1438,197 +1509,5 @@ curl -I https://notes.home.example.com</code></pre>
 <h2 id="away-from-home">Away from home</h2>
 <p>Nothing here is reachable from the internet, by design. To use these names away from home, connect to your network over WireGuard or Tailscale and make sure the VPN hands out your local resolver. The same names and the same certificate then work everywhere.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>A subdomain of a real domain you own, never <code>.local</code>, <code>.internal</code> or <code>.home.arpa</code></li><li>Caddy built with your DNS provider's module, and <code>caddy list-modules | grep dns</code> shows it</li><li>An API token scoped to one zone and DNS edit only, in <code>caddy.env</code> with <code>chmod 600</code>, kept out of Git</li><li>One <code>*.home.example.com</code> block with a host matcher per app and a final <code>handle { abort }</code></li><li>Staging CA while testing, removed once the certificate arrives; <code>./data</code> kept and backed up</li><li>A local DNS override pointing <code>*.home.example.com</code> at the Docker VM, nothing in the public zone</li><li>Rebind protection allows your internal domain; <code>dig</code> and <code>curl -I</code> pass from a laptop</li><li>Remote access through WireGuard or Tailscale, handing out your local resolver</li><li>No ports 80 or 443 forwarded from the internet</li></ul><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item><item><title>Looki L1 mount v9: snug holder + slide-in collar clips (free STL)</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/looki-l1-mount-v9/</guid>
-<pubDate>Mon, 26 Oct 2026 12:30:00 -0400</pubDate><description>Version 9 of the free 3D-printed Looki L1 wearable camera mount. A snug holder sized for the bare camera and two collar clips that slide in on dovetail rails and click locked. STL downloads, the exact ABS print settings and the real print timelapse.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-hero.jpg" type="image/jpeg" length="0"/>
-<category>3d printing</category><category>looki</category><category>camera mount</category><category>abs</category><category>maker</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-hero.jpg" alt=""></p><p>The free Looki L1 mount is on <strong>version 9</strong>, and this is the one to print now. It has a new <strong>holder</strong> that fits the bare camera snugly and two new <strong>collar clips</strong> (thick and thin) that slide into the back of the holder on full-width dovetail rails and click locked with a small button.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-01-looki-l1-worn-in-v9-holder.jpg" alt="The Looki L1 in the printed v9 holder, clipped to a hoodie collar" loading="lazy"></figure>
-<h2 id="what-changed-from-the-last-version">What changed from the last version</h2>
-<ul><li><strong>Holder:</strong> the older pocket was sized for the Looki wearing its silicone case, so the bare camera had about 2.4 mm of play on each side. The v9 pocket is the bare Looki plus 0.25 mm per side, with four small snap bumps (0.6 mm over the edge, just above the widest rim) that hold it in. The lens, button and back windows are unchanged.</li><li><strong>Clips:</strong> the old clips only had a dovetail on one side and the tongue stopped half way, so they could pop out. The v9 clips slide in <strong>sideways</strong>, from the right. That way both rails, top and bottom, are part of the clip's side profile, so they print cleanly and run the clip's full width.</li><li><strong>Lock:</strong> a 1.3 mm flex beam under the rails carries a small button that clicks into a 4.2 mm hole in the holder. The weight hangs on the rails, not on the button.</li><li>The <strong>safety lanyard frame</strong> is not part of this release. It's coming in a later update.</li></ul>
-<h2 id="printed-and-assembled">Printed and assembled</h2>
-<p>These photos are the real v9 parts, printed in black ABS.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-02-v9-holder-front.jpg" alt="Front of the v9 holder with the Looki seated in it" loading="lazy"></figure>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-03-v9-holder-with-clip-side.jpg" alt="Side view of the holder with a clip slid into the back" loading="lazy"></figure>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-real-04-v9-thin-clip.jpg" alt="The thin v9 collar clip" loading="lazy"></figure>
-<h2 id="downloads">Downloads</h2>
-<ul><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/v9/looki_v9_holder.stl">looki_v9_holder.stl</a> (964 KB): the holder the Looki snaps into</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/v9/looki_v9_clip_thick.stl">looki_v9_clip_thick.stl</a> (98 KB): the thick collar clip, 32 mm wide</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/v9/looki_v9_clip_thin.stl">looki_v9_clip_thin.stl</a> (101 KB): the thin collar clip, 26 mm wide</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/v9/looki_v9_abs_profile.ini">looki_v9_abs_profile.ini</a>: the PrusaSlicer profile the parts in the photos were printed with</li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/downloads/looki-mount/v9/looki-mount-v9.zip">Everything as one zip</a></li></ul>
-<p>Also on <a href="https://www.printables.com/model/1884139-looki-l1-camera-mount-v9-snug-holder-slide-in-coll">Printables</a>, where the older v4 files are still available too. License: CC BY 4.0, Charles Hartmann / Homelab the Right Way.</p>
-<h2 id="how-the-clip-goes-on-and-comes-off">How the clip goes on and comes off</h2>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-render-assembled.jpg" alt="Render of the holder and clip from the front and the back" loading="lazy"></figure>
-<ol><li>Slide the clip into the channel on the back of the holder from the <strong>right</strong> side. The rails guide it, and the closed left end is the stop.</li><li>Push until the button clicks into the hole in the holder.</li><li>To take it off, press the thumb tab toward the shirt and slide the clip out to the right. With the Looki out, you can also push the button from the inside.</li></ol>
-<p>Pick the thick or the thin clip, whichever fits your collar better.</p>
-<figure class="post-img"><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/looki/v9-render-clip-rail.jpg" alt="Section cut showing the dovetail rails and the button in its hole" loading="lazy"></figure>
-<h2 id="print-settings">Print settings</h2>
-<p>What the parts in the photos were printed with:</p>
-<ul><li><strong>Material:</strong> ABS, 240 C nozzle and 100 C bed.</li><li><strong>Layers:</strong> 0.2 mm with a 0.4 mm nozzle, 4 perimeters, 40% gyroid infill. <strong>No supports.</strong></li><li><strong>Raft:</strong> an easy-peel raft, 3 raft layers with a 0.3 mm contact gap and no raft expansion. It keeps the ABS flat and comes off clean.</li><li><strong>Orientation:</strong> print as exported. The clips print on their side, so the layer lines run around the bend and the arm flexes instead of snapping.</li><li><strong>Time:</strong> the plate in the timelapse (the holder, both clips and the lanyard frame that isn't released yet) took 8 h 22 min.</li></ul>
-<p>The timelapse at the top of this page is the real v9 plate printing, straight off the OctoPrint camera.</p>
-<h2 id="fit-notes">Fit notes</h2>
-<p>The Looki outline is based on the camera's official 50.53 x 48.02 mm size. If the holder is too tight or too loose on yours, or a clip is too stiff or too loose on the rails, leave a comment on the Printables page saying which part.</p>
-<p>The original v4 cradle and clip, with the screw-on design, are still written up in the <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/free-looki-camera-mount-3d-print/">first Looki mount post</a>.</p>
-<p>Not affiliated with Looki. The Looki L1 is a product of looki.ai; this is an independent, free accessory. The model was designed with AI help and printed and tested on a real printer.</p><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>CrowdTransit: live bus and train stops with community reviews</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/crowdtransit-bus-train-stops-reviews/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/crowdtransit-bus-train-stops-reviews/</guid>
-<pubDate>Mon, 26 Oct 2026 12:30:00 -0400</pubDate><description>CrowdTransit finds bus and train stops, shows real-time arrivals and alerts, and adds commuter reviews of stops and routes. No account needed.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.crowdtransit.app.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>public transit</category><category>commuting</category><category>bus</category><category>train</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.crowdtransit.app.jpg" alt=""></p><p>A transit schedule tells you when the bus should come. It does not tell you that the stop has no shelter, that the platform is hard to reach with a stroller, or that a route has been running late all week. CrowdTransit combines both: live transit data for bus and train stops, plus reviews from the people who actually ride them.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Live transit data.</strong> Real-time bus and train tracking, upcoming arrivals at a stop, route information and maps, and service alerts and delays.</li><li><strong>Community reviews.</strong> Read reviews of stops and routes, rate your own experience, and see safety and accessibility ratings.</li><li><strong>Quick search.</strong> Find a stop by its stop number or by address, and save your favorite stops.</li><li><strong>Offline stop lists.</strong> Keep a list of stops for your area available without a connection.</li><li><strong>Nationwide coverage.</strong> The listing says it works in cities across the country, on urban and rural routes, with coverage that keeps expanding.</li><li><strong>No account.</strong> You can use it without signing up.</li></ul>
-<h2 id="how-it-works">How it works</h2>
-<p>CrowdTransit is described as community-powered. The schedules and real-time information come from open data sources, and riders add the part official feeds leave out: reviews and ratings for the stops and routes they use. Coverage itself is partly community-contributed, which is how the listing explains its reach into rural routes as well as big cities.</p>
-<p>That makes the app more useful the more people use it. Every rating you leave helps the next commuter decide which stop to walk to, or whether a route is worth the wait.</p>
-<h2 id="getting-set-up-for-your-commute">Getting set up for your commute</h2>
-<ol><li>Search for your usual stop by its number or the street address.</li><li>Save it, and any other stops you use, as favorites.</li><li>Check upcoming arrivals before you leave, and watch for service alerts or delays on your route.</li><li>Save the offline stop list for your area, so you can still look up stops with a weak signal.</li><li>After a ride, leave a quick rating so others know what to expect.</li></ol>
-<h2 id="the-ratings-worth-reading">The ratings worth reading</h2>
-<p>Two kinds of rating stand out for planning:</p>
-<ul><li><strong>Safety ratings</strong> help when you are waiting somewhere late or in an unfamiliar area.</li><li><strong>Accessibility ratings</strong> help when you are traveling with a wheelchair, a stroller, heavy bags or anyone who cannot manage stairs.</li></ul>
-<p>Neither replaces official information from your transit agency, but both answer questions a timetable never will.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li>CrowdTransit is free to download, and the listing describes it as free with no subscriptions.</li><li>Google Play's listing labels the app as containing ads and offering in-app purchases.</li><li>No account is required.</li><li>It is rated Teen, in the Maps and Navigation category.</li><li>Coverage depends on available data and community contributions, so check that your area is covered.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You ride buses or trains and want live arrivals and delay alerts in one place.</li><li>You care about how safe or accessible a stop is, not only when the bus comes.</li><li>You like being able to rate stops and routes and help other riders.</li><li>You want to look up stops without creating an account.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.crowdtransit.app">Get CrowdTransit: Bus &amp; Train on Google Play</a></p>]]></content:encoded></item><item><title>Promtail is dead: ship your homelab logs to Loki with Grafana Alloy</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/promtail-is-dead-grafana-alloy-loki/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/promtail-is-dead-grafana-alloy-loki/</guid>
-<pubDate>Sun, 25 Oct 2026 12:30:00 -0400</pubDate><description>Promtail reached end of life on March 2, 2026. Here is the replacement pipeline from Watch Your Homelab, with Loki 3.7, retention that actually deletes, Grafana Alloy reading the journal and Docker logs, and LogQL queries worth saving.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-02.jpg" type="image/jpeg" length="0"/>
-<category>loki</category><category>grafana alloy</category><category>promtail</category><category>logging</category><category>monitoring</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-02.jpg" alt=""></p><p>Metrics tell you that something changed. Logs tell you why. <em>Watch Your Homelab</em> gives logs their own chapter because the usual homelab approach only works until the day you actually need it.</p>
-<h2 id="the-trap-ssh-journalctl-and-a-dead-agent">The trap: SSH, journalctl, and a dead agent</h2>
-<p>The default homelab log strategy is SSH and <code>journalctl</code>, one machine at a time, after the fact. By the time you look, the container was recreated and its logs went with it, or the journal on a small root disk has already rotated.</p>
-<p>The second trap is building a log stack from an old tutorial. Many of them still use Promtail, which reached end of life on March 2, 2026. Grafana's documentation states that it receives no further updates and that future development happens in Grafana Alloy. New setups should start with Alloy.</p>
-<h2 id="how-the-pieces-fit">How the pieces fit</h2>
-<ul><li><strong>Loki</strong> stores logs. Unlike a full-text search engine, it indexes only a small set of labels (host, unit, container) and stores the log lines compressed in chunks. That keeps it light enough for a homelab.</li><li><strong>Alloy</strong> is the agent. It reads the systemd journal and Docker's container logs on each host, attaches labels, and pushes the lines to Loki.</li><li><strong>Grafana</strong> queries Loki with LogQL, from the same place that shows your dashboards.</li></ul>
-<h2 id="run-loki-with-retention-switched-on">Run Loki with retention switched on</h2>
-<p>At the time the book was written (October 2026), Loki is at 3.7. A single Loki process with local filesystem storage is the right size for a homelab. This config is based on the project's own local example, with retention turned on:</p>
-<pre><code># /opt/stacks/logs/loki/config.yaml
-auth_enabled: false
-
-server:
-  http_listen_port: 3100
-
-common:
-  instance_addr: 127.0.0.1
-  path_prefix: /loki
-  storage:
-    filesystem:
-      chunks_directory: /loki/chunks
-      rules_directory: /loki/rules
-  replication_factor: 1
-  ring:
-    kvstore:
-      store: inmemory
-
-schema_config:
-  configs:
-    - from: 2026-10-01
-      store: tsdb
-      object_store: filesystem
-      schema: v13
-      index:
-        prefix: index_
-        period: 24h
-
-compactor:
-  working_directory: /loki/compactor
-  retention_enabled: true
-  delete_request_store: filesystem
-
-limits_config:
-  retention_period: 30d
-
-analytics:
-  reporting_enabled: false</code></pre>
-<pre><code># /opt/stacks/logs/compose.yaml
-services:
-  loki:
-    image: grafana/loki:3.7.8
-    restart: unless-stopped
-    command: ["-config.file=/etc/loki/config.yaml"]
-    ports: ["3100:3100"]
-    volumes:
-      - ./loki/config.yaml:/etc/loki/config.yaml:ro
-      - loki-data:/loki
-volumes:
-  loki-data:</code></pre>
-<p>Retention is the part people get wrong. In Loki, the compactor does the deleting, and Loki's documentation is explicit on three points:</p>
-<ol><li><code>retention_enabled</code> must be <code>true</code>. Otherwise the compactor only compacts.</li><li><code>delete_request_store</code> must be set when retention is on.</li><li>Retention needs the 24-hour index period used in the schema above.</li></ol>
-<p><code>retention_period</code> in <code>limits_config</code> then applies to every log stream. The last block turns off Loki's anonymous usage reporting, which the example config leaves on by default.</p>
-<h2 id="install-alloy-on-each-host">Install Alloy on each host</h2>
-<p>Alloy runs as a native service, which makes reading the journal straightforward. These steps follow Grafana's Debian instructions (Alloy 1.20 when the book was written). Run them on the Proxmox host and on each Docker host:</p>
-<pre><code>apt install gpg
-mkdir -p /etc/apt/keyrings
-wget -O /etc/apt/keyrings/grafana.asc https://apt.grafana.com/gpg-full.key
-chmod 644 /etc/apt/keyrings/grafana.asc
-echo "deb [signed-by=/etc/apt/keyrings/grafana.asc] \
-https://apt.grafana.com stable main" &gt; /etc/apt/sources.list.d/grafana.list
-apt-get update &amp;&amp; apt-get install alloy
-usermod -aG adm,systemd-journal alloy</code></pre>
-<p>Don't skip the last line. Alloy's documentation warns that without membership in <code>adm</code> and <code>systemd-journal</code>, the journal source starts without an error and collects nothing. That's a silent failure, the worst kind for a logging system.</p>
-<p>On Docker hosts, also add the <code>alloy</code> user to the <code>docker</code> group so it can read container logs through the socket. That comes with a caveat: access to the Docker socket is full control of Docker on that host.</p>
-<h2 id="the-alloy-config">The Alloy config</h2>
-<p>The config lives in <code>/etc/alloy/config.alloy</code>. It's a set of components wired together: sources forward to a writer. This is the book's example for a Docker host named <code>docker1</code>, with Loki on the monitoring guest at 192.168.10.20:</p>
-<pre><code>// /etc/alloy/config.alloy on docker1
-loki.write "default" {
-  endpoint {
-    url = "http://192.168.10.20:3100/loki/api/v1/push"
-  }
-}
-
-// systemd journal, with unit and level as labels
-loki.relabel "journal" {
-  forward_to = []
-  rule {
-    source_labels = ["__journal__systemd_unit"]
-    target_label  = "unit"
-  }
-  rule {
-    source_labels = ["__journal_priority_keyword"]
-    target_label  = "level"
-  }
-}
-
-loki.source.journal "host" {
-  forward_to    = [loki.write.default.receiver]
-  relabel_rules = loki.relabel.journal.rules
-  labels        = {host = "docker1", job = "journal"}
-}
-
-// Docker containers, labelled by container name
-discovery.docker "local" {
-  host = "unix:///var/run/docker.sock"
-}
-
-discovery.relabel "containers" {
-  targets = discovery.docker.local.targets
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "container"
-  }
-}
-
-loki.source.docker "containers" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.relabel.containers.output
-  forward_to = [loki.write.default.receiver]
-  labels     = {host = "docker1", job = "docker"}
-}</code></pre>
-<p>On the Proxmox host, keep the <code>loki.write</code> and journal blocks and drop the Docker ones. The journal there carries pvedaemon, pveproxy, pvestatd, backup jobs and the kernel. Restart with <code>systemctl restart alloy</code> and check it with <code>systemctl status alloy</code>. When started with a listen address, Alloy also serves a debugging UI on port 12345 that shows each component and whether it's healthy.</p>
-<h2 id="labels-few-and-boring">Labels: few and boring</h2>
-<p>Loki is fast because its index is small. Every distinct combination of label values creates a new stream, and too many streams make Loki slow and heavy. Keep labels to things with only a handful of values that you filter by: host, job, unit, container, level. Never turn request IDs, user names, IP addresses or full paths into labels. Search for those in the log line instead.</p>
-<h2 id="four-logql-queries-worth-saving">Four LogQL queries worth saving</h2>
-<p>In Grafana, open Explore, pick the Loki data source, start with a label selector, then filter lines:</p>
-<pre><code>{host="pve1", unit="pvedaemon.service"}
-{job="docker", container="immich_server"} |= "error"
-{job="journal", level=~"err|crit|alert|emerg"}
-sum by (host) (count_over_time({level="err"}[1h]))</code></pre>
-<p>In order, these show:</p>
-<ol><li>The Proxmox API daemon's log.</li><li>Only the lines containing "error" from one container.</li><li>Every high-priority journal line across the lab.</li><li>Errors per host per hour. This turns logs into a metric, and it makes a good panel on an overview dashboard.</li></ol>
-<p>Grafana alert rules can run LogQL too. The book's advice is to use that sparingly, for lines that only appear when something is wrong, like a backup job's failure message or repeated authentication failures on a service you expose.</p>
-<h2 id="don-t-forget-the-local-logs">Don't forget the local logs</h2>
-<p>Loki gives you a searchable copy, but Docker still keeps container logs on the host. With the default json-file logging driver, they grow without limit unless you configure them. Set limits in <code>/etc/docker/daemon.json</code> on each Docker host and restart Docker. Existing containers pick up the change when they're recreated.</p>
-<pre><code>{
-    "log-driver": "json-file",
-    "log-opts": { "max-size": "10m", "max-file": "3" }
-}</code></pre>
-<p>Cap the journal too: set <code>SystemMaxUse=500M</code> in <code>/etc/systemd/journald.conf</code>, then run <code>systemctl restart systemd-journald</code>. Loki is now the long memory, so local logs only need to cover a few days.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>No Promtail in new setups: Alloy on every host</li><li>Loki 3.7 with <code>retention_enabled: true</code>, <code>delete_request_store</code> set, a 24h index period and <code>retention_period: 30d</code></li><li>The <code>alloy</code> user in <code>adm</code> and <code>systemd-journal</code> (plus <code>docker</code> on Docker hosts)</li><li>Journal on every host, container logs on every Docker host, <code>systemctl status alloy</code> clean</li><li>Labels limited to host, job, unit, container and level</li><li>The four LogQL queries saved, with the errors-per-host query as a dashboard panel</li><li>Docker log rotation in <code>daemon.json</code> and <code>SystemMaxUse=500M</code> for the journal</li></ul><p><a href="https://payhip.com/b/An62R">Go deeper: Watch Your Homelab</a></p>]]></content:encoded></item>
+<ul><li>A subdomain of a real domain you own, never <code>.local</code>, <code>.internal</code> or <code>.home.arpa</code></li><li>Caddy built with your DNS provider's module, and <code>caddy list-modules | grep dns</code> shows it</li><li>An API token scoped to one zone and DNS edit only, in <code>caddy.env</code> with <code>chmod 600</code>, kept out of Git</li><li>One <code>*.home.example.com</code> block with a host matcher per app and a final <code>handle { abort }</code></li><li>Staging CA while testing, removed once the certificate arrives; <code>./data</code> kept and backed up</li><li>A local DNS override pointing <code>*.home.example.com</code> at the Docker VM, nothing in the public zone</li><li>Rebind protection allows your internal domain; <code>dig</code> and <code>curl -I</code> pass from a laptop</li><li>Remote access through WireGuard or Tailscale, handing out your local resolver</li><li>No ports 80 or 443 forwarded from the internet</li></ul><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item>
 </channel></rss>
