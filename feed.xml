@@ -1,9 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Tue, 03 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 04 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Leaving Google Photos for Immich: keep your dates, keep backups running, share with family</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</guid>
+<item><title>The infinite scroll trap</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/the-infinite-scroll-trap/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/the-infinite-scroll-trap/</guid>
+<pubDate>Wed, 04 Nov 2026 12:30:00 -0500</pubDate><description>Putting a LazyColumn inside a vertically scrolling Column breaks layout. The book calls this the infinite scroll trap.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>compose</category><category>kotlin</category><category>layout</category><category>lazycolumn</category><category>scrolling</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The trap is thinking you can nest a scrolling list inside a scrolling container. The book warns that a lazy list composes only what is visible, but a vertically scrolling Column composes every child. When you put a LazyColumn inside a Column with Modifier.verticalScroll, the parent hands the lazy list infinite height. Compose throws an error. The book calls this the infinite scroll trap.</p>
+<h2 id="the-trap-nesting-scrolling-containers">The trap: nesting scrolling containers</h2>
+<p>Compose lays out in a single pass. A parent hands each child constraints (a minimum and maximum width and height), the child picks a size inside them, and the parent places it. Modifiers like size, fillMaxWidth, padding and widthIn simply change the constraints on the way down. When a layout looks wrong, ask: what constraints did this child receive? That question solves most layout puzzles faster than trial and error. The book explains this flow in one paragraph. The trap is that a parent offering infinite height to a child that cannot fill it causes a crash. The book shows a code example of a Column with Modifier.verticalScroll. It then warns: WATCH OUT Never put a LazyColumn inside a vertically scrolling Column (Modifier.verticalScroll). The lazy list would be offered infinite height and Compose throws an error.</p>
+<h2 id="the-fix-move-headers-and-footers-into-the-list">The fix: move headers and footers into the list</h2>
+<p>The book states that a lazy list composes only what is visible and reuses the slots as you scroll. It also says that two details make lists behave: Keys and <code>animateItem()</code>. The fix is to put headers and footers inside the lazy list with item { } instead of nesting them. The book provides a code example of a PantryList composable. It uses a LazyColumn with a modifier and contentPadding. Inside the LazyColumn, it uses an item block for a header Text. Then it uses items(items = items, key = { it.id }) to render the list. The book calls this the correct approach and warns against nesting.</p>
+<h2 id="the-fix-use-scaffold-for-the-screen-frame">The fix: use Scaffold for the screen frame</h2>
+<p>The book introduces Scaffold as the Material 3 layout for a full screen. It has slots for a top bar, a bottom bar, a floating action button and a snackbar host, and it calculates the padding your content needs so nothing hides behind them or behind the system bars. The book shows a code example of a PantryListScreen composable. It uses @OptIn(ExperimentalMaterial3Api::class) and @Composable. It builds a Scaffold with a topBar, a floatingActionButton, and an innerPadding lambda. Inside the innerPadding, it calls PantryList and passes the innerPadding as contentPadding. The book warns: COMMON MISTAKE Ignoring the innerPadding lambda parameter. Android Studio warns you, and for good reason: without it, your first list item sits under the top bar and the last one under the navigation bar. Pass it to the content, and for lists pass it as contentPadding so the list can still scroll behind the bars while its first and last items stay visible.</p>
+<h2 id="the-fix-use-material-components-for-rows">The fix: use Material components for rows</h2>
+<p>The book suggests that for rows, reach for Material's ListItem before building your own Row. It gives you correct spacing and typography, with slots for a headline, supporting text and leading or trailing content. The book calls this a list row for free. It shows a code example of a ListItem composable. It sets headlineContent, supportingContent, and trailingContent. It also applies a modifier for clickability. The book mentions other ready-made pieces worth knowing: Card and ElevatedCard, HorizontalDivider, LazyVerticalGrid(GridCells.Adaptive(160.dp)) for grids that adapt to width, PullToRefreshBox around a list, and ModalBottomSheet.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Never put a LazyColumn inside a vertically scrolling Column</li><li>Use item { } for headers and footers inside the list</li><li>Use Scaffold for the screen frame</li><li>Pass innerPadding as contentPadding to the content</li><li>Use Material's ListItem for list rows</li></ul><p><a href="https://payhip.com/b/fNO53">Go deeper: Compose Without the Confusion</a></p>]]></content:encoded></item><item><title>Flashlight: Torch + SOS, fast light and an SOS signal for Android</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/flashlight-torch-sos-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/flashlight-torch-sos-android-app/</guid>
+<pubDate>Wed, 04 Nov 2026 12:30:00 -0500</pubDate><description>A free Android torch app with camera flash, adjustable screen light, an SOS strobe and Morse signal, shake to toggle, a widget and a quick settings tile.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.flashlight.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>flashlight</category><category>tools</category><category>sos</category><category>widgets</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.flashlight.jpg" alt=""></p><p>A flashlight is the kind of tool you only think about when the power is out, the car keys are under the seat, or you are walking a dark driveway. At that moment you want light in one motion, not a hunt through menus. Flashlight: Torch + SOS is built around that idea: several fast ways to switch the light on, a screen light for softer situations, and an SOS mode for the moments that are more serious than a dropped key.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Camera flash torch.</strong> The main mode uses your phone's flash as a bright light source.</li><li><strong>Screen light.</strong> Turns the display into a light panel with adjustable brightness and several colors, useful when a harsh flash is too much.</li><li><strong>Stays on with the screen off.</strong> The torch keeps running after the display goes dark.</li><li><strong>SOS mode.</strong> An emergency strobe and a Morse code SOS signal, with adjustable speed.</li><li><strong>Shake to toggle.</strong> Shake the phone to switch the light on or off.</li><li><strong>Quick settings tile, widget and notification controls.</strong> Start the light from the pull-down shade, from your home screen, or from the notification.</li><li><strong>Auto-off timer.</strong> An optional timer switches the light off for you.</li><li><strong>Themes and orientation.</strong> Light, dark and system themes, with portrait and landscape support.</li></ul>
+<h2 id="getting-the-light-on-fast">Getting the light on fast</h2>
+<p>The useful thing about this app is the number of entry points. You do not have to open it at all most of the time:</p>
+<ol><li>Add the <strong>quick settings tile</strong> to your pull-down shade. Swipe down, tap, light.</li><li>Put the <strong>home screen widget</strong> next to the apps you use most, so the torch is one tap from unlocking.</li><li>Turn on <strong>shake to toggle</strong> if you often need light with one hand busy.</li><li>Use the <strong>notification controls</strong> to switch it off again without hunting for the app.</li></ol>
+<p>Pick whichever matches how you hold your phone in the dark. Many people end up using the tile for everyday use and the widget as a backup.</p>
+<h2 id="screen-light-vs-torch">Screen light vs torch</h2>
+<p>The camera flash is the brightest option, but it is also narrow and harsh. The screen light is the gentler choice: reading a label, checking on someone sleeping, or lighting a small area close up. Because you can change both its color and brightness, you can dial it down until it is just enough. The listing notes that the screen light uses minimal power.</p>
+<h2 id="sos-mode">SOS mode</h2>
+<p>The SOS mode turns the light into a signal rather than a lamp. You get two styles:</p>
+<ul><li>an <strong>emergency strobe</strong>, a fast flashing light that draws attention, and</li><li>a <strong>Morse code SOS</strong>, the classic three short, three long, three short pattern.</li></ul>
+<p>The speed is adjustable. It is worth trying SOS mode once at home so you know where it is before you ever need it. A signal you can find in two seconds is far more useful than one you have to look for.</p>
+<h2 id="battery">Battery</h2>
+<p>A torch that drains your phone defeats the purpose when you are already low. The listing describes the app as optimized for minimal battery drain, and the <strong>auto-off timer</strong> helps if you tend to forget the light is on in a pocket or bag.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free.</li><li><strong>Ads:</strong> Google Play lists the app as containing ads.</li><li><strong>In-app purchases:</strong> none are listed.</li><li><strong>Category and rating:</strong> Tools, rated Everyone.</li><li><strong>Devices:</strong> the listing says it works on all Android devices. The torch mode needs a phone with a camera flash; the screen light works on any screen.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want the torch on from the shade, a widget or a shake, without opening an app.</li><li>You want a softer, colored screen light as well as the bright flash.</li><li>You like having an SOS strobe and Morse signal ready on your phone.</li><li>You forget to turn lights off and would use an auto-off timer.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.flashlight">Get Flashlight: Torch + SOS on Google Play</a></p>]]></content:encoded></item><item><title>Leaving Google Photos for Immich: keep your dates, keep backups running, share with family</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/leaving-google-photos-for-immich-migration/</guid>
 <pubDate>Tue, 03 Nov 2026 12:30:00 -0500</pubDate><description>The move from Google Photos to Immich goes wrong in four quiet places. Takeout imports that land ten years of photos on today&#x27;s date, phone backups that stall, one shared family login, and a reverse proxy that chokes on big videos. Here is the fix for each, plus a checklist.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>immich</category><category>google photos</category><category>self-hosting</category><category>photos</category><category>backup</category><category>homelab</category>
@@ -1413,101 +1449,5 @@ prompt.authenticate(
 <h2 id="good-to-know">Good to know</h2>
 <ul><li>CruiseLoom is free to download and contains ads.</li><li>Some features ask for optional permissions: camera, nearby devices, location or notifications.</li><li>CruiseLoom is an independent app and is not affiliated with or endorsed by any cruise line.</li><li>Deck schematics are only available for supported ships.</li><li>It is rated Teen, in the Travel and Local category.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You have a cruise coming up and want every day's plan in one place.</li><li>You expect weak or pricey internet at sea and need things to work offline.</li><li>You travel with a group and want a way to message without ship Wi-Fi.</li><li>You like keeping your plans on your own device rather than in a cloud account.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.cruiseapp">Get CruiseLoom on Google Play</a></p>]]></content:encoded></item><item><title>CruiseWatch: get alerted when your booked cruise fare drops</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/cruisewatch-cruise-fare-drop-alerts/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/cruisewatch-cruise-fare-drop-alerts/</guid>
-<pubDate>Tue, 27 Oct 2026 12:30:00 -0400</pubDate><description>CruiseWatch tracks the public fare on a cruise you already booked and alerts you when it drops, with the claim steps and deadline for your line.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.cruisewatch.app.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>cruise</category><category>travel</category><category>price alerts</category><category>wear os</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.cruisewatch.app.jpg" alt=""></p><p>Booking a cruise is usually not the end of the price story. Fares keep moving after you pay your deposit, and many cruise lines will refund the difference or give onboard credit if the price drops before your final payment date. The catch: you have to notice the drop and ask before the window closes. CruiseWatch does the noticing.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Watches your booked cruise.</strong> Add your ship, sail date and cabin category, and CruiseWatch checks the public fare.</li><li><strong>Covers five lines.</strong> Royal Caribbean, Celebrity, Carnival, Princess and Norwegian.</li><li><strong>Instant push alerts.</strong> When a lower fare appears, you get the new price and how much you are owed.</li><li><strong>Exact next steps.</strong> Each alert shows the cruise line's phone number, a ready-to-read script, and your claim deadline, based on that line's price-drop or "Best Price Guarantee" policy.</li><li><strong>On-device AI refund assistant.</strong> Ask questions about a specific alert and get step-by-step help claiming a refund or onboard credit.</li><li><strong>Wear OS companion.</strong> Installed automatically with the phone app, it shows price-drop alerts and your claim history on your watch.</li><li><strong>Home screen widget.</strong> Check status at a glance.</li></ul>
-<h2 id="how-a-claim-works">How a claim works</h2>
-<p>The flow is short:</p>
-<ol><li>Add each cruise you have already booked: ship, sail date and cabin category.</li><li>Let CruiseWatch watch the public pricing.</li><li>When an alert arrives, read the new price and the amount you are owed.</li><li>Call the number shown in the alert, using the script provided.</li><li>Do it before the claim deadline in the alert.</li></ol>
-<p>The script and deadline are the useful part. Policies differ by line, and the app pulls the steps from each line's own price-drop policy instead of leaving you to search for the terms.</p>
-<h2 id="privacy">Privacy</h2>
-<p>The AI refund assistant runs entirely on your device and works fully offline, and the listing states that your booking details never leave your phone when you use it.</p>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li>CruiseWatch is free to use with ads, and there is an optional ad-free monthly subscription.</li><li>It only works with cruises already booked on Royal Caribbean, Celebrity, Carnival, Princess or Norwegian.</li><li>CruiseWatch is an independent tool and is not affiliated with, endorsed by or sponsored by any cruise line.</li><li>Pricing and policy information is provided for reference only. Always confirm current terms directly with your cruise line before requesting a refund; a refund or credit is never guaranteed by the app.</li><li>Most lines only honor a drop before your final payment date, so add your cruise as soon as you book.</li><li>It is rated Everyone, in the Travel and Local category.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You have a cruise booked with one of the five supported lines.</li><li>Your final payment date has not passed yet.</li><li>You would rather get a push alert than check fares by hand every week.</li><li>You want the phone number, script and deadline ready when a drop happens.</li><li>You wear a Wear OS watch and like alerts on your wrist.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.cruisewatch.app">Get CruiseWatch: Fare Drop Alerts on Google Play</a></p>]]></content:encoded></item><item><title>Real HTTPS for your homelab without opening a single port</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/real-https-homelab-caddy-dns-01-wildcard/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/real-https-homelab-caddy-dns-01-wildcard/</guid>
-<pubDate>Mon, 26 Oct 2026 12:30:00 -0400</pubDate><description>Self-signed warnings, a private CA nobody can install, or port forwarding? None of them. Here is the fix from Containers Without the Chaos - Caddy, a DNS-01 wildcard certificate and split DNS, so every internal app gets a real padlock and nothing is exposed.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-04.jpg" type="image/jpeg" length="0"/>
-<category>caddy</category><category>https</category><category>dns-01</category><category>wildcard certificate</category><category>reverse proxy</category><category>split dns</category><category>docker</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-04.jpg" alt=""></p><p>You want <code>https://notes.home.example.com</code> to open with a padlock and no warning on every device in the house, including the phones of guests you will never install a certificate on. And you want it without opening a single port to the internet. <em>Containers Without the Chaos</em> covers this in two chapters: a reverse proxy done right, then real HTTPS for internal names.</p>
-<h2 id="the-trap-three-half-solutions">The trap: three half-solutions</h2>
-<p>There are three common ways people try this, and each one fails in its own way:</p>
-<ul><li><strong>Self-signed certificates.</strong> Every browser warns, every family member learns to click "continue anyway", and that habit is the real security problem.</li><li><strong>A private certificate authority.</strong> It works, but every device needs the CA installed, and many phones, TVs and apps make that hard.</li><li><strong>Port forwarding 80 and 443</strong> so the normal HTTP challenge works. Now your internal apps are reachable from the internet, which is the opposite of the goal.</li></ul>
-<h2 id="the-fix-the-dns-01-challenge">The fix: the DNS-01 challenge</h2>
-<p>To issue a certificate, a public certificate authority such as Let's Encrypt has to check that you control the name. With the DNS challenge, the CA does an authoritative DNS lookup for a special TXT record, and if it sees the expected value, it issues the certificate. No open ports, and the server asking for the certificate never has to be reachable from outside.</p>
-<p>You need two things:</p>
-<ol><li>A real domain you own, with its DNS hosted at a provider that has an API and a Caddy DNS module (Cloudflare and many others have one; the module list is on caddyserver.com/download).</li><li>An API token that lets Caddy create and delete TXT records in that zone.</li></ol>
-<p>Names under <code>.local</code>, <code>.internal</code> and <code>.home.arpa</code> cannot get publicly trusted certificates. Use a subdomain of a real domain you own, such as <code>home.example.com</code>.</p>
-<h2 id="one-wildcard-for-everything">One wildcard for everything</h2>
-<p>Instead of one certificate per app, ask for one wildcard: <code>*.home.example.com</code>. It covers <code>notes.home.example.com</code>, <code>photos.home.example.com</code> and anything you add later. Wildcards require the DNS challenge, and a certificate may have only one wildcard, as the left-most label.</p>
-<p>There is a privacy bonus. Certificates are published in public Certificate Transparency logs, so per-app certificates would list every internal app name for anyone to read. A wildcard reveals only <code>*.home.example.com</code>.</p>
-<h2 id="build-caddy-with-a-dns-module">Build Caddy with a DNS module</h2>
-<p>The standard Caddy image does not include DNS provider modules, so build your own with the official builder image and xcaddy. Create <code>/srv/stacks/proxy/Dockerfile</code> (Cloudflare shown; use your provider's module):</p>
-<pre><code>FROM caddy:2.11-builder AS builder
-RUN xcaddy build \
-    --with github.com/caddy-dns/cloudflare
-
-FROM caddy:2.11
-COPY --from=builder /usr/bin/caddy /usr/bin/caddy</code></pre>
-<p>Point the proxy stack at it instead of the plain image. Ports, volumes and networks stay as in the proxy chapter (80, 443 and 443/udp; the <code>./conf</code> folder mounted at <code>/etc/caddy</code>; <code>./data</code> for certificates; the external <code>proxy</code> network):</p>
-<pre><code>services:
-  caddy:
-    build: .
-    image: local/caddy-dns:2.11
-    restart: unless-stopped
-    env_file: ./caddy.env</code></pre>
-<p>Build, start and confirm the module is in:</p>
-<pre><code>docker compose build --pull
-docker compose up -d
-docker compose exec caddy caddy list-modules | grep dns</code></pre>
-<h2 id="the-api-token">The API token</h2>
-<p>Create a token at your DNS provider that can edit DNS records in this one zone and nothing else. Put it in <code>caddy.env</code>, readable only by you, and keep the file out of Git:</p>
-<pre><code>CF_API_TOKEN=paste-the-token-here</code></pre>
-<pre><code>chmod 600 /srv/stacks/proxy/caddy.env</code></pre>
-<p>That token can change DNS for your whole domain. Scope it to the single zone and to DNS edit only. If it leaks, revoke it at the provider and create a new one.</p>
-<h2 id="the-wildcard-caddyfile">The wildcard Caddyfile</h2>
-<p>Put every internal site inside one wildcard site block and pick the app with a host matcher. This is the pattern from Caddy's "Common Caddyfile Patterns" page:</p>
-<pre><code>*.home.example.com {
-    tls {
-        dns cloudflare {env.CF_API_TOKEN}
-    }
-
-    @notes host notes.home.example.com
-    handle @notes {
-        reverse_proxy notes:8080
-    }
-
-    @photos host photos.home.example.com
-    handle @photos {
-        reverse_proxy photos:2283
-    }
-
-    handle {
-        abort
-    }
-}</code></pre>
-<p>The last <code>handle</code> block catches any name you have not defined and closes the connection, so a typo does not land on some other app. Since Caddy 2.10, separate site blocks per app also use an automated wildcard certificate; the single block just keeps the <code>tls</code> settings in one place.</p>
-<p>Reload without downtime and watch for the certificate:</p>
-<pre><code>docker compose exec -w /etc/caddy caddy caddy reload
-docker compose logs caddy | grep -i -E "certificate|obtain"</code></pre>
-<p>While testing, add <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> inside the <code>tls</code> block. Staging certificates are not trusted by browsers, but staging has much looser rate limits. Remove the line once it works. And never delete <code>./data</code> to "start fresh": it holds every certificate Caddy has obtained, and certificate authorities enforce rate limits.</p>
-<h2 id="split-dns-names-that-only-exist-at-home">Split DNS: names that only exist at home</h2>
-<p>The certificate proves the names are yours. Now your network has to answer them. Your public DNS zone does not need any record for <code>*.home.example.com</code> at all; only your local resolver answers it, pointing every name at the Docker VM.</p>
-<p>On OPNsense with Unbound, add one host override: host <code>*</code>, domain <code>home.example.com</code>, address <code>192.168.20.10</code>. If your resolver does not support wildcard overrides, add one override per app. In plain Unbound configuration it looks like this:</p>
-<pre><code>server:
-  local-zone: "home.example.com." redirect
-  local-data: "home.example.com. 300 IN A 192.168.20.10"</code></pre>
-<p>Check from a laptop on the LAN:</p>
-<pre><code>dig +short notes.home.example.com
-# 192.168.20.10
-curl -I https://notes.home.example.com</code></pre>
-<p>If a name resolves on the Docker VM but not on a laptop, suspect DNS rebinding protection. Some resolvers and routers refuse answers that point a public domain at a private address. Check the resolver's rebind settings and allow your internal domain.</p>
-<h2 id="away-from-home">Away from home</h2>
-<p>Nothing here is reachable from the internet, by design. To use these names away from home, connect to your network over WireGuard or Tailscale and make sure the VPN hands out your local resolver. The same names and the same certificate then work everywhere.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>A subdomain of a real domain you own, never <code>.local</code>, <code>.internal</code> or <code>.home.arpa</code></li><li>Caddy built with your DNS provider's module, and <code>caddy list-modules | grep dns</code> shows it</li><li>An API token scoped to one zone and DNS edit only, in <code>caddy.env</code> with <code>chmod 600</code>, kept out of Git</li><li>One <code>*.home.example.com</code> block with a host matcher per app and a final <code>handle { abort }</code></li><li>Staging CA while testing, removed once the certificate arrives; <code>./data</code> kept and backed up</li><li>A local DNS override pointing <code>*.home.example.com</code> at the Docker VM, nothing in the public zone</li><li>Rebind protection allows your internal domain; <code>dig</code> and <code>curl -I</code> pass from a laptop</li><li>Remote access through WireGuard or Tailscale, handing out your local resolver</li><li>No ports 80 or 443 forwarded from the internet</li></ul><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a></p>]]></content:encoded></item>
+<ul><li>You have a cruise coming up and want every day's plan in one place.</li><li>You expect weak or pricey internet at sea and need things to work offline.</li><li>You travel with a group and want a way to message without ship Wi-Fi.</li><li>You like keeping your plans on your own device rather than in a cloud account.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.cruiseapp">Get CruiseLoom on Google Play</a></p>]]></content:encoded></item>
 </channel></rss>
