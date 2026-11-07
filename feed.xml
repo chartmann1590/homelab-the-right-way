@@ -1,9 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 05 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 07 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>The 0 7 * * * brew coffee mug</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/scheduled-caffeine-cron-mug/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/scheduled-caffeine-cron-mug/</guid>
+<item><title>The Powered by E-Waste sticker</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/powered-by-e-waste-sticker/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/powered-by-e-waste-sticker/</guid>
+<pubDate>Sat, 07 Nov 2026 12:30:00 -0500</pubDate><description>The Powered by E-Waste sticker from merch drop 7: a round badge for the mini PC someone was throwing out and the old laptop that now runs the house. Sizes and prices.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-s8.jpg" type="image/jpeg" length="0"/>
+<category>merch</category><category>homelab</category><category>selfhosted</category><category>sticker</category><category>ewaste</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-s8.jpg" alt=""></p><p>A lot of homelabs start with hardware somebody else was done with: an office mini PC on its way to recycling, a laptop with a cracked hinge, a desktop that got replaced. The <a href="https://homelab-the-right-way.printful.me/product/powered-by-e-waste-sticker">Powered by E-Waste Sticker</a> is a badge for that machine.</p>
+<h2 id="the-design">The design</h2>
+<p>A round badge: POWERED BY E-WASTE, with the line reclaimed, repurposed, running. It is sized for the lid or the front panel of exactly the machine it describes.</p>
+<h2 id="sizes-and-price">Sizes and price</h2>
+<ul><li>Kiss-cut vinyl sticker</li><li>3 x 3, 4 x 4 and 5.5 x 5.5 in</li><li>$4.50 to $5.50 depending on size, before shipping (Printful calculates shipping at checkout)</li><li>Printed to order by Printful</li></ul>
+<h2 id="making-the-old-box-a-reliable-one">Making the old box a reliable one</h2>
+<p>Old hardware is fine for a homelab. What makes it reliable is the setup around it: backup jobs that cover every guest, storage that does not fill the root disk, and a cluster that does not freeze when one node goes away. <a href="https://payhip.com/b/mJKnI">Homelab the Right Way</a> covers Proxmox, OPNsense and Home Assistant as the trap, the fix and a checklist for each, and the <a href="https://payhip.com/b/qon0W">free sample</a> shows the format.</p>
+<h2 id="get-it">Get it</h2>
+<p>The sticker is in the <a href="https://homelab-the-right-way.printful.me/product/powered-by-e-waste-sticker">merch store</a> with the rest of <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/">drop 7</a> and every earlier design on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a></p>]]></content:encoded></item><item><title>How big a tank does an aquatic turtle need?</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/how-big-a-tank-does-an-aquatic-turtle-need/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/how-big-a-tank-does-an-aquatic-turtle-need/</guid>
+<pubDate>Sat, 07 Nov 2026 12:30:00 -0500</pubDate><description>The rule of thumb is about 10 gallons of water per inch of shell, and sliders grow fast enough that an adult can need 75 gallons or more. How to size the tank, why a plain storage tote is a good first one, and what else has to grow with it.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-07.jpg" type="image/jpeg" length="0"/>
+<category>turtle tank</category><category>turtle care</category><category>red-eared slider</category><category>aquatic turtle</category><category>diy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-07.jpg" alt=""></p><p>Most new turtle keepers size the tank for the turtle they bring home. That is the trap. A hatchling looks lost in almost any container, so a small tank feels generous on day one, and nothing about it looks wrong until the turtle has quietly outgrown it.</p>
+<p>The Smart Turtle Tank book opens its care chapter with exactly this, under a heading that sums it up: <em>bigger than you think, sooner than you think.</em> This post covers the sizing rule, what a sensible first tank looks like, and the parts of the setup that have to scale with the water.</p>
+<p>One caveat, straight from the book: this is general guidance for aquatic turtles such as sliders. Your species may want different numbers, so check a care sheet written for it, and ask a reptile vet if anything looks off.</p>
+<h2 id="the-rule-about-10-gallons-per-inch-of-shell">The rule: about 10 gallons per inch of shell</h2>
+<p>The rule of thumb for aquatic turtles is <strong>about 10 gallons of water per inch of shell</strong>. Note that it says <em>water</em>, not tank: a tank is never filled to the brim, and the dry dock takes up room too.</p>
+<p>The arithmetic is simple enough to do with a ruler:</p>
+<div class="table"><table><thead><tr><th>Shell length</th><th>Water to plan for</th></tr></thead><tbody><tr><td>2 inches</td><td>about 20 gallons</td></tr><tr><td>4 inches</td><td>about 40 gallons</td></tr><tr><td>6 inches</td><td>about 60 gallons</td></tr></tbody></table></div>
+<p>The second half of the rule is the part that catches people. A hatchling is fine in a small tank for a while, but <strong>sliders grow fast, and an adult can need 75 gallons or more</strong>. A tank that is right today has an expiry date, and the turtle sets it, not you.</p>
+<h3 id="the-trap-waiting-for-the-turtle-to-tell-you">The trap: waiting for the turtle to tell you</h3>
+<p>The usual way people find out a tank is too small is that the turtle runs out of room to swim. The book's answer is to keep a clock instead. Its turtle cam includes an age counter that shows days, then weeks and days, and the book calls it the "time for a bigger tank" clock. The point is to know when the small tank stops being enough before the turtle has to show you.</p>
+<p>You do not need a camera app for this. A note of the date the turtle arrived, plus a shell measurement now and then, does the same job: multiply the shell length by 10 and compare it to the water you actually have.</p>
+<h2 id="a-good-first-tank-can-be-a-storage-tote">A good first tank can be a storage tote</h2>
+<p>The book's own first tank is a clear plastic storage tote. It sounds cheap because it is, and the book still calls it a very good first tank:</p>
+<ul><li>It is light.</li><li>It does not crack.</li><li>It is easy to drain into the sink, which matters for weekly water changes.</li><li>Its rim is a flat lip that printed parts can grip, which is how the book's sensor build hangs its probe hook and electronics box on the tank.</li></ul>
+<p>The one thing to get right when you pick a tote: <strong>choose one that is longer than it is tall.</strong> Turtles swim sideways and climb out upward. Floor length is swimming room; height mostly gives a determined turtle something to climb.</p>
+<p>If you would rather buy a kit, the book notes that pet stores sell turtle starter kits (it found a 20-gallon one with the lamp fixtures and bulbs, a thermometer, a floating dock, gravel and food). The kit route is the quickest way to get all the pieces at once. Buying separately lets you pick a better filter, which is where kits usually skimp.</p>
+<h2 id="what-has-to-grow-with-the-tank">What has to grow with the tank</h2>
+<p>Moving to a bigger tank is not just more water. Three other things are sized to the water volume, so they change too.</p>
+<h3 id="the-filter-two-to-three-times-the-water-volume">The filter: two to three times the water volume</h3>
+<p>Turtles are far messier than fish. They eat in the water, defecate in the water, and shred things. The standard advice in the book is a filter <strong>rated for two to three times your actual water volume</strong>: a 20-gallon turtle tank wants a filter sold for 40 to 60 gallons. Canister filters are the usual recommendation once the tank gets big; for a small tank, a dedicated aquatic turtle filter that sits low in shallow water is fine.</p>
+<p>Apply the same multiplier when you size up. Using the table above, a turtle with a 4-inch shell needs about 40 gallons of water, and that water wants a filter sold for roughly 80 to 120 gallons.</p>
+<h3 id="water-changes-25-to-50-percent-a-week">Water changes: 25 to 50 percent a week</h3>
+<p>Even with a good filter, you change water. A 25 to 50 percent change every week is normal for a small tank, with dechlorinator added to the new water and the new water matched to roughly the tank's temperature so the turtle does not get a cold shock. On a 20-gallon tank, that is 5 to 10 gallons a week.</p>
+<p>Feeding in a separate container of water and tipping it out afterwards keeps a surprising amount of waste out of the main tank, which helps at any size.</p>
+<h3 id="the-layout-one-warm-end-one-cool-end">The layout: one warm end, one cool end</h3>
+<p>A longer tank also makes the layout work better. The book puts heat and light over the dry dock at one end so the turtle can choose between warm-and-bright and cool-and-dim, which is how a turtle regulates its own temperature. The heater and filter go at the other end, where the filter's current spreads the heater's warmth. A tank with real length gives that gradient room to exist.</p>
+<p>The water itself still has to stay in the book's "fine" band of <strong>76 to 82 °F (about 24.5 to 28 °C)</strong>, held by a submersible heater with its own thermostat. A bigger volume of water does not change that number; it only changes how much the heater has to warm.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Measure the shell and plan on about 10 gallons of water per inch.</li><li>Assume growth: sliders grow fast, and an adult can need 75 gallons or more.</li><li>Note the date the turtle arrived and re-measure the shell now and then, so a too-small tank is caught early.</li><li>For a first tank, a clear storage tote works; pick one longer than it is tall.</li><li>Size the filter at two to three times the actual water volume, and resize it when the tank grows.</li><li>Change 25 to 50 percent of the water weekly, dechlorinated and temperature-matched.</li><li>Heat and light over the dock at one end, heater and filter at the other.</li><li>Keep the water at 76 to 82 °F with a thermostatic heater, whatever the tank size.</li><li>Check a care sheet for your species, and ask a reptile vet if anything looks off.</li></ul><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a></p>]]></content:encoded></item><item><title>Owefolk: split shared expenses and settle up without the awkward part</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/owefolk-split-expenses-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/owefolk-split-expenses-android-app/</guid>
+<pubDate>Sat, 07 Nov 2026 12:30:00 -0500</pubDate><description>Owefolk splits group expenses by shares, amounts or percentages, scans receipts on-device, translates into 50+ languages and only counts confirmed payments.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.owefolk.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>finance</category><category>expenses</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.owefolk.jpg" alt=""></p><p>Shared costs are easy to start and hard to finish. Someone covers dinner, someone else books the rental, a subscription gets split four ways, and a month later nobody is sure who owes what. Owefolk is built to keep that math clear, so the money question never turns into a friendship question.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Clear balances.</strong> After you sign in you see your net balance, what you owe, who owes you, and which group each number comes from, down to the cent.</li><li><strong>Flexible splits.</strong> Split dinners, rent, trips and subscriptions by equal shares, exact amounts or custom percentages, and record who actually paid.</li><li><strong>On-device receipt scanning.</strong> Point the camera at a receipt and the app reads the merchant and total.</li><li><strong>On-device translation.</strong> Group names, expenses, balances and the activity feed in your language, chosen from 50+ languages.</li><li><strong>One-tap settling.</strong> When someone owes you, the app shows the exact amount and jumps to Venmo, Cash App, PayPal, Zelle or a custom payment link.</li><li><strong>Confirmed payments only.</strong> A payment counts only after the sender marks it sent and the recipient confirms it.</li><li><strong>Shared history.</strong> Everyone in a group sees the same activity history.</li></ul>
+<h2 id="why-only-real-money-moves-count-matters">Why "only real money moves count" matters</h2>
+<p>A common weak spot in shared-expense tracking is the gap between "will pay" and "has paid". Owefolk closes it with a two-step rule. Opening a payment app does not count as paying. You mark a payment as sent only after you have really sent it, and the balance changes only when the person receiving it confirms. Combined with the shared activity history, that means both sides always see the same story.</p>
+<h2 id="choosing-a-split">Choosing a split</h2>
+<p>Not every cost is split evenly, and Owefolk does not assume it is:</p>
+<div class="table"><table><thead><tr><th>Split type</th><th>Good for</th></tr></thead><tbody><tr><td>Equal shares</td><td>A group dinner where everyone ate about the same</td></tr><tr><td>Exact amounts</td><td>A bill where each person's items are known</td></tr><tr><td>Custom percentages</td><td>Rent or a shared plan where people pay different portions</td></tr></tbody></table></div>
+<p>Whatever you pick, the expense is tracked against the person who actually paid, so the balances stay honest.</p>
+<h2 id="what-stays-on-your-phone">What stays on your phone</h2>
+<p>Two features that usually rely on outside services run on the device here:</p>
+<ul><li><strong>Receipt scanning</strong> uses on-device recognition, and the listing says your receipt photos never leave your phone.</li><li><strong>Translation</strong> happens on the device too, so no text is sent to a translation service.</li></ul>
+<p>Diagnostics are anonymous and can be switched off, and you can delete your account at any time. Note that the app does use an account: you sign in to see balances and share groups.</p>
+<h2 id="getting-started">Getting started</h2>
+<ol><li>Sign in and pick your language during onboarding (you can change it later in settings).</li><li>Create a group for the trip, the apartment or the dinner club.</li><li>Add expenses as they happen, choosing how each one is split.</li><li>When it is time to settle, use the payment shortcuts, mark the payment sent once it really is, and let the other person confirm.</li></ol>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download.</li><li><strong>Ads and purchases:</strong> the Google Play listing marks it as containing ads and offering in-app purchases.</li><li><strong>Account:</strong> sign-in is required; account deletion is available any time.</li><li><strong>Category and rating:</strong> Finance, rated Everyone.</li><li>Owefolk tracks who owes what. Money itself moves through the payment app you choose.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You split costs with roommates, a partner, a trip group or friends.</li><li>You want splits by shares, exact amounts or percentages, not just "divide by four".</li><li>You want receipts scanned and text translated without sending them to an outside service.</li><li>You want balances to change only when a payment is actually confirmed.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.charles.owefolk">Get Owefolk on Google Play</a></p>]]></content:encoded></item><item><title>The wrong server for the job</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/the-wrong-server-for-the-job/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/the-wrong-server-for-the-job/</guid>
+<pubDate>Fri, 06 Nov 2026 12:30:00 -0500</pubDate><description>Using one program for everything wastes resources and hurts playback.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>jellyfin</category><category>navidrome</category><category>audiobookshelf</category><category>media server</category><category>architecture</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most people start a media server with a single program. They install Jellyfin and try to make it play music, audiobooks, and movies all at once. That is the trap. A media server is not a Swiss Army knife; it is a specialized tool for a specific job. When you force one program to handle every file type, you fight its design. The file organization becomes messy, the database gets bloated, and the app feels slow. The book calls this the "one program for everything" mistake. The result is a library that feels like a broken file browser instead of a polished streaming service.</p>
+<h2 id="the-trap-one-program-for-everything">The trap: one program for everything</h2>
+<p>The book warns that a media server does not find media for you. It only serves the files you give it. You cannot fix a bad folder layout by choosing a different program. However, you can choose the right program for the right media. The book explains that films, music, and audiobooks have different needs. Trying to satisfy all of them with one tool is a mistake.</p>
+<p>Jellyfin is built for films and series. It needs artwork, episode order, subtitles, and several audio tracks. It also needs transcoding for phones and old TVs. Navidrome is built for music. It needs fast browsing by artist and album across tens of thousands of tracks, gapless playback, and good phone apps with offline caching. Audiobookshelf is built for audiobooks and podcasts. It needs chapter support, playback speed, bookmarks, and progress that syncs between devices.</p>
+<p>If you put music in Jellyfin, you fight its interface. If you put audiobooks in Navidrome, you fight its layout. The book suggests a better approach. It recommends running three small servers. Each server reads its own part of the media share and keeps its own small database. This separation means each program does exactly what it is good at.</p>
+<h2 id="the-fix-three-servers-three-media-types">The fix: three servers, three media types</h2>
+<p>The book lays out a clear architecture. You do not need to buy new hardware. You can run all three as containers. They read from the same media share, so you do not duplicate files. The book states that Navidrome and Audiobookshelf are light. Only Jellyfin needs real resources when it transcodes. This saves money and keeps your system responsive.</p>
+<p>The servers share the media folder. You organize your files by type. You put movies in one folder, music in another, and audiobooks in a third. The servers scan these folders separately. Jellyfin only looks at the movie folder. Navidrome only looks at the music folder. Audiobookshelf only looks at the audiobook folder. This keeps the databases small and the scans fast.</p>
+<p>The book also notes that each server has its own config and database. These live on fast local storage, separate from the media. This follows the rule "Config and media apart." You can back up the database of one server without touching the media files. You can move the database to a different drive if you need to.</p>
+<h2 id="the-fix-direct-play-first-gpu-transcoding-second">The fix: direct play first, GPU transcoding second</h2>
+<p>The book follows a specific rule for playback. It says "Direct play first, GPU transcoding second, CPU transcoding never by design." This means you should configure your servers to try direct play before converting the file. If the client cannot play the file, you use the GPU for transcoding. You should never use the CPU for transcoding.</p>
+<p>This rule applies to all three servers. However, it is most important for Jellyfin. Jellyfin is the only server that needs real resources when it transcodes. Navidrome and Audiobookshelf are light. They do not need to transcode. They only need to stream the file to the client. The book emphasizes that you should keep the CPU free for other tasks.</p>
+<p>The book covers this in Chapter 7. It shows how to get most playback to need no conversion at all. This reduces the load on the server. It also improves the quality of the stream. You get the full bitrate and the full quality of the file. The client app handles the rest.</p>
+<h2 id="the-fix-private-by-default">The fix: private by default</h2>
+<p>The book also has a rule about security. It says "Private by default. Reach the servers from outside through your tailnet. A public URL is an exception you choose on purpose, with a reverse proxy and HTTPS in front." This means you should not expose your servers to the open internet. You should use a tailnet to reach them.</p>
+<p>A tailnet is a private network. It connects your devices to your servers without exposing them to the public. You can use Tailscale or ZeroTier for this. The book recommends using a reverse proxy and HTTPS in front of the public URL. This adds an extra layer of security. It also encrypts the traffic.</p>
+<p>The book warns that a media server on the open internet is a target like any other web app. Chapter 8 exists because of this. It shows how to make an exposed port safe. However, the book prefers to keep the servers private. You can still access them from outside your home network, but you do it through the tailnet.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Run three separate servers for films, music, and audiobooks.</li><li>Put each media type in its own folder on the shared media share.</li><li>Configure Jellyfin to read only the film folder.</li><li>Configure Navidrome to read only the music folder.</li><li>Configure Audiobookshelf to read only the audiobook folder.</li></ul><p><a href="https://payhip.com/b/4uE86">Go deeper: Stream Your Own Library</a></p>]]></content:encoded></item><item><title>TipsyBuddy: track drinks, estimate BAC and get home safe</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/tipsybuddy-drink-bac-tracker-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/tipsybuddy-drink-bac-tracker-android-app/</guid>
+<pubDate>Fri, 06 Nov 2026 12:30:00 -0500</pubDate><description>A night-out companion for Android that logs drinks, shows an estimated BAC and sober countdown, shares a live location link and puts rides one tap away.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.tipsybuddy.app.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>nightlife</category><category>safety</category><category>health</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.tipsybuddy.app.jpg" alt=""></p><p>A night out goes better when you have a rough idea of where you stand: how many drinks, how much you have spent, and whether your friends know where you are. Counting in your head stops working after the second round. TipsyBuddy is a night-out companion that keeps that count for you, gives you an <em>estimate</em> of your blood alcohol content, and makes getting home safely a one-tap job.</p>
+<p>One thing first, because the app itself puts it front and center: every number TipsyBuddy shows is an estimate for informational and harm-reduction purposes. It is not a breathalyzer, and it is never a reason to drive.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Quick drink logging.</strong> One-tap buttons for beer, wine, cocktails, shots and water, plus custom drinks with your own ABV, volume and cost.</li><li><strong>Estimated BAC and sober countdown.</strong> A gauge based on your profile, color-coded zones (Sober, Buzzed, Tipsy, Elevated) and a timer showing roughly when you will feel back to baseline.</li><li><strong>Running tab.</strong> A drink counter and a spending total, so the end-of-night bill is not a surprise.</li><li><strong>Hydration nudges.</strong> Water reminders between alcoholic drinks, a next-day hangover risk score with recovery advice, and hydration tips before bed.</li><li><strong>Live location sharing.</strong> Send friends a live map link that lasts from 30 minutes up to 4 hours.</li><li><strong>Rides and emergency dialing.</strong> One-tap Uber or Lyft to your current location, speed dial for a trusted contact or local emergency services, and easy address copy for a designated driver.</li><li><strong>History and trends.</strong> A monthly calendar of light, moderate, heavy and sober days, sober streaks and monthly spending.</li><li><strong>Wear OS companion.</strong> BAC estimate, countdown and quick-add drinks on your watch.</li></ul>
+<h2 id="how-the-estimate-works">How the estimate works</h2>
+<p>TipsyBuddy uses the Widmark formula, a standard physiological formula, with the profile you enter. The listing is clear about its limits: metabolism varies a lot with food, hydration, medications, fatigue and individual biology. Treat the gauge as a pacing aid, a reason to have a water or call it a night, not as a measurement.</p>
+<h2 id="sharing-your-night">Sharing your night</h2>
+<p>The live link is designed to be easy for the people you send it to. Friends open it in any browser, on any phone or PC, with no app download or sign-up. They can see your live location, your venue check-in and your phone's battery level. The link only works for whoever you send it to and expires on its own.</p>
+<h2 id="privacy">Privacy</h2>
+<p>According to the listing, your drinks, spending and health data stay on your device, and the monthly statistics are private on-device statistics. Location sharing is opt-in, reachable only through the unique link you share, and it expires automatically.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free to download, with ads.</li><li><strong>Subscription:</strong> an optional ad-free subscription removes banners and interstitials. You manage or cancel it through Google Play subscriptions.</li><li><strong>Rating:</strong> Mature 17+, in the Food &amp; Drink category.</li><li><strong>Safety notice from the app:</strong> estimates are for informational and harm-reduction purposes only. Never drink and drive. Always use a designated driver, taxi or rideshare. If you or someone near you needs urgent medical care, call your local emergency services immediately.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want a quick way to count drinks and see what the night is costing.</li><li>You like a gentle nudge to drink water between rounds.</li><li>You want friends to be able to follow you home on a live map without installing anything.</li><li>You understand the BAC number is an estimate and plan your ride home regardless.</li></ul><p><a href="https://play.google.com/store/apps/details?id=com.tipsybuddy.app">Get TipsyBuddy: Drink &amp; BAC Track on Google Play</a></p>]]></content:encoded></item><item><title>The 0 7 * * * brew coffee mug</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/scheduled-caffeine-cron-mug/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/scheduled-caffeine-cron-mug/</guid>
 <pubDate>Thu, 05 Nov 2026 12:30:00 -0500</pubDate><description>The Scheduled Caffeine cron mug from merch drop 7: a cron line that runs at 7:00 every day and has never failed. Sizes, prices and how to read the five fields.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-m7.jpg" type="image/jpeg" length="0"/>
 <category>merch</category><category>homelab</category><category>linux</category><category>cron</category><category>mug</category>
@@ -1037,424 +1142,5 @@ ollama run hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF
 ollama run hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF:Q8_0</code></pre>
 <p>Stick to repositories from the model's publisher or well-known quantizers, and read the model card, including the license, before you build anything on top. "Open" models come with very different licenses: as listed on Hugging Face in October 2026, Llama 3.1 uses the Llama 3.1 Community License and Gemma 3 the Gemma Terms of Use, while Qwen3, gpt-oss and Mistral 7B are Apache 2.0.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>You know your card's memory before you pick a model.</li><li>You start at Q4_K_M and move up only with memory to spare.</li><li>You estimate weights + KV cache + overhead before you pull.</li><li>You know the context you need, and that parallel requests multiply it.</li><li><code>ollama ps</code> shows the SIZE you expected and <code>100% GPU</code> after loading.</li><li>You have read the license of every model you build on.</li></ul><p><a href="https://payhip.com/b/71LQ2">Go deeper: Private AI at Home</a></p>]]></content:encoded></item><item><title>Real HTTPS for your homelab Kubernetes apps without opening a port: k3s Traefik, cert-manager and a DNS-01 wildcard</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/k3s-traefik-cert-manager-dns01-wildcard/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/k3s-traefik-cert-manager-dns01-wildcard/</guid>
-<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Self-signed warnings on every app, or port 80 open to the internet for Let&#x27;s Encrypt? Neither. A DNS-01 wildcard from cert-manager, served as Traefik&#x27;s default certificate on k3s, gives every internal app a trusted certificate while nothing on your network is reachable from outside.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>kubernetes</category><category>k3s</category><category>traefik</category><category>cert-manager</category><category>lets encrypt</category><category>homelab</category><category>tls</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Every web app in a homelab cluster should answer at a proper hostname with a certificate your browser trusts, and you should not have to forward a single port from the internet to get there. On k3s you already have most of the pieces: the Traefik ingress controller ships with it. Add cert-manager, one DNS-01 issuer and one wildcard certificate, and every app you route gets real HTTPS automatically.</p>
-<h2 id="the-trap">The trap</h2>
-<p>There are two traps, one on each side.</p>
-<p>The first is living with certificate warnings: self-signed certificates on every app, a browser you have trained to click "proceed anyway", and a password manager that refuses to autofill. That habit is exactly what an attacker on your network would rely on.</p>
-<p>The second is fixing it the obvious way: opening port 80 to the internet so Let's Encrypt can run an HTTP-01 challenge. That publishes your lab to every scanner on the internet for the sake of a padlock icon.</p>
-<p>The DNS-01 challenge avoids both. You prove you control the domain by creating a DNS record through your DNS provider's API. Nothing on your network has to be reachable from outside.</p>
-<h2 id="how-a-request-reaches-a-pod">How a request reaches a pod</h2>
-<p>When something does not load, walk this path in order:</p>
-<ol><li>Your browser asks LAN DNS for <code>paperless.home.example.com</code> and gets the private address of Traefik's LoadBalancer Service (for example <code>192.168.40.200</code>, handed out by MetalLB).</li><li>The node that holds that address receives the connection and hands it to a Traefik pod.</li><li>Traefik terminates TLS, matches the hostname against its routes, and forwards the request to the app's ClusterIP Service.</li><li>The Service sends it to one of the app's ready pods.</li></ol>
-<h2 id="step-1-check-the-traefik-that-k3s-installed">Step 1: check the Traefik that k3s installed</h2>
-<p>k3s installs Traefik from a bundled Helm chart into <code>kube-system</code> and registers an IngressClass called <code>traefik</code>. Because it is the only ingress controller in the cluster, it picks up standard Ingress objects without being told.</p>
-<pre><code>kubectl get ingressclass
-kubectl -n kube-system get deploy,svc traefik
-kubectl -n kube-system get helmchart traefik -o yaml | grep -i version</code></pre>
-<p>Change Traefik's settings with a <code>HelmChartConfig</code> named <code>traefik</code>, never by editing the generated chart manifest. One gotcha when you copy older snippets: the chart version k3s ships moved the Service type from <code>service.type</code> to <code>service.spec.type</code>, and the k3s documentation warns that the old key is silently ignored.</p>
-<p>While you are there, redirect plain HTTP to HTTPS everywhere:</p>
-<pre><code>apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
-metadata:
-  name: traefik
-  namespace: kube-system
-spec:
-  valuesContent: |-
-    ports:
-      web:
-        http:
-          redirections:
-            entryPoint:
-              to: websecure
-              scheme: https
-              permanent: true</code></pre>
-<pre><code>kubectl apply -f traefik-config.yaml
-kubectl -n kube-system get pods -l app.kubernetes.io/name=traefik -w</code></pre>
-<p>k3s re-runs the chart with the merged values and Traefik restarts.</p>
-<p>A note if you are following an older tutorial that installs ingress-nginx first: in November 2025 Kubernetes SIG Network and the Security Response Committee announced the retirement of ingress-nginx, with best-effort maintenance until March 2026 and no releases or security fixes after that. k3s already gives you Traefik. Translate those guides' Ingress objects to the <code>traefik</code> class, and review any <code>nginx.ingress.kubernetes.io/*</code> annotations, because Traefik ignores them.</p>
-<h2 id="step-2-install-cert-manager">Step 2: install cert-manager</h2>
-<p>cert-manager watches <code>Certificate</code> objects, gets certificates from an issuer such as Let's Encrypt, stores them in Secrets and renews them before they expire. The project publishes its Helm chart in an OCI registry (v1.21.3 at the time of writing; check for the current release):</p>
-<pre><code>helm install cert-manager oci://quay.io/jetstack/charts/cert-manager \
-  --version v1.21.3 \
-  --namespace cert-manager --create-namespace \
-  --set crds.enabled=true
-kubectl -n cert-manager get pods</code></pre>
-<p><code>crds.enabled=true</code> lets the chart install and upgrade cert-manager's CustomResourceDefinitions.</p>
-<h2 id="step-3-a-dns-01-issuer">Step 3: a DNS-01 issuer</h2>
-<p>You need a domain you own, hosted at a DNS provider cert-manager can talk to. It supports several directly (Cloudflare, Route 53, Google Cloud DNS, Azure DNS, DigitalOcean and others) and many more through webhooks. With Cloudflare, follow cert-manager's documentation: create an API <strong>token</strong>, not the global API key, with <strong>Zone - DNS - Edit</strong> and <strong>Zone - Zone - Read</strong>, limited to your zone.</p>
-<pre><code>kubectl -n cert-manager create secret generic cloudflare-api-token \
-  --from-literal=api-token='PASTE-THE-TOKEN'</code></pre>
-<p>Then a ClusterIssuer:</p>
-<pre><code>apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: you@example.com
-    privateKeySecretRef:
-      name: letsencrypt-prod-account
-    solvers:
-      - dns01:
-          cloudflare:
-            apiTokenSecretRef:
-              name: cloudflare-api-token
-              key: api-token</code></pre>
-<p>Create a second issuer named <code>letsencrypt-staging</code> with the server <code>https://acme-staging-v02.api.letsencrypt.org/directory</code>. Staging has much more generous rate limits, so get everything working there first. The token secret lives in the <code>cert-manager</code> namespace because, for a ClusterIssuer, cert-manager looks for referenced secrets in its own namespace by default.</p>
-<h2 id="step-4-one-wildcard-for-every-internal-name">Step 4: one wildcard for every internal name</h2>
-<p>You could request one certificate per app. A single wildcard for <code>*.home.example.com</code> is simpler and has a privacy benefit: every certificate Let's Encrypt issues is published in public Certificate Transparency logs, and a wildcard publishes <code>*.home.example.com</code> instead of a list of every app you run. Wildcards can only be issued through DNS-01, which is one more reason to use it.</p>
-<pre><code>apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: wildcard-home
-  namespace: kube-system
-spec:
-  secretName: wildcard-home-tls
-  issuerRef:
-    name: letsencrypt-staging        # switch to letsencrypt-prod when it works
-    kind: ClusterIssuer
-  dnsNames:
-    - "home.example.com"
-    - "*.home.example.com"</code></pre>
-<pre><code>kubectl apply -f wildcard.yaml
-kubectl -n kube-system get certificate wildcard-home -w     # READY becomes True
-kubectl describe certificaterequest -n kube-system          # if it does not</code></pre>
-<p>Once the staging certificate shows <code>Ready</code>, change <code>issuerRef.name</code> to <code>letsencrypt-prod</code>, apply again, and delete the old secret so cert-manager issues a fresh one.</p>
-<h2 id="step-5-make-it-traefik-s-default-certificate">Step 5: make it Traefik's default certificate</h2>
-<p>The certificate lives in <code>kube-system</code>, but an Ingress can only reference Secrets in its own namespace. Instead of copying the secret into every namespace, make it Traefik's default. Traefik serves the default certificate for any TLS connection that no more specific certificate matches:</p>
-<pre><code>apiVersion: traefik.io/v1alpha1
-kind: TLSStore
-metadata:
-  name: default
-  namespace: kube-system
-spec:
-  defaultCertificate:
-    secretName: wildcard-home-tls</code></pre>
-<p>Now any Ingress under <code>home.example.com</code> that asks for TLS gets the wildcard automatically, with no <code>secretName</code> at all:</p>
-<pre><code>apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: whoami
-  namespace: whoami
-spec:
-  tls:
-    - hosts: ["whoami.home.example.com"]
-  rules:
-    - host: whoami.home.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: whoami
-                port:
-                  number: 80</code></pre>
-<p>Plain Ingress is a fine choice here. The k3s documentation states that the traditional Ingress API is still supported and not planned for deprecation, and most Helm charts still generate it.</p>
-<h2 id="keep-internal-names-internal">Keep internal names internal</h2>
-<p>DNS-01 means the certificate is public but the service is not. Nothing in public DNS points at your lab; the only public record cert-manager creates is a temporary TXT record during issuance. <code>*.home.example.com</code> resolves only through your LAN resolver's override to a private address, so from outside your network the names do not resolve and the address is unreachable.</p>
-<p>For access from outside the house, use a VPN instead of a port forward. Once your phone is connected, it uses the LAN resolver and every app works exactly as it does at home.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li><code>kubectl get ingressclass</code> shows <code>traefik</code>, and Traefik settings live in one <code>HelmChartConfig</code>.</li><li>Plain HTTP redirects to HTTPS.</li><li>cert-manager is installed with <code>crds.enabled=true</code>.</li><li>The DNS provider credential is a scoped API token, stored in the <code>cert-manager</code> namespace.</li><li>Staging and production ClusterIssuers exist, and you proved the setup on staging first.</li><li>One wildcard <code>Certificate</code> is <code>Ready</code> and set as Traefik's default in a <code>TLSStore</code>.</li><li>No port is forwarded from the internet; remote access goes through a VPN.</li></ul><p><a href="https://payhip.com/b/uyY03">Go deeper: Kubernetes Without the Overwhelm</a></p>]]></content:encoded></item><item><title>Dead Tide: a zombie horde survivor for Android, coming soon to Google Play</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/dead-tide-zombie-horde-survivor-android-game/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/dead-tide-zombie-horde-survivor-android-game/</guid>
-<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Dead Tide is a new top-down zombie horde survivor for Android from Hartmann Studios: auto-fire weapons, one-thumb movement, three upgrades every level, four chapters with bosses and a squad to rescue. Coming soon to Google Play.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.deadtide.hordesurvivor.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>games</category><category>zombies</category><category>apps</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.deadtide.hordesurvivor.jpg" alt=""></p><p>Survive the endless undead horde.</p>
-<p>Dead Tide is a new game from Hartmann Studios: a top-down zombie horde survivor for Android phones. It is coming soon to Google Play.</p>
-<h2 id="how-a-run-works">How a run works</h2>
-<p>Your weapons fire on their own. You steer with one thumb and dash out of trouble, and the horde keeps coming from every side: shamblers, brutes and worse.</p>
-<p>Every level-up offers three upgrades. Pick damage, speed or a new weapon and stack them into a build that can hold the line. Runs are short and frantic, so it fits a coffee break.</p>
-<h2 id="the-arsenal">The arsenal</h2>
-<p>The weapons in the game include the Rocket Launcher, Combat Shotgun, Rail Sniper, Plasma Bolt, Storm Drone, Frost Nova, Chain Lightning, Flame Aura, Starfall and Meteor Strike.</p>
-<h2 id="rescue-your-squad">Rescue your squad</h2>
-<p>Three survivors are out there: Sarge, Ghost and Sparks. Find their beacons, pull them out, and each one joins the fight.</p>
-<h2 id="four-chapters-four-bosses">Four chapters, four bosses</h2>
-<ul><li><strong>Cursed Graveyard</strong></li><li><strong>Crimson Catacombs</strong></li><li><strong>Frozen Desolation</strong></li><li><strong>Toxic Quarantine</strong></li></ul>
-<p>Each chapter ends with its own boss.</p>
-<h2 id="progress-that-sticks">Progress that sticks</h2>
-<p>Between runs, spend the gold you salvage on permanent armory talents. Every run makes the next one a little easier.</p>
-<h2 id="free-to-play">Free to play</h2>
-<p>Dead Tide is free with ads. There is an optional one-time Remove Ads purchase and optional gold packs. No account is needed, and your progress is saved on your phone.</p>
-<h2 id="get-it">Get it</h2>
-<p>Dead Tide is coming soon to Google Play. The game's site will link straight to the store the moment it is live: <a href="https://chartmann1590.github.io/dead-tide-site/">https://chartmann1590.github.io/dead-tide-site/</a>.</p><p><a href="https://chartmann1590.github.io/dead-tide-site/">Dead Tide: coming soon to Google Play</a></p>]]></content:encoded></item><item><title>Test your Compose ViewModels in milliseconds: fakes, runTest, the Main dispatcher and Turbine</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-viewmodel-unit-tests-fakes-runtest-turbine/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-viewmodel-unit-tests-fakes-runtest-turbine/</guid>
-<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>The ViewModel holds a Compose screen&#x27;s behavior and runs on the plain JVM, which makes it the best-value test in an Android app. A hand-written fake, a MainDispatcherRule, runTest&#x27;s virtual time, Turbine for state sequences, and the StateFlow and stateIn traps that make these tests fail for the wrong reason.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>kotlin</category><category>testing</category><category>jetpack compose</category><category>coroutines</category><category>viewmodel</category><category>turbine</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The ViewModel is where a Compose screen's behavior lives: what the screen shows while loading, what happens when the user saves, which error appears when the network fails. It is plain Kotlin and runs on the JVM, so its tests take milliseconds and need no emulator. That makes it the best-value test in an Android app. This post tests a small note editor's ViewModel with a fake repository, coroutine test dispatchers, Turbine and <code>SavedStateHandle</code>.</p>
-<h2 id="the-code-under-test">The code under test</h2>
-<p>The editor loads a note by id, lets the user change the title and body, and saves. Its state is a single <code>StateFlow&lt;EditorUiState&gt;</code>, and the important parts look like this:</p>
-<pre><code>class EditorViewModel(
-    private val repository: NotesRepository,
-    private val savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-
-    private val noteId: Long? = savedStateHandle.get&lt;Long&gt;("noteId")
-    private val _state = MutableStateFlow(EditorUiState())
-    val state: StateFlow&lt;EditorUiState&gt; = _state.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            val note = noteId?.let { repository.getNote(it) }
-            _state.update {
-                it.copy(
-                    title = savedStateHandle["draftTitle"] ?: note?.title.orEmpty(),
-                    body = note?.body.orEmpty(),
-                    isLoading = false,
-                )
-            }
-        }
-    }
-
-    fun save() {
-        val current = _state.value
-        if (current.title.isBlank()) {
-            _state.update { it.copy(error = "Title is required") }
-            return
-        }
-        viewModelScope.launch {
-            _state.update { it.copy(isSaving = true) }
-            when (val result = repository.save(noteId, current.title, current.body)) {
-                is SaveResult.Ok -&gt; _state.update { it.copy(isSaving = false, saved = true) }
-                is SaveResult.Failed -&gt; _state.update {
-                    it.copy(isSaving = false, error = result.message)
-                }
-            }
-        }
-    }
-    // onTitleChange() also writes savedStateHandle["draftTitle"]
-}</code></pre>
-<p><code>NotesRepository</code> is an interface. That one decision makes the ViewModel testable: a test can hand it anything that implements the interface.</p>
-<h2 id="fakes-not-mocks-by-default">Fakes, not mocks, by default</h2>
-<p>A <strong>mock</strong> (MockK, for example) is configured per test: you tell it what to return and afterwards verify which calls were made. A <strong>fake</strong> is a small, real implementation written by hand, usually backed by a map in memory. Google's testing guidance recommends fakes as the default test double, for practical reasons:</p>
-<ul><li>A fake behaves like the real thing, so tests check behavior ("after saving, the note is in the repository") rather than implementation details ("<code>save</code> was called once with these arguments").</li><li>A fake is written once and reused by every test. Mocks are configured again in every test.</li><li>Refactoring the ViewModel does not break tests that use a fake, as long as the behavior stays the same.</li></ul>
-<p>Keep mocks for the edges: a third-party class you cannot implement easily, or a check that something was <em>not</em> called.</p>
-<pre><code>class FakeNotesRepository : NotesRepository {
-    private val notes = mutableMapOf&lt;Long, Note&gt;()
-    private var nextId = 1L
-    var failNextSave: String? = null
-    var saveDelayMs = 0L
-
-    fun seed(vararg seed: Note) {
-        seed.forEach { notes[it.id] = it }
-        nextId = (notes.keys.maxOrNull() ?: 0L) + 1
-    }
-
-    override suspend fun getNote(id: Long): Note? = notes[id]
-
-    override suspend fun save(id: Long?, title: String, body: String): SaveResult {
-        delay(saveDelayMs)                 // virtual time in tests
-        failNextSave?.let { failNextSave = null; return SaveResult.Failed(it) }
-        val note = Note(id ?: nextId++, title, body)
-        notes[note.id] = note
-        return SaveResult.Ok(note.id)
-    }
-
-    fun all(): List&lt;Note&gt; = notes.values.toList()
-}</code></pre>
-<h2 id="step-1-replace-the-main-dispatcher">Step 1: replace the Main dispatcher</h2>
-<p><code>viewModelScope</code> launches on <code>Dispatchers.Main</code>. On the JVM there is no Android main looper, so a test that creates this ViewModel fails with an error about the Main dispatcher missing. The fix is <code>Dispatchers.setMain</code> and <code>Dispatchers.resetMain</code> from kotlinx-coroutines-test, and the Android Developers coroutine testing guide recommends wrapping them in a JUnit rule so no test forgets:</p>
-<pre><code>class MainDispatcherRule(
-    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
-) : TestWatcher() {
-    override fun starting(description: Description) {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    override fun finished(description: Description) {
-        Dispatchers.resetMain()
-    }
-}</code></pre>
-<p>Every ViewModel test then starts with one line: <code>@get:Rule val mainDispatcherRule = MainDispatcherRule()</code>.</p>
-<h2 id="step-2-understand-runtest-and-the-two-dispatchers">Step 2: understand runTest and the two dispatchers</h2>
-<p><code>runTest</code> runs the test body as a coroutine with <strong>virtual time</strong>: a <code>delay(5_000)</code> inside it completes instantly, while the test still sees five seconds pass. There are two test dispatchers, and the difference matters:</p>
-<ul><li><code>StandardTestDispatcher</code> queues new coroutines. They do not run until the test yields, with <code>advanceUntilIdle()</code>, <code>advanceTimeBy()</code>, <code>runCurrent()</code> or by suspending. It is the default in <code>runTest</code>, and it lets you check intermediate states such as "saving is in progress".</li><li><code>UnconfinedTestDispatcher</code> starts new coroutines eagerly until their first suspension. Simple tests read shorter, but you cannot observe the state between "launched" and "finished".</li></ul>
-<p>When <code>MainDispatcherRule</code> installs a test dispatcher as Main, <code>runTest</code> reuses its scheduler, so <code>advanceUntilIdle()</code> in the test also drives coroutines launched in <code>viewModelScope</code>.</p>
-<h2 id="step-3-the-first-tests">Step 3: the first tests</h2>
-<pre><code>class EditorViewModelTest {
-
-    @get:Rule val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
-
-    private val repository = FakeNotesRepository()
-
-    private fun viewModel(noteId: Long? = null) = EditorViewModel(
-        repository,
-        SavedStateHandle(mapOf("noteId" to noteId)),
-    )
-
-    @Test fun saving_blank_note_shows_error_and_saves_nothing() = runTest {
-        val vm = viewModel()
-        advanceUntilIdle()
-
-        vm.onTitleChange("   ")
-        vm.save()
-        advanceUntilIdle()
-
-        assertThat(vm.state.value.error).isEqualTo("Title is required")
-        assertThat(repository.all()).isEmpty()
-    }
-
-    @Test fun saving_shows_progress_then_marks_saved() = runTest {
-        repository.saveDelayMs = 2_000
-        val vm = viewModel()
-        advanceUntilIdle()
-        vm.onTitleChange("Groceries")
-
-        vm.save()
-        runCurrent()                       // the save starts, then suspends in delay()
-        assertThat(vm.state.value.isSaving).isTrue()
-
-        advanceUntilIdle()                 // two virtual seconds pass instantly
-        assertThat(vm.state.value.saved).isTrue()
-    }
-}</code></pre>
-<p>The classic mistake is asserting before advancing. With <code>StandardTestDispatcher</code>, the coroutine launched in <code>init</code> has not run when the constructor returns, so a test that reads <code>state.value.title</code> straight away sees the default empty title and fails, or worse, passes for the wrong reason.</p>
-<h2 id="step-4-sequences-of-states-with-turbine">Step 4: sequences of states with Turbine</h2>
-<p>When the order of states is the behavior, Turbine collects the flow and lets you await each item:</p>
-<pre><code>@Test fun save_emits_saving_then_saved() = runTest {
-    repository.saveDelayMs = 1_000         // a suspension between the two updates
-    val vm = viewModel()
-    advanceUntilIdle()
-    vm.onTitleChange("Packing list")
-
-    vm.state.test {
-        assertThat(awaitItem().isSaving).isFalse()   // current state
-        vm.save()
-        assertThat(awaitItem().isSaving).isTrue()
-        assertThat(awaitItem().saved).isTrue()
-        cancelAndIgnoreRemainingEvents()
-    }
-}</code></pre>
-<p><code>StateFlow</code> is <strong>conflated</strong>: if two updates happen before the collector runs, it sees only the latest, and equal consecutive values are dropped. A test that expects a state that was immediately replaced waits and times out. That is why the fake has a delay: the suspension between "saving" and "saved" lets the collector see both. Assert on the states that matter, and make sure something suspends between them.</p>
-<h2 id="the-statein-trap">The stateIn trap</h2>
-<p>A flow exposed with <code>stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())</code> runs its upstream only while someone collects it. Reading <code>.value</code> in a test with nobody collecting returns the initial empty list forever. Collect it in <code>backgroundScope</code>, which <code>runTest</code> cancels for you at the end:</p>
-<pre><code>backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-    vm.notes.collect()
-}</code></pre>
-<h2 id="process-death-at-the-viewmodel-level">Process death, at the ViewModel level</h2>
-<p><code>SavedStateHandle</code> has a public constructor that takes a map, so you can simulate the system recreating the ViewModel: write a value through the first instance, build a second one with a handle holding the same values, and assert the state comes back.</p>
-<pre><code>val restored = EditorViewModel(repository, SavedStateHandle(mapOf(
-    "noteId" to null,
-    "draftTitle" to handle.get&lt;String&gt;("draftTitle"),
-)))
-advanceUntilIdle()
-assertThat(restored.state.value.title).isEqualTo("Half-typed")</code></pre>
-<h2 id="checklist">Checklist</h2>
-<ul><li>The ViewModel depends on interfaces, and each has a reusable fake.</li><li>A <code>MainDispatcherRule</code> replaces <code>Dispatchers.Main</code> in every ViewModel test.</li><li>Tests advance (<code>advanceUntilIdle()</code>, <code>runCurrent()</code>) before asserting.</li><li>Turbine tests have a real suspension between the states they expect.</li><li><code>stateIn</code> flows are collected in <code>backgroundScope</code> before reading <code>.value</code>.</li><li>Saved state is tested by rebuilding the ViewModel from a <code>SavedStateHandle</code>.</li></ul><p><a href="https://payhip.com/b/Fpyu8">Go deeper: Test It Before They Do</a></p>]]></content:encoded></item><item><title>Your fingerprint prompt is a speed bump, not a lock: Android biometrics with a CryptoObject</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-biometric-prompt-cryptoobject-keystore/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-biometric-prompt-cryptoobject-keystore/</guid>
-<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Most Android biometric prompts just flip a boolean that a patched APK can flip too, while the data sits unencrypted behind it. Bind a Keystore key to BIOMETRIC_STRONG, pass a CryptoObject, and the prompt releases a key the Keystore guards outside your process. Authenticator classes, key settings and KeyPermanentlyInvalidatedException.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>security</category><category>biometrics</category><category>keystore</category><category>kotlin</category><category>androidx biometric</category><category>encryption</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A fingerprint prompt feels like security. The user touches the sensor, a little animation plays, the app opens. But look at what most implementations do with the result: <code>onAuthenticationSucceeded()</code> sets a boolean, and the boolean opens the screen. Anyone who can change that boolean, with a debugger on a rooted phone or by patching the APK, opens the screen without a fingerprint. Worse, the data behind the screen was never protected at all; it was sitting in storage the whole time.</p>
-<p>A biometric check is only as strong as what it unlocks. This post shows the difference between a prompt that decides a branch in your code and a prompt that releases a cryptographic key, and how to build the second kind with <code>androidx.biometric</code>.</p>
-<h2 id="the-library">The library</h2>
-<p>Use the Jetpack Biometric library rather than the platform <code>BiometricPrompt</code> directly. It works back to older Android versions, handles device differences and gives you one API.</p>
-<pre><code>dependencies {
-    implementation("androidx.biometric:biometric:1.1.0")
-}</code></pre>
-<p>1.1.0 is the stable release in October 2026. The 1.4.0 alpha line adds an activity-result API, a <code>biometric-compose</code> artifact and <code>KeyAgreement</code> support in <code>CryptoObject</code>; everything below uses the stable <code>BiometricPrompt</code> API, which the alpha keeps.</p>
-<h2 id="strong-weak-and-the-screen-lock">Strong, weak and the screen lock</h2>
-<p><code>BiometricManager.Authenticators</code> defines three types, and the difference between the first two is the whole story:</p>
-<ul><li><strong>BIOMETRIC_STRONG</strong>: a Class 3 biometric under the Android Compatibility Definition. Strong enough to unlock Keystore keys.</li><li><strong>BIOMETRIC_WEAK</strong>: a Class 2 biometric. Can confirm presence, cannot unlock keys.</li><li><strong>DEVICE_CREDENTIAL</strong>: the screen lock (PIN, pattern or password).</li></ul>
-<p>The device maker decides which sensor is Class 2 or Class 3, not you. Many face unlock implementations are Class 2 and many fingerprint sensors are Class 3, but do not assume; ask the system.</p>
-<p>A few rules from the documentation shape everything:</p>
-<ul><li>You cannot call <code>setNegativeButtonText()</code> together with <code>DEVICE_CREDENTIAL</code>; when the screen lock is allowed, the system provides its own fallback button.</li><li>On Android 10 (API level 29) and lower, <code>DEVICE_CREDENTIAL</code> alone and <code>BIOMETRIC_STRONG or DEVICE_CREDENTIAL</code> are not supported combinations. Check for a screen lock with <code>KeyguardManager.isDeviceSecure()</code> instead.</li><li>Crypto-based authentication is incompatible with Class 2 biometrics, and before Android 11 with the device credential too. Passing a <code>CryptoObject</code> with those authenticators throws <code>IllegalArgumentException</code>.</li></ul>
-<h2 id="check-before-you-prompt">Check before you prompt</h2>
-<p>Call <code>canAuthenticate()</code> with exactly the combination you will pass to the prompt:</p>
-<pre><code>fun biometricState(context: Context, allowed: Int): BiometricState {
-    val manager = BiometricManager.from(context)
-    return when (manager.canAuthenticate(allowed)) {
-        BiometricManager.BIOMETRIC_SUCCESS -&gt; BiometricState.Ready
-        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -&gt; BiometricState.NeedsEnrollment
-        else -&gt; BiometricState.Unavailable    // no hardware, unavailable, update needed
-    }
-}</code></pre>
-<p>When nothing is enrolled, on Android 11 (API level 30) and higher you can send the user to <code>Settings.ACTION_BIOMETRIC_ENROLL</code>, passing the authenticators you accept in <code>Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED</code>. When biometrics are unavailable, fall back to your normal sign-in rather than hiding the feature.</p>
-<h2 id="the-prompt-without-crypto-and-what-it-proves">The prompt without crypto, and what it proves</h2>
-<p>The common version calls <code>showNotes()</code> from <code>onAuthenticationSucceeded()</code>. A successful callback proves only that the system said the user passed, and your code then trusts a callback inside your own process. With a patched APK, or on a device where an attacker controls your process, that callback can be faked, and the notes were readable all along. It is fine for confirming that the person holding an already-unlocked phone is probably the owner before showing something mildly sensitive. It is not a lock.</p>
-<h2 id="the-prompt-with-crypto-unlocking-a-key">The prompt with crypto: unlocking a key</h2>
-<p>The fix is to make the prompt release something the app cannot get any other way. Create a key in the Android Keystore that can only be used after a strong biometric check, and encrypt the sensitive data with it. Now the only way to decrypt is to pass the prompt, because the Keystore enforces the check outside your process, often in secure hardware.</p>
-<h3 id="step-1-an-authentication-bound-key">Step 1: an authentication-bound key</h3>
-<pre><code>private const val KEY_ALIAS = "fieldnotes_vault"
-
-fun createVaultKey() {
-    val spec = KeyGenParameterSpec.Builder(
-        KEY_ALIAS,
-        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
-    )
-        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-        .setKeySize(256)
-        .setUserAuthenticationRequired(true)
-        // 0 = authenticate for every use; API 30+ form of the setting
-        .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
-        .setInvalidatedByBiometricEnrollment(true)
-        .build()
-    KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
-        init(spec)
-        generateKey()
-    }
-}</code></pre>
-<ul><li><code>setUserAuthenticationRequired(true)</code> makes the key unusable until the user authenticates.</li><li><code>setUserAuthenticationParameters(timeout, type)</code>, added in API level 30, sets how long a successful authentication keeps the key usable (0 means every operation needs its own prompt) and which kinds count. <code>AUTH_BIOMETRIC_STRONG</code> accepts only Class 3 biometrics; add <code>or KeyProperties.AUTH_DEVICE_CREDENTIAL</code> to accept the screen lock too. Below API 30, the older <code>setUserAuthenticationValidityDurationSeconds()</code> does the same job, with <code>-1</code> meaning per-use.</li><li><code>setInvalidatedByBiometricEnrollment(true)</code> (the default, API 24 and higher) permanently invalidates the key when the user enrolls a new fingerprint or face. Someone who learns the PIN cannot add their own finger and then decrypt.</li></ul>
-<h3 id="step-2-prompt-with-a-cryptoobject">Step 2: prompt with a CryptoObject</h3>
-<p>Initialize a <code>Cipher</code> with the key, wrap it in a <code>CryptoObject</code> and pass it to <code>authenticate()</code>. On success, the cipher in the result is authorized for one operation:</p>
-<pre><code>val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-    .apply { init(Cipher.ENCRYPT_MODE, vaultKey()) }
-
-val prompt = BiometricPrompt(activity, ContextCompat.getMainExecutor(activity),
-    object : BiometricPrompt.AuthenticationCallback() {
-        override fun onAuthenticationSucceeded(
-            result: BiometricPrompt.AuthenticationResult,
-        ) {
-            val c = result.cryptoObject?.cipher ?: return
-            onDone(EncryptedBlob(iv = c.iv, data = c.doFinal(plaintext)))
-        }
-    })
-prompt.authenticate(
-    BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Protect your vault")
-        .setAllowedAuthenticators(BIOMETRIC_STRONG)
-        .setNegativeButtonText("Cancel")
-        .build(),
-    BiometricPrompt.CryptoObject(cipher),
-)</code></pre>
-<p>Decryption is the same with <code>Cipher.DECRYPT_MODE</code> and a <code>GCMParameterSpec(128, blob.iv)</code>. Store the IV next to the ciphertext; it is not secret, but GCM needs it, and the Keystore generates a fresh random IV for each encryption by default.</p>
-<h3 id="step-3-handle-a-dead-key">Step 3: handle a dead key</h3>
-<p>When the user adds a new fingerprint or removes the screen lock, the key is gone for good and <code>cipher.init()</code> throws <code>KeyPermanentlyInvalidatedException</code>. That is the system doing its job. Catch it, delete the key alias and the ciphertext it protected, and ask the user to sign in again the normal way. Never treat it as a crash:</p>
-<pre><code>fun cipherOrNull(mode: Int, iv: ByteArray? = null): Cipher? = try {
-    Cipher.getInstance("AES/GCM/NoPadding").apply {
-        if (iv == null) init(mode, vaultKey())
-        else init(mode, vaultKey(), GCMParameterSpec(128, iv))
-    }
-} catch (e: KeyPermanentlyInvalidatedException) {
-    KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(KEY_ALIAS)
-    vaultStore.clear()
-    null   // caller falls back to a full sign-in
-}</code></pre>
-<h2 id="where-it-belongs">Where it belongs</h2>
-<p>Good uses: unlocking a stored refresh token so a returning user signs in with a fingerprint; confirming a sensitive action such as deleting the account, where the strongest version signs a server nonce with a biometric-bound private key; and a private vault inside the app with its own authentication-bound key.</p>
-<p>Bad uses: a prompt in front of the whole app while the data sits unencrypted behind it, or a prompt treated as a replacement for server-side authentication. After too many failed attempts the system locks biometrics out and reports it through <code>onAuthenticationError()</code>; offer the screen lock or your normal sign-in instead of looping the prompt. And if what you want is "sign in with my fingerprint", passkeys are the better answer, since the credential provider already uses the screen lock and biometrics.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li><code>canAuthenticate()</code> is called with the same authenticators the prompt uses.</li><li>Anything sensitive is encrypted with a Keystore key that requires <code>BIOMETRIC_STRONG</code>.</li><li>The prompt passes a <code>CryptoObject</code>, and only the authorized cipher touches the data.</li><li>Keys are invalidated by new biometric enrollment.</li><li><code>KeyPermanentlyInvalidatedException</code> leads to a clean re-sign-in, not a crash.</li><li>A failed or locked-out prompt falls back to the screen lock or normal sign-in.</li></ul><p><a href="https://payhip.com/b/oZl1J">Go deeper: Sign-In and Security Done Right</a></p>]]></content:encoded></item><item><title>Fieldkey is live on Google Play: identify plants, rocks and coins offline</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/fieldkey-plant-rock-coin-identifier-android-app/</guid>
-<pubDate>Thu, 29 Oct 2026 12:30:00 -0400</pubDate><description>Fieldkey is a new Android app from Hartmann Studios that identifies plants, rocks, minerals and US coins right on your phone, with no account, no upload and no internet needed. Now free on Google Play.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>privacy</category><category>offline</category><category>apps</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Snap it. Know it.</p>
-<p>Fieldkey, a new Android app from Hartmann Studios, is now live on Google Play. It identifies plants, rocks, minerals and US coins right on your phone, with no account, no upload and no internet needed.</p>
-<h2 id="three-modes-in-one-app">Three modes in one app</h2>
-<ul><li><strong>Plants:</strong> about 2,100 wild and garden species, plus 100 popular houseplants and garden plants, with light, water and pet-safety notes.</li><li><strong>Rocks:</strong> about 130 rocks, minerals, crystals and gemstones, with hardness, streak, crystal system and simple tests you can do at home.</li><li><strong>Coins:</strong> 22 US coin types. Fieldkey also reads the year and mint mark from your photo and flags silver content and well-known key dates.</li></ul>
-<h2 id="honest-by-design">Honest by design</h2>
-<p>Every result shows how confident the model is and the next-best matches. When it is not sure, it says so and asks for another angle.</p>
-<p>Coin values are only ever given as an estimated range, so check a dealer before you sell anything. Plant safety notes are general information, not medical or veterinary advice. Never eat a plant or mushroom because an app said so.</p>
-<h2 id="private-and-offline">Private and offline</h2>
-<p>All identification runs on your phone. Your photos never leave the device. There is no account and no analytics, and it works without a connection.</p>
-<p>You can save finds to your collection with the photo, date and your own notes, and share a find card with friends.</p>
-<h2 id="free-and-pro">Free and Pro</h2>
-<p>The free version gives you 3 identifications a day, plus one more by watching a short video. Pro removes the limit and the ads and adds collection export. It comes as a monthly or yearly subscription (with a free trial) or a one-time lifetime purchase.</p>
-<p>Fieldkey is built on open models and open data: the Google AIY plant classifier, photos from iNaturalist and Wikimedia Commons contributors, and descriptions from Wikipedia and Wikidata.</p>
-<h2 id="get-it">Get it</h2>
-<p>Fieldkey is free on Google Play: <a href="https://play.google.com/store/apps/details?id=com.charles.fieldkey">Fieldkey: Plant Rock Coin ID</a>. More details are on the app's site: <a href="https://chartmann1590.github.io/fieldkey-site/">https://chartmann1590.github.io/fieldkey-site/</a>.</p><p><a href="https://play.google.com/store/apps/details?id=com.charles.fieldkey">Get Fieldkey: Plant Rock Coin ID on Google Play</a></p>]]></content:encoded></item>
+<ul><li>You know your card's memory before you pick a model.</li><li>You start at Q4_K_M and move up only with memory to spare.</li><li>You estimate weights + KV cache + overhead before you pull.</li><li>You know the context you need, and that parallel requests multiply it.</li><li><code>ollama ps</code> shows the SIZE you expected and <code>100% GPU</code> after loading.</li><li>You have read the license of every model you build on.</li></ul><p><a href="https://payhip.com/b/71LQ2">Go deeper: Private AI at Home</a></p>]]></content:encoded></item>
 </channel></rss>
