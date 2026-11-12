@@ -1,9 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 11 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 12 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Lock the Firewall Admin Page</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/lock-the-firewall-admin-page/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/lock-the-firewall-admin-page/</guid>
+<item><title>The trap of the version code reset</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</guid>
+<pubDate>Thu, 12 Nov 2026 12:30:00 -0500</pubDate><description>You set a version code in CI to prevent duplicates, but the workflow recreation resets the counter, forcing you to use a code Play has already rejected.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>gradle</category><category>google play</category><category>versioning</category><category>ci</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most developers set a version code in CI to guarantee that every upload is unique. That is the trap. A workflow recreation resets the counter to 1, so every new run tries to upload a version code Play has already seen, and the upload is refused. You might see the error message in the console or the Play Console, but you might not realize the root cause is the counter resetting. The book's example shows a workflow that computes the code using the CI run number, which starts at 1. This number would create a conflict with the manual release, and Play rejects any code at or below the live one.</p>
+<p>The book "Pass Google Play Review" explains that versionCode must be a positive integer, each release must use a greater value than the one before, and Play refuses an upload that reuses a code. The greatest value Google Play allows is 2100000000. If you compute the code from the CI run number, you discover the app's first release was uploaded by hand with a higher code, so every automated upload is refused. The trap is that you think you are being safe by enforcing uniqueness, but you are actually creating a conflict with the manual release. You must ensure your code always increases and stays far below the limit.</p>
+<h2 id="the-rule-pass-the-code-in-from-the-build">The rule: pass the code in from the build</h2>
+<p>The book recommends the safest pattern for automated releases: pass the version code in from the build, with a fallback for local builds. You do not hardcode the number in the source. This approach ensures the build system pulls the number from the environment. If the environment variable is missing, it falls back to 1 for local development. This separation of concerns keeps your build configuration clean and allows you to control the version number in your CI pipeline.</p>
+<pre><code>android {
+    defaultConfig {
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+    }
+}</code></pre>
+<p>This configuration reads the version code from the environment variable VERSION_CODE. If the variable is not present, it defaults to 1. This is useful for local builds where you might not have the CI environment variables set. However, for CI builds, you must provide the variable. This pattern prevents you from hardcoding a specific number that might conflict with existing releases.</p>
+<h2 id="the-trap-the-ci-run-number-resets">The trap: the CI run number resets</h2>
+<p>The book warns that a CI run number restarts when the workflow is recreated. If you compute the code from the clock in CI, you rely on a counter that can start over. The book shows an example of this pitfall in the "CaptionBurn" workflow. The workflow in chartmann1590/captionburn computes the code exactly this way. The workflow's own run counter starts at 1 and would undercut the version code already live on Play (116, published manually). Play rejects any code at or below the live one.</p>
+<pre><code>CODE=$(date -u +'%y%j%H%M')
+echo "VERSION_CODE=$CODE" &gt;&gt; "$GITHUB_ENV"</code></pre>
+<p>The comment in the workflow explains why: the workflow's own run counter starts at 1 and would undercut the version code already live on Play. Its first successful automated release used version code 262850104 and versionName 0.1.20261012.0104. The trap is that the workflow counter is not persistent. When you recreate the workflow, the counter goes back to 1. If you are already past 116, the new code will be rejected. You need a number that is guaranteed to be unique and larger than the previous one.</p>
+<h2 id="the-fix-compute-from-the-clock-not-the-counter">The fix: compute from the clock, not the counter</h2>
+<p>The book suggests computing the code from the clock in CI so it only ever goes up. You should use a date-based code that always increases and stays far below the limit. The example in the book uses the year, day of year, and time in UTC. This method guarantees that every new build gets a unique, increasing number. It does not rely on a workflow counter that can restart. The Dosely workflow takes the opposite approach and asks for the code as a manual input, with a description that tells you to check App bundle explorer for the highest code already used.</p>
+<pre><code># yy + day of year + HHMM in UTC, e.g. 262850104 (2026, day 285, 01:04)
+CODE=$(date -u +'%y%j%H%M')
+echo "VERSION_CODE=$CODE" &gt;&gt; "$GITHUB_ENV"</code></pre>
+<p>This code calculates the version code based on the current UTC date and time. The format is yy (year), j (day of year), H (hour), M (minute). This ensures that every build gets a unique number based on when it was built. Since the date and time always increase, the version code will never decrease or repeat. This is the safest way to generate version codes in CI, as described in the book.</p>
+<h2 id="checklist-chapter-2">Checklist: Chapter 2</h2>
+<p>☐    compileSdk on the newest stable level; targetSdk meets this year's requirement (API 36 at the time of writing) ☐    Target level raised in spring on a branch, tested against the behavior-changes page ☐    Extension requested in Play Console only if you truly cannot make August 31 ☐    Version code passed in from CI, always increasing, below 2100000000 ☐    Highest version code per app known, across phone and Wear bundles</p><p><a href="https://payhip.com/b/YcoD4">Go deeper: Pass Google Play Review</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Path: build a daily Bible study habit with gentle streaks</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/path-daily-bible-study-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/path-daily-bible-study-android-app/</guid>
+<pubDate>Thu, 12 Nov 2026 12:30:00 -0500</pubDate><description>Path is a calm Android Bible study app with reading plans, gentle streaks, highlights and notes stored on your device, offline reading and text-to-speech.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.biblereadingpath.app.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>bible</category><category>reading</category><category>habits</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.biblereadingpath.app.jpg" alt=""></p><p>Starting a Bible reading plan is easy. Day twelve is where most people slip. A missed day turns into a missed week, and the plan quietly stops. Path is a Bible study app designed around that problem: steady, achievable daily reading, with encouragement that nudges instead of nags, and nothing on screen competing for your attention.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Daily study plans:</strong> read the Bible in order, focus on specific books, follow topic-based studies such as faith, anxiety and forgiveness, or use devotional-style plans with reflection prompts.</li><li><strong>Your own pace:</strong> customize how much you read each day.</li><li><strong>Progress tracking:</strong> a visual dashboard, daily streaks and non-pushy motivation messages.</li><li><strong>Highlights and notes:</strong> highlight favorite verses and write personal notes linked to passages.</li><li><strong>Verse of the Day,</strong> easy to share with friends.</li><li><strong>Offline reading:</strong> download translations and study without an internet connection.</li><li><strong>Text-to-speech:</strong> listen to your daily reading at an adjustable speed.</li></ul>
+<h2 id="picking-a-plan">Picking a plan</h2>
+<p>The plan types suit different goals:</p>
+<div class="table"><table><thead><tr><th>Plan type</th><th>Good when you want to</th></tr></thead><tbody><tr><td>Sequential</td><td>Read the whole Bible in order</td></tr><tr><td>Book-based</td><td>Go deep on one book at a time</td></tr><tr><td>Topic-based</td><td>Study a theme like faith, anxiety or forgiveness</td></tr><tr><td>Devotional-style</td><td>Read a shorter passage and reflect with prompts</td></tr></tbody></table></div>
+<p>Whichever you choose, set the daily pace to something you can keep on a busy day. A smaller daily amount you actually finish usually beats an ambitious plan you abandon.</p>
+<h2 id="streaks-without-pressure">Streaks without pressure</h2>
+<p>Habit apps often motivate with guilt. Path describes its approach as gentle: streaks with gentle encouragement and motivation messages that are deliberately non-pushy. The progress dashboard shows how far you have come, which is often the best reason to keep going.</p>
+<h2 id="notes-that-stay-yours">Notes that stay yours</h2>
+<p>As you read, you can highlight verses and write notes tied to the passage they belong to. The listing says all of that data is stored securely on your device, and you can export your notes at any time, so your study history is not locked inside the app.</p>
+<h2 id="reading-anywhere">Reading anywhere</h2>
+<p>After the initial setup, Path works completely offline. Download the translations you want and your daily study needs no internet at all. On a commute, or any time reading is not practical, the text-to-speech feature reads the passage aloud, and you can adjust the playback speed.</p>
+<h2 id="a-simple-routine">A simple routine</h2>
+<ol><li>Open Path and read the Verse of the Day.</li><li>Do today's portion of your plan, or listen to it.</li><li>Highlight anything that stands out and add a short note.</li><li>Glance at your progress, then close the app and get on with your day.</li></ol>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free, with no account required.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>In-app purchases:</strong> none are listed.</li><li><strong>Category and rating:</strong> Books &amp; Reference, rated Everyone.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want to read the Bible daily and keep the habit going.</li><li>You prefer gentle encouragement to pushy reminders.</li><li>You want highlights and notes kept on your device and exportable.</li><li>You like to read offline or listen while doing something else.</li></ul><p><a href="https://charleshartmann.com/apps/#sec-path-daily-bible-study">Get Path - Daily Bible Study for Android</a></p>]]></content:encoded></item><item><title>Lock the Firewall Admin Page</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/lock-the-firewall-admin-page/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/lock-the-firewall-admin-page/</guid>
 <pubDate>Wed, 11 Nov 2026 12:30:00 -0500</pubDate><description>A fresh OPNsense install is wide open. This guide moves the web interface to HTTPS and the management network only.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-11.jpg" type="image/jpeg" length="0"/>
 <category>opnsense</category><category>firewall</category><category>security</category><category>hardening</category><category>network</category>
@@ -786,266 +835,5 @@ Description:   Force IoT time to the firewall</code></pre>
 <h2 id="checklist-iot-that-still-works">Checklist: IoT that still works</h2>
 <ul><li>[ ] mDNS repeater on TRUSTED and IOT only</li><li>[ ] SSDP relay only if a device needs it</li><li>[ ] Narrow pass rules for call-backs you saw in Live View, one device each</li><li>[ ] Home Assistant on a second network card in VLAN 30, or narrow rules instead</li><li>[ ] MQTT exception: IOT net to the broker host and port only</li><li>[ ] NTP (and DNS) redirected to the firewall on IOT</li><li>[ ] Local-only devices listed in <code>IOT_LOCAL_ONLY</code> and blocked from the internet</li></ul>
 <p>The wall between IoT and the rest of the house stays up. You just let the right questions through it.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=wifi+access+point+multiple+SSID+VLAN&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Access point with VLAN SSIDs</a> · <a href="https://www.amazon.com/s?k=managed+switch+802.1Q+VLAN+8+port&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Managed VLAN switch</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p><p><a href="https://payhip.com/b/k6WMS">Go deeper: Lock Down Your Home Network</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Gradle convention plugins for a multi-module Android app: build-logic, AGP 9 and the version catalog</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-gradle-convention-plugins-build-logic/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-gradle-convention-plugins-build-logic/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Stop repeating twenty lines in every build.gradle.kts. How to set up a build-logic included build, write class-based convention plugins (library, Compose, Hilt, feature), keep compileSdk and minSdk in one place with AGP 9&#x27;s CommonExtension, and use libs.versions.toml properly.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>gradle</category><category>convention plugins</category><category>version catalog</category><category>modularization</category><category>kotlin</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Once an Android app has a dozen or more modules, every <code>build.gradle.kts</code> starts to repeat the same twenty lines: the Android plugin, <code>compileSdk</code>, <code>minSdk</code>, Java and Kotlin options, the Compose setup, the Hilt plugin and processor, the test dependencies. Bumping <code>minSdk</code> means editing every file, and forgetting one means a module that quietly builds differently from the rest.</p>
-<p><strong>Convention plugins</strong> fix that. A convention plugin is a small Gradle plugin you write yourself, which applies and configures other plugins the way your project wants. Each module then says <em>what kind</em> of module it is, a library or a feature, and the plugin supplies the <em>how</em>. Google's Now in Android sample is built this way, and Gradle's documentation recommends this approach over cross-project configuration with <code>subprojects {}</code> and <code>allprojects {}</code>.</p>
-<h2 id="buildsrc-or-build-logic">buildSrc or build-logic</h2>
-<p>Gradle offers two places for shared build logic.</p>
-<ul><li><strong><code>buildSrc</code></strong> is a special directory Gradle builds automatically before your project. It works, but any change inside it invalidates the whole build's configuration, because it is on the classpath of every build script.</li><li><strong>An included build</strong>, by convention named <code>build-logic</code>, is a separate Gradle build that your main build includes with <code>includeBuild</code>. Its plugins are resolved by ID like any other plugin, and only the modules that apply a changed plugin are affected.</li></ul>
-<p>This post uses <code>build-logic</code>, as Now in Android does.</p>
-<h2 id="setting-up-build-logic">Setting up build-logic</h2>
-<pre><code>MyApp/
-├── build-logic/
-│   ├── settings.gradle.kts
-│   └── convention/
-│       ├── build.gradle.kts
-│       └── src/main/kotlin/
-│           ├── AndroidLibraryConventionPlugin.kt
-│           ├── AndroidLibraryComposeConventionPlugin.kt
-│           ├── AndroidFeatureConventionPlugin.kt
-│           ├── HiltConventionPlugin.kt
-│           └── com/example/buildlogic/KotlinAndroid.kt
-├── gradle/libs.versions.toml
-└── settings.gradle.kts      // pluginManagement { includeBuild("build-logic") }</code></pre>
-<p><code>build-logic/settings.gradle.kts</code> shares the main project's version catalog, so plugins and libraries have one source of versions:</p>
-<pre><code>// build-logic/settings.gradle.kts
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    versionCatalogs {
-        create("libs") { from(files("../gradle/libs.versions.toml")) }
-    }
-}
-rootProject.name = "build-logic"
-include(":convention")</code></pre>
-<p>The convention module is a Kotlin DSL plugin project. It puts the Android, Kotlin and KSP Gradle plugins on its classpath as <code>compileOnly</code> dependencies, so it can reference their types without forcing versions on the main build, and registers each plugin under an ID:</p>
-<pre><code>// build-logic/convention/build.gradle.kts
-plugins {
-    `kotlin-dsl`
-}
-
-dependencies {
-    compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
-    compileOnly(libs.compose.gradlePlugin)
-    compileOnly(libs.ksp.gradlePlugin)
-}
-
-gradlePlugin {
-    plugins {
-        register("androidLibrary") {
-            id = "myapp.android.library"
-            implementationClass = "AndroidLibraryConventionPlugin"
-        }
-        register("androidFeature") {
-            id = "myapp.android.feature"
-            implementationClass = "AndroidFeatureConventionPlugin"
-        }
-        // ...one register() per plugin
-    }
-}</code></pre>
-<p>You can write a convention plugin as a precompiled script (<code>myapp.android.library.gradle.kts</code>, file name = plugin ID) or as a class implementing <code>Plugin&lt;Project&gt;</code>. Classes are more verbose but are ordinary Kotlin, so plugins can share helper functions.</p>
-<h2 id="one-place-for-compilesdk-and-minsdk">One place for compileSdk and minSdk</h2>
-<p>The shared helper holds the project-wide Android settings:</p>
-<pre><code>// KotlinAndroid.kt
-internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
-    commonExtension.apply {
-        compileSdk = 36
-        defaultConfig.apply {
-            minSdk = 26
-        }
-        compileOptions.apply {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
-    }
-    configure&lt;KotlinAndroidProjectExtension&gt; {
-        compilerOptions { jvmTarget = JvmTarget.JVM_17 }
-    }
-}</code></pre>
-<p>Bumping <code>compileSdk</code> or <code>minSdk</code> is now a one-line change.</p>
-<p>Note the shape: <code>CommonExtension</code> has no type arguments, and blocks are reached as properties (<code>defaultConfig.apply { }</code>) rather than lambdas. That is an <strong>AGP 9 change</strong>. The AGP 9.0 release notes state that the parameterization of <code>CommonExtension</code> was removed and the block methods moved to <code>ApplicationExtension</code> and <code>LibraryExtension</code>. Convention plugins written for AGP 8 used <code>CommonExtension&lt;*, *, *, *, *, *&gt;</code> and <code>defaultConfig { }</code>, and need this update when you move to AGP 9.</p>
-<p>A tiny extension gives every plugin the version catalog:</p>
-<pre><code>val Project.libs: VersionCatalog
-    get() = extensions.getByType&lt;VersionCatalogsExtension&gt;().named("libs")</code></pre>
-<h2 id="the-plugins-themselves">The plugins themselves</h2>
-<p>An Android library:</p>
-<pre><code>class AndroidLibraryConventionPlugin : Plugin&lt;Project&gt; {
-    override fun apply(target: Project) = with(target) {
-        apply(plugin = "com.android.library")
-        extensions.configure&lt;LibraryExtension&gt; {
-            configureKotlinAndroid(this)
-            defaultConfig.testInstrumentationRunner =
-                "androidx.test.runner.AndroidJUnitRunner"
-        }
-        dependencies {
-            "testImplementation"(libs.findLibrary("junit").get())
-            "testImplementation"(libs.findLibrary("kotlinx.coroutines.test").get())
-        }
-    }
-}</code></pre>
-<p>There is no Kotlin Android plugin to apply: AGP 9's built-in Kotlin support compiles the sources.</p>
-<p>Hilt, in the style of Now in Android's <code>HiltConventionPlugin</code>:</p>
-<pre><code>class HiltConventionPlugin : Plugin&lt;Project&gt; {
-    override fun apply(target: Project) = with(target) {
-        apply(plugin = "com.google.devtools.ksp")
-        pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-            dependencies {
-                "implementation"(libs.findLibrary("hilt.core").get())
-                "ksp"(libs.findLibrary("hilt.compiler").get())
-            }
-        }
-        pluginManager.withPlugin("com.android.base") {
-            apply(plugin = "com.google.dagger.hilt.android")
-            dependencies {
-                "implementation"(libs.findLibrary("hilt.android").get())
-                "ksp"(libs.findLibrary("hilt.android.compiler").get())
-            }
-        }
-    }
-}</code></pre>
-<p><code>pluginManager.withPlugin</code> runs its block only if that plugin is applied, so one convention plugin serves both pure Kotlin and Android modules.</p>
-<p>The feature plugin encodes your module rules in one place: it stacks the Compose library and Hilt plugins and adds what every feature needs.</p>
-<pre><code>class AndroidFeatureConventionPlugin : Plugin&lt;Project&gt; {
-    override fun apply(target: Project) = with(target) {
-        apply(plugin = "myapp.android.library.compose")
-        apply(plugin = "myapp.hilt")
-        dependencies {
-            "implementation"(project(":core:data"))
-            "implementation"(project(":core:designsystem"))
-            "implementation"(project(":core:ui"))
-            "testImplementation"(project(":core:testing"))
-        }
-    }
-}</code></pre>
-<h2 id="what-a-module-s-build-file-looks-like-now">What a module's build file looks like now</h2>
-<pre><code>// feature/notes/build.gradle.kts
-plugins {
-    alias(libs.plugins.myapp.android.feature)
-}
-android {
-    namespace = "com.example.myapp.feature.notes"
-}
-dependencies {
-    implementation(projects.core.domain)
-}</code></pre>
-<p>Everything a feature always needs comes from the plugin; the module lists only what is special about it.</p>
-<h2 id="the-version-catalog">The version catalog</h2>
-<p><code>gradle/libs.versions.toml</code> is where Gradle looks by default for dependency versions. It has four sections: <code>[versions]</code>, <code>[libraries]</code>, <code>[bundles]</code> for groups of libraries always used together, and <code>[plugins]</code> for Gradle plugin IDs. Your convention plugins get <code>[plugins]</code> entries too, without versions, because they come from the included build:</p>
-<pre><code>[plugins]
-android-library = { id = "com.android.library", version.ref = "agp" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-myapp-android-library = { id = "myapp.android.library" }
-myapp-android-feature = { id = "myapp.android.feature" }</code></pre>
-<p>A few rules keep the catalog useful:</p>
-<ul><li><strong>Dashes become dots.</strong> <code>androidx-navigation3-runtime</code> is <code>libs.androidx.navigation3.runtime</code> in Kotlin, and <code>libs.findLibrary("androidx.navigation3.runtime")</code> inside a plugin.</li><li><strong>Libraries under a BOM have no version.</strong> Compose entries take their versions from the Compose BOM, which the Compose convention plugin adds as a <code>platform()</code> dependency.</li><li><strong>Bundles only for libraries that are always used together.</strong></li><li><strong>Versions live only in the catalog.</strong> A version string in any <code>build.gradle.kts</code> is a version that will be missed in the next upgrade.</li></ul>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Shared build logic lives in a <code>build-logic</code> included build, not in <code>subprojects {}</code> or <code>allprojects {}</code>.</li><li><code>compileSdk</code>, <code>minSdk</code> and the Java and Kotlin targets are set in exactly one place.</li><li>Convention plugins use AGP 9's unparameterized <code>CommonExtension</code>.</li><li>Each module's build file names its kind and lists only its own extras.</li><li>All versions live in <code>gradle/libs.versions.toml</code>, shared with <code>build-logic</code>.</li></ul><p><a href="https://payhip.com/b/4YgzU">Go deeper: Structure That Scales</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Android reminders that actually fire: exact alarms, SCHEDULE_EXACT_ALARM and rescheduling after reboot</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/android-exact-alarms-reminders-reboot/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/android-exact-alarms-reminders-reboot/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Which Android scheduler to use for &quot;at this minute&quot; versus &quot;some time today&quot;, SCHEDULE_EXACT_ALARM versus USE_EXACT_ALARM on Android 14, asking for Alarms &amp; reminders access, a fallback when it is denied, and the receiver that reschedules after a reboot or clock change.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>alarmmanager</category><category>exact alarms</category><category>notifications</category><category>kotlin</category><category>reminders</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A reminder is a promise with a time on it. The user said "remind me at 9:00", and if the notification arrives at 9:40, or after the next reboot, or never, the promise is broken. Android gives you several ways to run code later, and each one trades precision for battery. This post picks the right one for each job and makes reminders survive the three things that kill them: Doze, reboots and permission changes.</p>
-<h2 id="the-menu-of-later">The menu of "later"</h2>
-<div class="table"><table><thead><tr><th>Need</th><th>Tool</th><th>Precision</th></tr></thead><tbody><tr><td>Deferrable work: sync, cleanup, a daily digest</td><td>WorkManager</td><td>Minutes to hours; runs when constraints allow</td></tr><tr><td>"Around this time"</td><td><code>AlarmManager.set()</code> / <code>setAndAllowWhileIdle()</code></td><td>Within an hour on Android 12+, unless battery saving delays it</td></tr><tr><td>"Within this window"</td><td><code>AlarmManager.setWindow()</code></td><td>Inside the window; short windows are usually stretched to 10 minutes</td></tr><tr><td>"At this minute", user-set</td><td><code>setExactAndAllowWhileIdle()</code></td><td>Nearly exact, even in Doze; needs exact alarm access</td></tr><tr><td>An alarm clock</td><td><code>setAlarmClock()</code></td><td>Exact; shown to the user as an upcoming alarm</td></tr></tbody></table></div>
-<p>Those figures come from Google's alarm documentation. For <code>set()</code> and <code>setAndAllowWhileIdle()</code>, the alarm never fires early, and on Android 12 (API 31) and higher the system fires it within one hour of the trigger time unless battery saver or Doze is in effect. For <code>setWindow()</code> on apps targeting Android 12+, windows under 600,000 milliseconds are typically clipped to 10 minutes.</p>
-<p>An hour late is fine for "back up my notes overnight" and useless for "remind me before the meeting". A user-set reminder at a specific minute is exactly what exact alarms exist for.</p>
-<h2 id="two-permissions-very-different-terms">Two permissions, very different terms</h2>
-<div class="table"><table><thead><tr><th></th><th><code>SCHEDULE_EXACT_ALARM</code></th><th><code>USE_EXACT_ALARM</code></th></tr></thead><tbody><tr><td>Granted by</td><td>The user, in "Alarms &amp; reminders"</td><td>Automatically at install</td></tr><tr><td>Can the user revoke it?</td><td>Yes</td><td>No</td></tr><tr><td>Who should declare it</td><td>Apps with a user-facing feature that needs precise timing</td><td>Calendar and alarm clock apps</td></tr><tr><td>Google Play</td><td>Allowed for genuine precise-timing features</td><td>Restricted by Play policy to limited use cases</td></tr></tbody></table></div>
-<p>Two details matter most. On Android 14 and higher, <code>SCHEDULE_EXACT_ALARM</code> is no longer pre-granted to most newly installed apps that target Android 13 or higher; it starts out denied. And without the access, <code>setExact()</code>, <code>setExactAndAllowWhileIdle()</code> and <code>setAlarmClock()</code> throw a <code>SecurityException</code>.</p>
-<p>A notes app with a reminder feature is not a calendar or an alarm clock. It should declare <code>SCHEDULE_EXACT_ALARM</code>, ask for it in context, and fall back to an inexact alarm when the user says no. Declaring <code>USE_EXACT_ALARM</code> just to skip the question puts the Play listing at risk for a feature that works without it.</p>
-<pre><code>&lt;uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /&gt;
-&lt;uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /&gt;</code></pre>
-<h2 id="asking-for-alarms-reminders">Asking for "Alarms &amp; reminders"</h2>
-<p><code>SCHEDULE_EXACT_ALARM</code> is a special app access, not a runtime permission. There is no dialog: you send the user to a settings page and check the result when they come back. Ask at the moment it matters, when the user sets a reminder for a specific time.</p>
-<pre><code>fun canScheduleExact(context: Context): Boolean {
-    if (Build.VERSION.SDK_INT &lt; 31) return true
-    val am = context.getSystemService(AlarmManager::class.java)
-    return am.canScheduleExactAlarms()
-}
-
-fun requestExactAlarmAccess(context: Context) {
-    if (Build.VERSION.SDK_INT &lt; 31) return
-    context.startActivity(
-        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-            Uri.fromParts("package", context.packageName, null))
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
-}</code></pre>
-<p>Explain why in your own UI first, then send the intent. One line under the time picker is enough: "Reminders may arrive up to an hour late. Allow exact reminders?" with an Allow button. If the user ignores it, the reminder is still saved and still fires, just less precisely.</p>
-<p>When the user grants access, the system sends <code>AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED</code>. Listen for it, call <code>canScheduleExactAlarms()</code> again rather than trusting the broadcast alone, and reschedule pending reminders as exact ones. The user can also revoke access at any time, and the system then cancels all of the app's future exact alarms.</p>
-<h2 id="database-first-alarm-second">Database first, alarm second</h2>
-<p>Store every reminder in your database first (note ID, trigger time, state), then schedule the alarm. The database is the source of truth; the alarm is only the wake-up call. That split is what makes rescheduling possible.</p>
-<pre><code>class ReminderScheduler(private val context: Context) {
-    private val am = context.getSystemService(AlarmManager::class.java)
-
-    fun schedule(r: Reminder) {
-        val pi = firePendingIntent(r.noteId)
-        val at = r.triggerAt.toEpochMilli()
-        if (canScheduleExact(context)) {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
-        } else {
-            am.setWindow(AlarmManager.RTC_WAKEUP, at, 10 * 60 * 1000L, pi)
-        }
-    }
-
-    fun cancel(noteId: Long) = am.cancel(firePendingIntent(noteId))
-
-    private fun firePendingIntent(noteId: Long) = PendingIntent.getBroadcast(
-        context, noteId.toInt(),
-        Intent(context, ReminderFireReceiver::class.java)
-            .setData("fieldnotes://note/$noteId".toUri()),
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-}</code></pre>
-<p><code>RTC_WAKEUP</code> uses wall-clock time and wakes the device, which is right for "9:00 tomorrow". For "in 20 minutes", <code>ELAPSED_REALTIME_WAKEUP</code> with <code>SystemClock.elapsedRealtime()</code> is immune to the user changing the clock. The data URI makes each reminder's PendingIntent unique, so <code>cancel()</code> cancels exactly one.</p>
-<p><code>setExact*</code> can still throw if access was revoked between your check and your call. Wrap the exact call in <code>try</code>/<code>catch</code> and fall back to the inexact path in the <code>catch</code>.</p>
-<h2 id="surviving-a-reboot">Surviving a reboot</h2>
-<p>Google's alarm documentation puts it plainly: "By default, all alarms are canceled when a device shuts down." The fix is to reschedule from your database when the system finishes booting, and also when the clock, the time zone or the exact-alarm access changes:</p>
-<pre><code>&lt;receiver
-    android:name=".reminders.RescheduleReceiver"
-    android:exported="true"&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name="android.intent.action.BOOT_COMPLETED" /&gt;
-        &lt;action android:name="android.intent.action.TIME_SET" /&gt;
-        &lt;action android:name="android.intent.action.TIMEZONE_CHANGED" /&gt;
-        &lt;action android:name=
-            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" /&gt;
-    &lt;/intent-filter&gt;
-&lt;/receiver&gt;</code></pre>
-<p>The receiver must be exported because the system sends these broadcasts, and the boot broadcast reaches your app only if the user has launched it at least once. Whatever the trigger, it does one thing: read every pending reminder and schedule it again.</p>
-<pre><code>class RescheduleReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED,
-            Intent.ACTION_TIME_CHANGED,
-            Intent.ACTION_TIMEZONE_CHANGED,
-            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED -&gt; Unit
-            else -&gt; return
-        }
-        val pending = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val app = context.applicationContext as FieldNotesApp
-                val scheduler = ReminderScheduler(context)
-                val now = Instant.now()
-                app.reminders.pending().forEach { r -&gt;
-                    if (r.triggerAt.isBefore(now)) app.reminders.markMissed(r.noteId)
-                    else scheduler.schedule(r)
-                }
-            } finally {
-                pending.finish()
-            }
-        }
-    }
-}</code></pre>
-<p>One trap: the action string for a clock change is <code>android.intent.action.TIME_SET</code>, and the Kotlin constant that holds it is <code>Intent.ACTION_TIME_CHANGED</code>. The names differ, which catches people out. Reminders whose time passed while the phone was off are marked missed and shown in the app rather than fired late.</p>
-<h2 id="testing-the-denied-path">Testing the denied path</h2>
-<p>On an emulator, turn the app's access off in Settings, Apps, Special app access, Alarms &amp; reminders. The app should fall back to inexact alarms and show its one-line explanation, and <code>canScheduleExactAlarms()</code> should report <code>false</code>. Then reboot the emulator and confirm pending reminders were rescheduled.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Each job uses the least precise scheduler that still keeps its promise.</li><li><code>SCHEDULE_EXACT_ALARM</code> is requested in context, never <code>USE_EXACT_ALARM</code> for a non-calendar app.</li><li>Reminders are stored first and scheduled second.</li><li>Exact calls are wrapped in <code>try</code>/<code>catch</code> with an inexact fallback.</li><li>A receiver reschedules on boot, clock, time zone and access changes.</li></ul><p><a href="https://payhip.com/b/Y21by">Go deeper: Notify Them Right</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
+<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=wifi+access+point+multiple+SSID+VLAN&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Access point with VLAN SSIDs</a> · <a href="https://www.amazon.com/s?k=managed+switch+802.1Q+VLAN+8+port&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Managed VLAN switch</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p><p><a href="https://payhip.com/b/k6WMS">Go deeper: Lock Down Your Home Network</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
 </channel></rss>
