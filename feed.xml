@@ -1,9 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 12 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 13 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>The trap of the version code reset</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</guid>
+<item><title>remember vs rememberSaveable vs ViewModel: what survives what</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</guid>
+<pubDate>Fri, 13 Nov 2026 12:30:00 -0500</pubDate><description>Learn which state holder survives rotation, process death, or app closure in Jetpack Compose. Stop losing draft text and scroll positions with the right choice.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-13.jpg" type="image/jpeg" length="0"/>
+<category>compose</category><category>android</category><category>state</category><category>viewmodel</category><category>remembersaveable</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-13.jpg" alt=""></p><p>Most developers assume that if they declare a variable inside a composable, it will persist as long as the screen is visible. That is the trap. You write <code>var count by remember { mutableStateOf(0) }</code>, expect the counter to hold its value when you rotate the phone or switch dark mode, and then watch it snap back to zero. The issue is not that Compose is broken; it is that you picked a holder that only survives recomposition, while your device performed a configuration change that recreated the entire Activity.</p>
+<p>The book <em>Compose Without the Confusion</em> opens its state chapter with exactly this distinction under the heading "How long does state live?". This post covers the four main holders, what each one survives, and the exact commands or settings you need to use to match your data to the right container.</p>
+<p>One caveat, straight from the book: this guidance applies to standard Android configuration changes and process death. Your specific app architecture may require additional layers, so check the sections on ViewModels and databases if your state needs to survive beyond the screen.</p>
+<h2 id="the-trap-confusing-recomposition-with-configuration-changes">The trap: confusing recomposition with configuration changes</h2>
+<p>The usual way people find out their state is too fragile is that they rotate the phone and see their UI reset. The book explains that <code>remember</code> survives only recomposition. Recomposition happens when Compose needs to redraw a composable because its inputs changed, but the Activity itself remains alive. When you rotate the device, switch dark mode, or change the system language, Android recreates the Activity. This destroys the composition tree entirely.</p>
+<p>If your state is held in <code>remember</code>, it vanishes with the old Activity. You might think adding <code>mutableStateOf</code> fixes it, but writing <code>val count = mutableStateOf(0)</code> without <code>remember</code> means the holder is recreated on every recomposition anyway, resetting the value immediately. You need both an observable holder and a mechanism to keep it across recreations.</p>
+<p>The fix for temporary UI state is <strong>rememberSaveable</strong>. It is <code>remember</code> that also writes the value into the saved instance state. This allows it to survive configuration changes and process death for Bundle-able values like numbers, strings, booleans, and parcelable types.</p>
+<pre><code>var draftName by rememberSaveable { mutableStateOf("") }
+var showDeleteDialog by rememberSaveable { mutableStateOf(false) }</code></pre>
+<p>A good rule of thumb from the book is to use <code>remember</code> or <code>rememberSaveable</code> for UI element state, such as whether a menu is expanded, the scroll position, or a draft in a text field. These values live in the composable and do not need to persist after the app closes.</p>
+<h2 id="the-trap-expecting-viewmodel-to-save-everything">The trap: expecting ViewModel to save everything</h2>
+<p>Many developers move all state into a <code>ViewModel</code>, assuming it will solve all persistence problems. This is partially correct but incomplete. A <code>ViewModel</code> survives configuration changes on its own, meaning your data stays intact when you rotate the phone. However, the book notes that a <code>ViewModel</code> does not survive process death on its own. If the system kills your app while it is in the background, the <code>ViewModel</code> is destroyed along with the Activity.</p>
+<p>If your state comes from data or business rules, such as a list of items fetched from an API or whether a save operation succeeded, it belongs in a <code>ViewModel</code>. This keeps your UI composables stateless and testable. You hoist the state up to the lowest common ancestor of everything that reads or writes it.</p>
+<pre><code>// Stateless: easy to preview, test and reuse
+@Composable
+fun AddItemBar(
+    name: String,
+    onNameChange: (String) -&gt; Unit,
+    onAdd: () -&gt; Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text("New item") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(8.dp))
+        Button(onClick = onAdd, enabled = name.isNotBlank()) { Text("Add") }
+    }
+}</code></pre>
+<p>This pattern separates the UI from the state ownership. The parent owns the state and passes it down; the child sends events up. If the state needs to survive the app being closed, you must move it out of the <code>ViewModel</code> and into a persistent storage solution like Room or DataStore.</p>
+<h2 id="the-trap-mutating-objects-instead-of-replacing-them">The trap: mutating objects instead of replacing them</h2>
+<p>Another common failure mode is assuming Compose will detect changes when you modify an object in place. Compose notices when a State holder gets a new value, but it does not notice when you reach into the old value and change it. Mutable objects that are not observable, such as an <code>ArrayList</code> or a mutable data class, do not trigger recomposition and show stale data.</p>
+<pre><code>// Wrong: mutates the list in place, Compose sees the same object
+val items = remember { mutableStateOf(mutableListOf&lt;PantryItem&gt;()) }
+items.value.add(newItem)                       // nothing recomposes</code></pre>
+<p>The fix is to treat UI state as values. You should replace the value with a new immutable list or use an observable list type provided by Compose. For data classes, you use <code>copy()</code> instead of setting fields directly.</p>
+<pre><code>// Right: replace the value with a new immutable list
+var items by remember { mutableStateOf(listOf&lt;PantryItem&gt;()) }
+items = items + newItem
+
+// Also right: an observable list
+val items = remember { mutableStateListOf&lt;PantryItem&gt;() }
+items.add(newItem)
+
+// Updating one item in a data class: copy, do not set fields
+items = items.map { if (it.id == id) it.copy(quantity = it.quantity + 1) else it }</code></pre>
+<p>This ensures that every time the list content changes, Compose receives a new reference and triggers recomposition for the affected components.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Use <code>remember</code> for state that only needs to survive recomposition within the same Activity instance.</li><li>Use <code>rememberSaveable</code> for UI element state like drafts or scroll positions that must survive rotation and process death.</li><li>Remember that <code>rememberSaveable</code> works out of the box for Bundle-able types; use a custom Saver for complex objects.</li><li>Hoist state to the lowest common ancestor that needs it, passing values down and events up via lambdas.</li><li>Use <code>ViewModel</code> for screen state derived from data or business rules that must survive configuration changes.</li><li>Know that <code>ViewModel</code> does not survive process death; use Room or DataStore for persistent storage.</li><li>Replace mutable lists with immutable lists or <code>mutableStateListOf</code> to trigger recomposition on change.</li><li>Never call suspend functions directly in the composable body; wrap them in <code>LaunchedEffect</code> with appropriate keys.</li></ul><p><a href="https://payhip.com/b/fNO53">Go deeper: Compose Without the Confusion</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>File Manager: Browse &amp; Sort, a simple, private Android file manager</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/file-manager-browse-sort-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/file-manager-browse-sort-android-app/</guid>
+<pubDate>Fri, 13 Nov 2026 12:30:00 -0500</pubDate><description>A free, simple Android file manager for browsing storage and SD cards, batch copy and move, search and filters, and all file operations happen on your device.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.filemanager.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>files</category><category>tools</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.filemanager.jpg" alt=""></p><p>Your phone fills up quietly. Downloads pile up, screenshots multiply, and somewhere there is a PDF you need right now. Finding it through a dozen different apps is slow. A file manager gives you one view of what is actually on your storage, and File Manager: Browse &amp; Sort keeps that view simple and fast.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Browse storage:</strong> internal storage and SD cards, with quick access to Downloads, Pictures and Music.</li><li><strong>Basic file operations:</strong> create, rename, move and delete files and folders.</li><li><strong>Sorting:</strong> by name, date, size or type.</li><li><strong>Copy and move</strong> between folders, with batch operations for multiple files and drag-and-drop style organization.</li><li><strong>Clipboard history</strong> for the files you have copied.</li><li><strong>Search and filters:</strong> instant search across all files, filters by type, size and date, and quick access to recent files.</li><li><strong>Clean design:</strong> dark mode and a tablet-optimized layout.</li></ul>
+<h2 id="a-quick-cleanup-routine">A quick cleanup routine</h2>
+<p>A file manager is most useful when you give it ten minutes now and then. Using the features above:</p>
+<ol><li><strong>Sort by size.</strong> The biggest files float to the top, which is usually where the space went.</li><li><strong>Check Downloads.</strong> Old installers, receipts and duplicates tend to gather there.</li><li><strong>Filter by type.</strong> Look at only videos, or only documents, to decide what to keep.</li><li><strong>Batch move or delete.</strong> Select several files at once instead of one at a time.</li><li><strong>Sort by date</strong> to find what you saved recently, or use <strong>recent files</strong>.</li></ol>
+<h2 id="finding-a-file-fast">Finding a file fast</h2>
+<p>When you know what you want but not where it is, search is quicker than browsing. Instant search covers all files, and you can narrow it with type, size and date filters. Recent files is the shortcut for something you downloaded or saved a few minutes ago.</p>
+<h2 id="moving-things-around">Moving things around</h2>
+<p>Organizing works the way you would expect on a computer: copy or move files between folders, run the same operation on many files at once, and use the clipboard history to go back to something you copied earlier. Moving files to an SD card to free up internal storage is a typical use.</p>
+<h2 id="private-by-design">Private by design</h2>
+<p>A file manager can see everything on your storage, so it is worth knowing what it does with that access. According to the listing, all file operations happen on your device and no account is required; the app is free, with ads, and internet access is used only for those ads. Your files are handled locally.</p>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>In-app purchases:</strong> none are listed.</li><li><strong>Account:</strong> none required.</li><li><strong>Category and rating:</strong> Tools, rated Everyone.</li><li><strong>Devices:</strong> phones and tablets, with a tablet-optimized layout.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You want one place to see and organize everything on your phone's storage.</li><li>You need to free up space and want to sort files by size.</li><li>You move files between internal storage and an SD card.</li><li>You prefer a file manager that keeps everything on your device.</li></ul><p><a href="https://charleshartmann.com/apps/">Get File Manager: Browse &amp; Sort for Android</a></p>]]></content:encoded></item><item><title>The trap of the version code reset</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/the-trap-of-the-version-code-reset/</guid>
 <pubDate>Thu, 12 Nov 2026 12:30:00 -0500</pubDate><description>You set a version code in CI to prevent duplicates, but the workflow recreation resets the counter, forcing you to use a code Play has already rejected.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>android</category><category>gradle</category><category>google play</category><category>versioning</category><category>ci</category>
@@ -697,143 +775,5 @@ sudo find / -xdev -type f -size +500M -exec ls -lh {} + 2&gt;/dev/null</code></p
 <ul><li>The exact command you ran and its exact output, copied, not paraphrased.</li><li>The relevant log lines (<code>journalctl -u app -n 50 --no-pager</code>), with secrets removed.</li><li>Versions: <code>cat /etc/debian_version</code>, <code>uname -r</code>, and the app's version.</li><li>What you already tried, and what changed before it broke.</li></ul>
 <p>Writing that down often solves the problem before you post it, and it is exactly the note you will want next time.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>Follow the order: running, listening, reachable, logs, changes.</li><li>Write down every change you make while troubleshooting.</li><li>Snapshot before trying a fix on anything important.</li><li>Read load average against <code>nproc</code>, and memory by the <code>available</code> column.</li><li>Check the kernel log for OOM kills when a service dies without a reason.</li><li>Truncate live logs instead of deleting them.</li></ul><p><a href="https://payhip.com/b/LV4qz">Go deeper: Linux Without the Guesswork</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Frigate recording retention: continuous, motion and alerts, and how big a disk you need</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/frigate-recording-retention-storage-math/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/frigate-recording-retention-storage-math/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Frigate keeps continuous, motion and alert/detection footage on separate clocks. The three retention plans from the Frigate docs, the storage arithmetic for your bitrates, what happens when the disk fills anyway, and what to back up.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>frigate</category><category>nvr</category><category>security cameras</category><category>homelab</category><category>storage</category><category>home assistant</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Recording is the easy part of a Frigate NVR to switch on and the hard part to size. Without a plan, one of two things happens. Either retention is set to "30 days of everything" and the disk fills in a week, at which point Frigate starts deleting the oldest footage on its own; or retention is so short that the clip you needed from last Tuesday is already gone. A retention plan is a short calculation and a few numbers in <code>config.yml</code>. This post walks through both.</p>
-<h2 id="what-frigate-keeps">What Frigate keeps</h2>
-<p>Frigate records in short segments and keeps three kinds of footage, each with its own retention:</p>
-<ul><li><strong>Continuous</strong>: all video, whether or not anything moved.</li><li><strong>Motion</strong>: only segments in which motion was detected.</li><li><strong>Alerts and detections</strong>: segments that overlap a review item, with a few seconds before and after (<code>pre_capture</code> and <code>post_capture</code>, both 5 seconds by default).</li></ul>
-<p>Each kind has its own number of days. A segment that overlaps an alert is the one you most want to keep, so give alerts the most days. Retention for alerts and detections also has a <strong>mode</strong>:</p>
-<div class="table"><table><thead><tr><th>Mode</th><th>What is kept for the review item's retention</th></tr></thead><tbody><tr><td><code>all</code></td><td>Every segment that overlaps the review item</td></tr><tr><td><code>motion</code></td><td>Only overlapping segments with motion</td></tr><tr><td><code>active_objects</code></td><td>Only overlapping segments with an active (moving) tracked object</td></tr></tbody></table></div>
-<h2 id="three-plans-from-the-documentation">Three plans from the documentation</h2>
-<p>Frigate's recording documentation gives three starting points. Pick the one that matches what you would need after an incident.</p>
-<p><strong>Keep everything for a while.</strong> All video for 3 days, motion for 7 days, and anything overlapping an alert or detection for 30 days:</p>
-<pre><code>record:
-  enabled: true
-  continuous:
-    days: 3
-  motion:
-    days: 7
-  alerts:
-    retain:
-      days: 30
-      mode: all
-  detections:
-    retain:
-      days: 30
-      mode: all</code></pre>
-<p><strong>Reduced storage.</strong> No continuous retention; motion for 3 days; alerts and detections for 30 days, keeping only their segments with motion:</p>
-<pre><code>record:
-  enabled: true
-  motion:
-    days: 3
-  alerts:
-    retain:
-      days: 30
-      mode: motion
-  detections:
-    retain:
-      days: 30
-      mode: motion</code></pre>
-<p><strong>Alerts only.</strong> Video is discarded unless an alert is ongoing; alerts are kept for 30 days:</p>
-<pre><code>record:
-  enabled: true
-  continuous:
-    days: 0
-  alerts:
-    retain:
-      days: 30
-      mode: motion</code></pre>
-<p>Continuous footage is what answers "what happened in the driveway at 3 a.m." when nothing was detected, which is why the first plan is a good default if the disk allows it. Retention values can be set globally, as above, and overridden per camera. Days may be decimals, so <code>0.5</code> keeps twelve hours.</p>
-<h2 id="storage-arithmetic">Storage arithmetic</h2>
-<p>The disk you need depends on the bitrate of each camera's main stream and the plan you picked. The upper bound is continuous recording:</p>
-<pre><code>GB per day per camera = bitrate (Mbit/s) x 86,400 / 8 / 1,000
-
-  2 Mbit/s  -&gt;  21.6 GB/day
-  4 Mbit/s  -&gt;  43.2 GB/day
-  6 Mbit/s  -&gt;  64.8 GB/day
-  8 Mbit/s  -&gt;  86.4 GB/day</code></pre>
-<p>For the first plan, estimate each layer separately and add them. Continuous days are the full rate. Motion days and alert days are a fraction of it, and that fraction depends entirely on the scene: a camera on a quiet back garden may see motion a small part of the day, one facing a street much more. A worked example, arithmetic only:</p>
-<pre><code>4 cameras at 4 Mbit/s
-
-Continuous, 3 days:      4 x 43.2 GB x 3          = 518 GB
-Motion days 4-7:         4 x 43.2 GB x 4 x 0.20   = 138 GB   (assume 20% motion)
-Alerts/detections 8-30:  4 x 43.2 GB x 23 x 0.05  = 199 GB   (assume 5% activity)
-                                           Total  ~ 855 GB  -&gt; plan for a 2 TB disk</code></pre>
-<p>The 20 and 5 percent figures are assumptions to replace with your own. After a few days, open <strong>System &gt; Storage</strong> in Frigate: it shows how much space each camera's recordings use, which gives you a real per-day figure. That page counts Frigate's recordings only; for the disk itself, use <code>df -h</code> on the host.</p>
-<p>Leave at least 20 percent of the disk free in the plan. Bitrates rise at night and in rain, cameras get added, and the emergency cleanup below works from the disk's real free space.</p>
-<h2 id="when-the-disk-fills-anyway">When the disk fills anyway</h2>
-<p>Frigate watches the free space of the disk holding <code>/media/frigate/recordings</code>. When less than roughly one hour of recording space remains, estimated from the current bitrate, it deletes the oldest recordings first, <strong>regardless of your retention settings</strong>, and logs a message. Two consequences follow:</p>
-<ul><li>Anything else filling that disk, even files that are not Frigate's, can trigger deletion of your oldest recordings. Keep the recordings disk for recordings only.</li><li>Frequent emergency cleanups mean your retention is larger than the disk. Reduce the days until normal retention keeps up.</li></ul>
-<p>Also check from inside the container that <code>/media/frigate</code> really is the disk you think it is:</p>
-<pre><code>docker exec frigate df -h /media/frigate</code></pre>
-<p>If a disk or NFS share is not actually mounted there, Frigate fills whatever filesystem is underneath, usually the system disk. If you record to a NAS, a dedicated dataset with its own quota keeps a runaway Frigate from filling the rest of the NAS, and keeps the NAS's other files from triggering Frigate's cleanup.</p>
-<h2 id="snapshots-and-exports">Snapshots and exports</h2>
-<p><strong>Snapshots</strong> are still images of tracked objects. They are what Home Assistant attaches to notifications, and they are off by default. Turn them on and give them their own retention:</p>
-<pre><code>snapshots:
-  enabled: true
-  bounding_box: true
-  retain:
-    default: 30</code></pre>
-<p><strong>Exports</strong> are how you keep a specific clip beyond retention. Use the Export button in the History view (or right-click a review item), choose the time range and give it a name. Exports are saved separately and are not removed by retention. Download an export to hand a clip to someone instead of copying files out of the recordings folder.</p>
-<h2 id="h-265-recordings-on-apple-devices">H.265 recordings on Apple devices</h2>
-<p>If a camera records an H.265 main stream, Safari on macOS and iPhone may refuse to play its recordings. Frigate has a per-camera setting for this:</p>
-<pre><code>cameras:
-  driveway:
-    ffmpeg:
-      apple_compatibility: true</code></pre>
-<p>Test playback from every device that will view recordings, including the Home Assistant app, before you rely on it.</p>
-<h2 id="what-to-back-up">What to back up</h2>
-<p>The recordings themselves are rarely backed up: they are large, they expire by design, and the important clips are exports. What you must back up is small:</p>
-<ul><li><code>config.yml</code> (your whole configuration)</li><li><code>frigate.db</code> (review items, tracked objects, users), copied while Frigate is stopped or with SQLite's backup command</li><li>your <code>compose.yaml</code> and <code>.env</code></li><li>the exports you want to keep, copied off the Frigate disk</li></ul>
-<p>If Frigate runs in a Proxmox VM, a VM backup covers all of it. Untick <strong>Backup</strong> on the recordings disk in the VM's Hardware tab so the backup skips the footage.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Plan chosen and written down: continuous, motion and alert/detection days.</li><li>Storage estimate done with your real bitrates, plus 20 percent headroom.</li><li>The <code>record</code> block in <code>config.yml</code> matches the plan.</li><li>Snapshots enabled with retention.</li><li>The recordings disk holds nothing but Frigate media.</li><li><code>docker exec frigate df -h /media/frigate</code> shows the right disk.</li><li>Storage page checked after a week, retention adjusted.</li><li>Config, database and compose files are in your backups.</li></ul>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=surveillance+hard+drive+8TB&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Surveillance-rated hard drive</a> · <a href="https://www.amazon.com/s?k=PoE+IP+camera+RTSP+ONVIF&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">PoE camera with RTSP</a> · <a href="https://www.amazon.com/s?k=PoE+switch+8+port&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">PoE switch</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p><p><a href="https://payhip.com/b/rPynw">Go deeper: Cameras You Control</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Your cast button went grey after the IoT VLAN: fix discovery without tearing down the wall</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/cast-button-grey-iot-vlan-mdns-repeater/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/cast-button-grey-iot-vlan-mdns-repeater/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Moving smart devices to their own network usually breaks casting, AirPlay and printer discovery, and the tempting fix is a rule that lets IoT reach everything again. Here is why discovery breaks, the mDNS repeater and SSDP relay on OPNsense, when to give Home Assistant a second network card, and the NTP redirect for devices that ignore DHCP.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>opnsense</category><category>iot</category><category>vlan</category><category>mdns</category><category>home assistant</category><category>networking</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The moment IoT moves to its own network, something stops working. The TV no longer shows up as a cast target, the speaker disappears from the AirPlay list, and the printer goes missing. Usually it is not the firewall rules. It is discovery: the way your phone finds the TV, the speaker or the printer by shouting on the local network and waiting for an answer. Those shouts do not cross a router.</p>
-<h2 id="the-trap-one-rule-that-undoes-the-whole-point">The trap: one rule that undoes the whole point</h2>
-<p>The tempting fix is a rule that lets IoT reach everything again. It works, and it throws away the separation you just built. The right fix is to understand what the device is actually doing and pass exactly that.</p>
-<h2 id="why-discovery-breaks">Why discovery breaks</h2>
-<p>Most home discovery protocols use multicast, which is local to one network by design:</p>
-<div class="table"><table><thead><tr><th>Protocol</th><th>Address and port</th><th>Used by</th></tr></thead><tbody><tr><td>mDNS (Bonjour)</td><td>224.0.0.251, UDP 5353</td><td>AirPlay, Chromecast, HomeKit, printers, ESPHome</td></tr><tr><td>SSDP (UPnP discovery)</td><td>239.255.255.250, UDP 1900</td><td>Smart TVs, Sonos, DLNA media servers, some consoles</td></tr></tbody></table></div>
-<p>A router does not forward multicast between subnets. Your phone on TRUSTED asks "is there a TV here?", the TV on IOT never hears it, and the cast button stays grey. Nothing is blocked; the question just never arrives.</p>
-<p>It helps to keep the one rule behind every rule in mind: a zone may start connections to zones below it, never to zones above it, and replies are always allowed back because OPNsense is a stateful firewall. Your phone (trusted) casting to the TV (IoT) is downhill, so the trusted rules already allow the connection itself. Only the discovery question is missing.</p>
-<h2 id="fix-1-an-mdns-repeater">Fix 1: an mDNS repeater</h2>
-<p>OPNsense has a plugin for this: <strong>os-mdns-repeater</strong>.</p>
-<ol><li><strong>System → Firmware → Plugins</strong>: install <code>os-mdns-repeater</code>.</li><li><strong>Services → mDNS Repeater</strong>: enable it and select the two interfaces it should bridge, <strong>TRUSTED</strong> and <strong>IOT</strong>.</li><li>Do not add GUEST or MGMT.</li></ol>
-<p>The repeater only carries discovery. Once your phone knows the TV's address, it opens a normal connection to it, which your trusted rules already allow.</p>
-<p>What the repeater does not do: it does not open any firewall ports, and it does not let IoT devices start connections into trusted. It copies small discovery packets between two networks. Your rules still decide everything else.</p>
-<h3 id="when-casting-finds-the-device-but-won-t-play">When casting finds the device but won't play</h3>
-<p>Some devices also need to connect back. Chromecast and AirPlay, for example, can open connections from the device to the phone during a session. If casting finds the device but fails to play:</p>
-<ol><li>Open <strong>Firewall → Log Files → Live View</strong> and filter on that device's address.</li><li>Look for blocked traffic from the device to the phone.</li><li>Add one narrow pass rule on IOT: that device to TRUSTED net, with the ports you saw.</li></ol>
-<p>One device per rule. Not IOT net to everything.</p>
-<h2 id="fix-2-ssdp-with-a-broadcast-relay">Fix 2: SSDP with a broadcast relay</h2>
-<p>For SSDP devices, the <strong>os-udpbroadcastrelay</strong> plugin plays the same role. Configure an instance for:</p>
-<ul><li>UDP port <strong>1900</strong></li><li>multicast address <strong>239.255.255.250</strong></li><li>interfaces <strong>TRUSTED</strong> and <strong>IOT</strong> only</li></ul>
-<p>Like the mDNS repeater, give it only the interfaces that need it, and expect to add a narrow rule if a device needs to call back.</p>
-<h2 id="fix-3-give-home-assistant-a-leg-on-iot">Fix 3: give Home Assistant a leg on IoT</h2>
-<p>Home Assistant uses discovery heavily: it finds ESPHome devices, Chromecasts, HomeKit accessories and many others by listening for multicast. You can make all of it work through repeaters, but there is a simpler option for Home Assistant specifically: add a second network card to its VM, tagged <strong>VLAN 30</strong>, so it sits directly on the IoT network as well as on servers.</p>
-<p>That gives Home Assistant first-hand discovery with no repeater and no rule exceptions. The trade-off is real: Home Assistant now bridges two zones, so it has to be the best-patched machine in the house, with its own updates on and its admin accounts on strong passwords and two-factor login.</p>
-<p>To choose, start with the question "who needs to discover the device?" Most homes end up with the repeater for phones and casting, and Home Assistant either on a second network card or reached through narrow rules.</p>
-<h2 id="device-by-device">Device by device</h2>
-<ul><li><strong>ESPHome</strong> devices report to Home Assistant over its API, and Home Assistant starts the connection, so ordinary downhill rules already cover it. Only discovery needs the repeater or the second network card.</li><li><strong>MQTT</strong> devices (Zigbee2MQTT bridges, Tasmota, Shelly in MQTT mode) start the connection to the broker. If the broker is on servers, add one IOT rule: IOT net to the broker's address on port <strong>1883</strong> (or <strong>8883</strong> with TLS). That is an uphill exception, so keep it to the one host and port.</li><li><strong>Printers</strong> need mDNS for discovery and IPP (<strong>TCP 631</strong>) from trusted, which is downhill and already allowed.</li><li><strong>Cameras</strong> that record to a server on your own network: the recorder starts the connection to the camera (downhill), so no exception is needed. If they do not need the cloud, put their addresses in an alias such as <code>IOT_LOCAL_ONLY</code> and block that alias from the internet.</li></ul>
-<h2 id="time-and-dns-for-devices-that-ignore-dhcp">Time and DNS for devices that ignore DHCP</h2>
-<p>Some devices hardcode a public DNS server or time server and ignore what DHCP tells them. You can quietly redirect them to the firewall with a port forward on the IOT interface, under <strong>Firewall → NAT → Port Forward</strong>:</p>
-<pre><code>Interface:     IOT
-Protocol:      UDP
-Source:        IOT net
-Destination:   ! IOT address   (anything except the firewall)
-Port:          123 (NTP)
-Redirect to:   127.0.0.1, port 123
-Description:   Force IoT time to the firewall</code></pre>
-<p>Make sure the firewall's NTP service (<strong>Services → Network Time</strong>) listens on the IOT interface. The same redirect works for DNS on port 53. It cannot catch encrypted DNS (DNS over HTTPS on 443 or DNS over TLS on 853), which needs blocking separately.</p>
-<h2 id="checklist-iot-that-still-works">Checklist: IoT that still works</h2>
-<ul><li>[ ] mDNS repeater on TRUSTED and IOT only</li><li>[ ] SSDP relay only if a device needs it</li><li>[ ] Narrow pass rules for call-backs you saw in Live View, one device each</li><li>[ ] Home Assistant on a second network card in VLAN 30, or narrow rules instead</li><li>[ ] MQTT exception: IOT net to the broker host and port only</li><li>[ ] NTP (and DNS) redirected to the firewall on IOT</li><li>[ ] Local-only devices listed in <code>IOT_LOCAL_ONLY</code> and blocked from the internet</li></ul>
-<p>The wall between IoT and the rest of the house stays up. You just let the right questions through it.</p>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=wifi+access+point+multiple+SSID+VLAN&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Access point with VLAN SSIDs</a> · <a href="https://www.amazon.com/s?k=managed+switch+802.1Q+VLAN+8+port&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">Managed VLAN switch</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p><p><a href="https://payhip.com/b/k6WMS">Go deeper: Lock Down Your Home Network</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
+<ul><li>Follow the order: running, listening, reachable, logs, changes.</li><li>Write down every change you make while troubleshooting.</li><li>Snapshot before trying a fix on anything important.</li><li>Read load average against <code>nproc</code>, and memory by the <code>available</code> column.</li><li>Check the kernel log for OOM kills when a service dies without a reason.</li><li>Truncate live logs instead of deleting them.</li></ul><p><a href="https://payhip.com/b/LV4qz">Go deeper: Linux Without the Guesswork</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
 </channel></rss>
