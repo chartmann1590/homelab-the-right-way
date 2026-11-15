@@ -1,9 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 13 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 15 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>remember vs rememberSaveable vs ViewModel: what survives what</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</guid>
+<item><title>Podcast, episode 5: Docker on Proxmox — The Official Way &amp; Anatomy of a Compose</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-5-containers-without-the-chaos/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-5-containers-without-the-chaos/</guid>
+<pubDate>Sun, 15 Nov 2026 12:30:00 -0500</pubDate><description>Episode 5 of the Homelab the Right Way Podcast: three AI hosts on Where Docker Lives on Proxmox, Install Docker the Official Way, Anatomy of a compose from the book Containers Without the Chaos, plus this week&#x27;s tech news and the OctoPulse app. Player, chapters, sources and links.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>podcast</category><category>homelab</category><category>monitoring</category><category>self-hosting</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>This episode explores the official Docker installation on Proxmox and breaks down the anatomy of a Docker Compose file, emphasizing the best practice of keeping one stack per folder. It also discusses the book 'Containers Without the Chaos' for troubleshooting common issues.</p>
+<p><strong>A note on the hosts:</strong> Maya, Sam and Theo are fictional AI hosts. Their voices and the script are AI-generated. Every technical fact in the episode comes from the Homelab the Right Way books (this week: <em>Containers Without the Chaos</em>); the news segment cites its sources below.</p>
+<h2 id="chapters">Chapters</h2>
+<ul><li>00:00 — Cold open: this week</li><li>02:24 — New tech this week</li><li>05:26 — Where Docker Lives on Proxmox</li><li>11:43 — Install Docker the Official Way</li><li>17:48 — Anatomy of a compose</li><li>23:31 — One Stack per Folder</li><li>31:53 — App spot: OctoPulse</li><li>33:25 — Listener question: When Things Break</li><li>36:54 — Merch, ebooks and the newsletter</li><li>39:42 — Outro: three takeaways</li></ul>
+<h2 id="new-tech-this-week-with-sources">New tech this week, with sources</h2>
+<ul><li><a href="https://www.theregister.com/security/2026/11/09/microsofts-azure-linux-gets-470-plus-security-fixes-in-one-almighty-patching-session/5308434">Microsoft's Azure Linux gets 470-plus security fixes in one almighty patching session</a> (The Register, 2026-11-09)</li><li><a href="https://www.tomshardware.com/software/linux/cyanogen-co-founder-unveils-kora-a-linux-os-that-splits-ai-models-across-the-cpu-gpu-and-npu-snapdragon-x2-elite-and-hexagon-npu-get-full-support-first">Cyanogen co-founder unveils Kora, a Linux OS that splits AI models across the CPU, GPU, and NPU</a> (Tom's Hardware, 2026-11-11)</li><li><a href="https://www.phoronix.com/news/AMD-MEXT">AMD Talks Up Their MEXT Software Amid RAM Crisis - Linux Support But Not Open-Source</a> (Phoronix, 2026-11-10)</li><li><a href="https://lwn.net/Articles/1106300/">Kernel prepatch 7.4-rc2</a> (LWN, 2026-11-09)</li></ul>
+<h2 id="links">Links</h2>
+<ul><li>The book: <a href="https://payhip.com/HomelabtheRightWay">the ebooks, with free sample chapters</a></li><li><a href="https://homelab-the-right-way.printful.me/">Merch</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/newsletter/">The free weekly email</a></li><li><a href="https://www.youtube.com/@HomelabTheRightWay">YouTube</a></li><li>App spot: OctoPulse, search its name on Google Play</li></ul>
+<p>As an Amazon Associate the show earns from qualifying purchases.</p><p><a href="https://payhip.com/b/Lmhcb">Go deeper: Containers Without the Chaos</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Amoura: a private, on-device AI companion app for adults</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/amoura-ai-companion-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/amoura-ai-companion-android-app/</guid>
+<pubDate>Sun, 15 Nov 2026 12:30:00 -0500</pubDate><description>Amoura is an AI girlfriend or boyfriend companion for adults that runs on your phone, with 3D avatars, voice, memory and no account required.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.airgf.app.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>ai</category><category>companion</category><category>privacy</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.airgf.app.jpg" alt=""></p><p>AI companion apps have become common, and most of them send every message to a server. For something as personal as a relationship-style chat, that is a real concern. Amoura takes a different route: the companion runs entirely on your phone, with no account, no cloud and, according to the listing, no chat data collection.</p>
+<p>Amoura is intended for adult users (18+) and includes romantic and relationship-oriented content.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>On-device AI.</strong> Conversations run locally on an on-device model (Gemma 4). No internet is needed to chat and no servers are involved.</li><li><strong>Choose your companion.</strong> Girlfriend, boyfriend or partner, with a name, appearance, personality traits and communication style you pick.</li><li><strong>3D avatars.</strong> Several 3D characters with real-time emotional expressions, lip sync and idle animation.</li><li><strong>Voice.</strong> Multiple voice profiles with word-level lip-synced speech.</li><li><strong>Photo sharing.</strong> Send a photo and the companion reacts to it, or generate images together with on-device Stable Diffusion.</li><li><strong>Memory and personality.</strong> The companion remembers what matters to you and adapts over time.</li><li><strong>Proactive messages.</strong> Your companion can message you first, on a schedule you control.</li><li><strong>Spicy Mode.</strong> Romantic and flirty conversation, off by default.</li></ul>
+<h2 id="setting-up-a-companion">Setting up a companion</h2>
+<p>The listing says you can start chatting in minutes. The setup is about choices:</p>
+<ol><li>Pick the relationship style: girlfriend, boyfriend or partner.</li><li>Choose a name and appearance, including one of the 3D characters.</li><li>Set personality traits and a communication style.</li><li>Pick a voice profile.</li></ol>
+<p>From there the companion builds up memory of what you tell it and adjusts its personality and style to you over time.</p>
+<h2 id="privacy">Privacy</h2>
+<p>This is the main reason to consider Amoura over a cloud-based companion. Every conversation runs locally. The listing states that nothing about your conversations ever leaves your phone, no account is required, and chat data is not collected. Image generation runs on the device too, through on-device Stable Diffusion.</p>
+<h2 id="proactive-messages-on-your-terms">Proactive messages, on your terms</h2>
+<p>Many companion apps send notifications whenever they like. In Amoura the companion can reach out first, but on a schedule you control, so you decide whether and when it happens.</p>
+<h2 id="how-spicy-mode-works">How Spicy Mode works</h2>
+<p>Spicy Mode is off by default. There are two ways to turn it on:</p>
+<div class="table"><table><thead><tr><th>Option</th><th>How long</th><th>Cost</th></tr></thead><tbody><tr><td>Subscription</td><td>Permanent</td><td>Paid, also removes all ads</td></tr><tr><td>Rewarded ad</td><td>Temporary, up to 4 hours a day</td><td>Free</td></tr></tbody></table></div>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free, supported by ads.</li><li><strong>Subscription:</strong> optional, for an ad-free, unlimited experience. The Play listing shows in-app purchases.</li><li><strong>Audience:</strong> intended for adults (18+). Google Play rates it Mature 17+, in the Role Playing category.</li><li><strong>Connection:</strong> no internet is needed to chat once the app is set up.</li><li>An AI companion is software. It can be a comfort or a hobby, but it is not a person.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You are an adult and curious about AI companion apps.</li><li>You want the conversation to stay on your phone, with no account.</li><li>You like customizing a character's look, personality and voice.</li><li>You want any proactive messages to follow a schedule you set.</li></ul><p><a href="https://charleshartmann.com/apps/">Get Amoura - AI Girlfriend App for Android</a></p>]]></content:encoded></item><item><title>ScriptureSearch: find and compare Bible verses across translations</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/scripturesearch-bible-verse-search-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/scripturesearch-bible-verse-search-android-app/</guid>
+<pubDate>Sat, 14 Nov 2026 12:30:00 -0500</pubDate><description>ScriptureSearch is a free Android app for searching the Bible by keyword or reference, comparing translations and sharing verses.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.bible.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>bible</category><category>search</category><category>study</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.bible.jpg" alt=""></p><p>You remember part of a verse, a phrase or a word, but not where it is. Or you know the reference and want to see how different translations put it. Flipping through a printed Bible or several websites for either job is slow. ScriptureSearch is built for exactly those two moments: find the verse, then compare it.</p>
+<h2 id="what-it-does">What it does</h2>
+<ul><li><strong>Search by keyword or reference.</strong> Type a word or phrase you remember, or a reference you already know.</li><li><strong>Compare translations.</strong> See how a verse reads in different translations of the Bible.</li><li><strong>Share verses</strong> with friends by social media, email or text.</li><li><strong>Reading plans and devotionals.</strong> The listing mentions access to reading plans and devotionals.</li><li><strong>Easy to use.</strong> A focused app built around search.</li></ul>
+<h2 id="two-ways-to-search">Two ways to search</h2>
+<p>The search box handles both kinds of lookup:</p>
+<ul><li><strong>Keyword search</strong> is for when you remember the words but not the location. Search a distinctive word or short phrase rather than a common one, so the results stay focused.</li><li><strong>Reference search</strong> is for when you know where a verse is and want to read it, or compare it.</li></ul>
+<p>A practical habit: when a keyword search turns up too many results, add a second distinctive word from the verse.</p>
+<h2 id="why-compare-translations">Why compare translations</h2>
+<p>Translations differ in how literally they follow the original wording and in how they phrase it for modern readers. Putting two or three side by side is one of the simplest ways to understand a verse better, because a word that seems odd in one may be clearer in another. It also helps when you are studying a specific topic and want to see how a key word is rendered. ScriptureSearch makes that comparison part of the same search, rather than a separate trip to another site.</p>
+<h2 id="where-the-text-comes-from">Where the text comes from</h2>
+<p>The listing says the app is based on bible-api.com, a popular online Bible tool. That means ScriptureSearch fetches verses online, so expect to need an internet connection for searches.</p>
+<h2 id="sharing-what-you-find">Sharing what you find</h2>
+<p>Once you have the verse you were looking for, you can send it on directly: through social media, by email or as a text message. It is handy for sending a verse to a friend, a study group or a family chat without copying and pasting.</p>
+<h2 id="a-simple-way-to-use-it">A simple way to use it</h2>
+<ol><li>Search a phrase you half remember, or type a reference.</li><li>Open the verse you meant.</li><li>Compare it in another translation.</li><li>Share it with whoever needs it.</li></ol>
+<h2 id="good-to-know">Good to know</h2>
+<ul><li><strong>Price:</strong> free.</li><li><strong>Ads:</strong> the app contains ads.</li><li><strong>In-app purchases:</strong> none are listed.</li><li><strong>Connection:</strong> verses come from an online Bible tool, so searches need internet access.</li><li><strong>Category and rating:</strong> Lifestyle, rated Everyone.</li></ul>
+<h2 id="is-it-for-you">Is it for you?</h2>
+<ul><li>You often remember a verse's words but not its location.</li><li>You like comparing how different translations phrase the same passage.</li><li>You share verses with friends, family or a study group.</li><li>You want a focused search tool rather than a full reading app.</li></ul><p><a href="https://charleshartmann.com/apps/#sec-scripturesearch">Get ScriptureSearch for Android</a></p>]]></content:encoded></item><item><title>remember vs rememberSaveable vs ViewModel: what survives what</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/remember-vs-remembersaveable-vs-viewmodel-what-survives-what/</guid>
 <pubDate>Fri, 13 Nov 2026 12:30:00 -0500</pubDate><description>Learn which state holder survives rotation, process death, or app closure in Jetpack Compose. Stop losing draft text and scroll positions with the right choice.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/2026-11-13.jpg" type="image/jpeg" length="0"/>
 <category>compose</category><category>android</category><category>state</category><category>viewmodel</category><category>remembersaveable</category>
@@ -622,158 +678,5 @@ send_timeout 600s;</code></pre>
 <h2 id="good-to-know">Good to know</h2>
 <ul><li>QR Scanner is free to download and is described as open source.</li><li>The app contains ads.</li><li>It has dark mode and a layout optimized for tablets.</li><li>It is rated Everyone, in the Tools category.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You scan QR codes and barcodes often and want it to be instant.</li><li>You want a history you can search and export.</li><li>You sometimes need to scan a code from a screenshot or photo.</li><li>You prefer a scanner that keeps scans on your phone and does not need an account.</li></ul><p><a href="https://charleshartmann.com/apps/#sec-qr-scanner-code-reader">Get QR Scanner: Code Reader for Android</a></p>]]></content:encoded></item><item><title>NUT shutdown on a timer: upssched, secondaries first, and HOSTSYNC explained</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/nut-upssched-timed-shutdown-order/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Network UPS Tools can shut your homelab down after N minutes on battery instead of waiting for &quot;low battery&quot;. How a NUT shutdown runs, a Debian secondary client, TrueNAS as a client, an upssched timer with its script and tmpfiles rule, and the timing settings that matter.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>ups</category><category>nut</category><category>network ups tools</category><category>proxmox</category><category>truenas</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>A NUT server that shuts itself down perfectly is not enough. If the NAS was never told, or the Docker host in the corner was never told, the outage still ends in a crash. And by default NUT waits for the UPS to report <strong>low battery</strong>, a threshold the UPS picks and an estimate that gets optimistic as the battery ages. This post connects the clients, explains the order NUT shuts things down in, and replaces "wait for low battery" with a timed shutdown that keeps most of the battery in reserve.</p>
-<p>The examples assume the UPS's USB cable is on a Proxmox host running the NUT server (<code>upsd</code>) and the primary <code>upsmon</code>, with the UPS named <code>myups</code> at <code>10.0.10.5</code>.</p>
-<h2 id="how-a-nut-shutdown-actually-runs">How a NUT shutdown actually runs</h2>
-<p>When the UPS goes critical (on battery <strong>and</strong> low battery, or the forced-shutdown flag is set), this is the sequence:</p>
-<ol><li>The primary <code>upsmon</code> notices and sets the <strong>FSD</strong> (forced shutdown) flag on the UPS in <code>upsd</code>.</li><li>Every secondary <code>upsmon</code> sees FSD on its next poll, waits <code>FINALDELAY</code> seconds and runs its own <code>SHUTDOWNCMD</code>. As it shuts down, it disconnects from <code>upsd</code>.</li><li>The primary waits until all secondaries have disconnected, or until <code>HOSTSYNC</code> seconds have passed, whichever comes first.</li><li>The primary shuts its own machine down, creating the <code>POWERDOWNFLAG</code> file on the way.</li><li>Late in the primary's shutdown, that flag tells the driver to command the UPS to cut its output after <code>offdelay</code> seconds.</li></ol>
-<p>That ordering is built in: secondaries always go before the primary. Put the NAS, the other servers and any VMs that run elsewhere on secondaries, and keep the primary on the machine with the UPS cable.</p>
-<h2 id="a-debian-client">A Debian client</h2>
-<p>On another Debian or Ubuntu machine that should shut down with the UPS, install only the client part:</p>
-<pre><code>apt install nut-client</code></pre>
-<p>Set the mode in <code>/etc/nut/nut.conf</code>:</p>
-<pre><code>MODE=netclient</code></pre>
-<p>Then point <code>upsmon</code> at the server with a secondary user you created in <code>upsd.users</code>:</p>
-<pre><code># /etc/nut/upsmon.conf
-MONITOR myups@10.0.10.5 1 upsmon_remote CHANGE-ME-long-random secondary
-
-MINSUPPLIES 1
-SHUTDOWNCMD "/sbin/shutdown -h +0"
-NOTIFYFLAG ONBATT   SYSLOG+WALL
-NOTIFYFLAG ONLINE   SYSLOG+WALL
-NOTIFYFLAG FSD      SYSLOG+WALL
-NOTIFYFLAG COMMBAD  SYSLOG+WALL</code></pre>
-<p>Lock the file down, start the monitor and check that the client can read the UPS:</p>
-<pre><code>chown root:nut /etc/nut/upsmon.conf
-chmod 0640 /etc/nut/upsmon.conf
-systemctl enable --now nut-monitor.service
-upsc myups@10.0.10.5 ups.status</code></pre>
-<p>A secondary never has a <code>POWERDOWNFLAG</code>: only the primary tells the UPS to cut power. Treat the secondary password as a low-value credential that only lets a client follow the UPS, and never reuse the admin password on a client.</p>
-<h2 id="truenas-as-a-client">TrueNAS as a client</h2>
-<p>TrueNAS has a built-in UPS service that is NUT underneath. In TrueNAS 25.10 it is under <strong>System &gt; Services &gt; UPS</strong> (the pencil icon). Set <strong>Identifier</strong> to <code>myups</code>, <strong>UPS Mode</strong> to <strong>Slave</strong> (TrueNAS still uses the old word for a secondary), <strong>Remote Hostname</strong> and <strong>Remote Port</strong> to the server and <code>3493</code>, and the monitor user and password. Save, turn the service on and set it to start automatically. Menu names have moved between TrueNAS releases, so check the UPS service page in the docs for your version if the screen looks different.</p>
-<p>The NAS is usually the machine whose clean shutdown matters most and takes longest. Time it. By default a secondary <code>upsmon</code> logs off <code>upsd</code> as soon as it has <em>started</em> its shutdown, so <code>HOSTSYNC</code> only covers that hand-off, not the whole NAS shutdown. What protects the rest of it is the time the primary's own shutdown takes plus the UPS's <code>offdelay</code>; make sure those together are longer than the NAS needs.</p>
-<h2 id="shutdown-on-a-timer-not-on-low-battery">Shutdown on a timer, not on low battery</h2>
-<p>The alternative to the UPS's low-battery threshold is to decide for yourself: if the UPS has been on battery for N minutes, the outage is real, so shut everything down while the battery is still mostly full. NUT does this with <code>upssched</code>, a timer helper that <code>upsmon</code> calls on events.</p>
-<p>On the primary, tell <code>upsmon</code> to call <code>upssched</code> for the on-battery and on-line events:</p>
-<pre><code># add to /etc/nut/upsmon.conf on the primary
-NOTIFYCMD /sbin/upssched
-NOTIFYFLAG ONBATT SYSLOG+WALL+EXEC
-NOTIFYFLAG ONLINE SYSLOG+WALL+EXEC</code></pre>
-<p>Check the real path with <code>command -v upssched</code> and use that. Then configure the timer. The stock <code>upssched.conf</code> ships with <code>PIPEFN</code> disabled on purpose, so you set it deliberately:</p>
-<pre><code># /etc/nut/upssched.conf
-CMDSCRIPT /etc/nut/upssched-cmd
-PIPEFN /run/nut/upssched/upssched.pipe
-LOCKFN /run/nut/upssched/upssched.lock
-
-AT ONBATT * START-TIMER onbatt 180
-AT ONLINE * CANCEL-TIMER onbatt</code></pre>
-<p><code>START-TIMER onbatt 180</code> starts a three-minute timer when the UPS goes on battery, and <code>CANCEL-TIMER</code> stops it if power comes back first. If the timer runs out, <code>upssched</code> runs <code>CMDSCRIPT</code> with the timer name as its argument. Pick the number from your own runtime at your real load, not from the box.</p>
-<p>The script:</p>
-<pre><code>#!/bin/sh
-# /etc/nut/upssched-cmd
-case "$1" in
-  onbatt)
-    logger -t upssched-cmd "On battery for too long, forcing shutdown"
-    /sbin/upsmon -c fsd
-    ;;
-  *)
-    logger -t upssched-cmd "Unrecognized timer: $1"
-    ;;
-esac</code></pre>
-<p><code>upsmon -c fsd</code> sets the forced-shutdown flag from the primary, which starts the normal ordered shutdown: secondaries first, then the primary. Create the directory for the pipe and lock file, owned by the user <code>upsmon</code> runs as (<code>nut</code> on Debian), make the script executable, and restart:</p>
-<pre><code>install -d -o nut -g nut -m 0750 /run/nut/upssched
-chmod 0750 /etc/nut/upssched-cmd
-chown root:nut /etc/nut/upssched-cmd /etc/nut/upssched.conf
-systemctl restart nut-monitor.service</code></pre>
-<p><code>/run</code> is cleared at every boot, so the directory has to be recreated each time. A one-line tmpfiles rule does it:</p>
-<pre><code># /etc/tmpfiles.d/nut-upssched.conf
-d /run/nut/upssched 0750 nut nut -</code></pre>
-<p>Do not test the timer by pulling the plug before the script works. Run the script by hand first, with a short timer, at a time when a real shutdown costs nothing.</p>
-<h2 id="the-timing-settings">The timing settings</h2>
-<div class="table"><table><thead><tr><th>Setting</th><th>Where</th><th>Default</th><th>Change it when</th></tr></thead><tbody><tr><td><code>HOSTSYNC</code></td><td>Primary <code>upsmon.conf</code></td><td>15 s</td><td>Your slowest secondary needs longer to disconnect</td></tr><tr><td><code>FINALDELAY</code></td><td>Every <code>upsmon.conf</code></td><td>5 s</td><td>You want more warning before <code>SHUTDOWNCMD</code>; keep it below the primary's <code>HOSTSYNC</code></td></tr><tr><td><code>DEADTIME</code></td><td>Every <code>upsmon.conf</code></td><td>15 s</td><td>Rarely; keep it a multiple of <code>POLLFREQ</code></td></tr><tr><td><code>POLLFREQ</code></td><td>Every <code>upsmon.conf</code></td><td>5 s</td><td>Rarely</td></tr><tr><td><code>START-TIMER</code></td><td>Primary <code>upssched.conf</code></td><td>none</td><td>Your own choice from your measured runtime</td></tr></tbody></table></div>
-<h2 id="home-assistant-for-eyes-only">Home Assistant, for eyes only</h2>
-<p>Home Assistant's Network UPS Tools integration does not shut anything down; it reads the NUT server so you can see the UPS on a dashboard and get a phone notification when it goes on battery. Give it its own user with no <code>upsmon</code>, <code>actions</code> or <code>instcmds</code> lines in <code>upsd.users</code>, so it can read status but change nothing, and reload <code>upsd</code> with <code>systemctl reload nut-server</code>.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Every machine that needs a clean shutdown runs a secondary <code>upsmon</code> or its own UPS client.</li><li><code>upsc myups@&lt;server&gt;</code> works from each client.</li><li>TrueNAS's UPS service is a secondary pointed at the server, enabled at boot.</li><li>The primary's shutdown time plus <code>offdelay</code> is longer than the NAS needs.</li><li>The <code>upssched</code> timer, script and tmpfiles rule are in place, and the script was tested by hand.</li></ul>
-<p><strong>Gear mentioned</strong> (As an Amazon Associate I earn from qualifying purchases. Affiliate links.) <a href="https://www.amazon.com/s?k=UPS+battery+backup+with+USB+port+NUT+compatible&amp;tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">UPS with a USB data port (NUT compatible)</a> · <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/gear-the-books-recommend/">All the gear the books recommend</a></p><p><a href="https://payhip.com/b/ig2Pb">Go deeper: Power Out, Data Safe</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Merch drop 8: a homelab space heater, a pinned dependency and a voided warranty</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-8/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-8/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>Five new items in the Homelab the Right Way merch store - the Self-Hosted. Self-Taught. Self-Inflicted. tee, the Heated by My Homelab hoodie, the coffee==forever pinned-dependency mug, the Warranty Voided sticker and the Self-Hosted since 127.0.0.1 dad hat.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop8-hero.jpg" type="image/jpeg" length="0"/>
-<category>merch</category><category>homelab</category><category>selfhosted</category><category>store</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop8-hero.jpg" alt=""></p><p>Five new designs are in the <a href="https://homelab-the-right-way.printful.me/">Homelab the Right Way merch store</a> today: a tee, a hoodie, a mug, a sticker and an embroidered dad hat. Same rules as every drop: original typography, no logos that belong to anyone else, printed or embroidered to order by Printful, nothing sitting in a warehouse.</p>
-<h2 id="self-hosted-self-taught-self-inflicted-tee">Self-Hosted. Self-Taught. Self-Inflicted. (tee)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/self-hosted-self-taught-self-inflicted-tee">Self-Hosted. Self-Taught. Self-Inflicted. Tee</a>: a little server rack, a <code>$ whoami</code> prompt that answers "admin, user, and the help desk", and the three words that sum up running your own stack. Every outage in a homelab has exactly one person to call, and they are wearing this shirt.</p>
-<p>Bella + Canvas 3001 unisex tee in Black, Navy, Dark Grey Heather and Forest. $27.50 to $45.50 depending on size.</p>
-<h2 id="heated-by-my-homelab-hoodie">Heated by My Homelab (hoodie)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/heated-by-my-homelab-hoodie">Heated by My Homelab Hoodie</a>: the winter one. Heat waves rising off a small rack, THIS WINTER I AM HEATED BY MY HOMELAB in big type, and the only thermodynamics you need along the bottom: watts in, warmth out. Everything a computer draws ends up as heat in the room, so the joke is at least technically correct.</p>
-<p>Gildan 18500 heavy blend hoodie in Black, Navy, Dark Heather and Forest Green. $47.50 to $64 depending on size.</p>
-<h2 id="coffee-forever-mug">coffee==forever (mug)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/coffee-is-my-only-pinned-dependency-mug">Coffee Is My Only Pinned Dependency Mug</a>: a requirements.txt card where everything else floats (<code>sleep&gt;=6.0</code>, <code>patience~=0.3</code>, <code>tickets&lt;=99</code>) and one line is pinned with <code>==</code> and highlighted: <code>coffee==forever</code>. Printed on both sides so it reads right in either hand. Dishwasher and microwave safe.</p>
-<p>Glossy ceramic mug, 11, 15 and 20 oz. $17 (11 oz) to $27.50 (20 oz).</p>
-<h2 id="warranty-voided-sticker">Warranty Voided (sticker)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/warranty-voided-tamper-seal-sticker">Warranty Voided Tamper Seal Sticker</a>: a scalloped navy seal with a tilted amber VOIDED stamp across WARRANTY and the honest footnote: I opened it. I fixed it. For the lid of the mini PC, NAS or laptop you took apart anyway.</p>
-<p>3 x 3, 4 x 4 and 5.5 x 5.5 in kiss-cut vinyl. $4.50 to $5.50 depending on size.</p>
-<h2 id="self-hosted-since-127-0-0-1-dad-hat">Self-Hosted since 127.0.0.1 (dad hat)</h2>
-<p><a href="https://homelab-the-right-way.printful.me/product/self-hosted-since-127001-dad-hat">Self-Hosted Since 127.0.0.1 Dad Hat</a>: SELF-HOSTED over "since 127.0.0.1", embroidered in two thread colours on a classic Yupoong 6245CM dad cap. Low-key enough to wear anywhere; anyone who knows localhost will get it.</p>
-<p>Black, Navy, Dark Grey and Spruce. $28.</p>
-<h2 id="where-everything-is">Where everything is</h2>
-<p>All five are in the <a href="https://homelab-the-right-way.printful.me/">merch store</a> with the 57 earlier designs, and on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a> here with photos. Prices are before shipping, which Printful calculates at checkout.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Troubleshooting a Linux server in a fixed order: running, listening, reachable, logs, changes</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/linux-server-troubleshooting-order/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/linux-server-troubleshooting-order/</guid>
-<pubDate>Mon, 02 Nov 2026 12:30:00 -0500</pubDate><description>A boring, repeatable order for fixing a broken Linux service, with the one command that answers each question. Plus load average read honestly, memory by the available column, OOM kills, a full disk, and a symptom-to-first-command table.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>linux</category><category>troubleshooting</category><category>systemd</category><category>journalctl</category><category>debian</category><category>homelab</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Something on the server is broken, and the instinct is to start changing things: restart the service, then the VM, then edit a config you half remember, then reinstall a package. Sometimes it comes back and you never learn why. Often you have now changed four things and broken a fifth. Good troubleshooting is boring on purpose: a fixed order of questions, each answered by a command, and no changes until you know what is wrong.</p>
-<h2 id="the-fixed-order">The fixed order</h2>
-<p>Stop at the first unexpected answer and work there.</p>
-<ol><li><strong>Is it running?</strong> <code>systemctl status app</code>, or <code>docker ps</code> for containers.</li><li><strong>Is it listening?</strong> <code>sudo ss -tulpn | grep 8080</code> shows the port and the address it is bound to.</li><li><strong>Can you reach it?</strong> From the server: <code>curl -v http://127.0.0.1:8080/</code>. From your laptop: the same with the server's address. The difference between those two answers is a bind address, a firewall or the network.</li><li><strong>What do the logs say?</strong> <code>journalctl -u app -n 100</code>, then <code>journalctl -p err -b</code> for everything else that went wrong this boot.</li><li><strong>What changed?</strong> Most outages follow a change. Find it:</li></ol>
-<pre><code>tail -n 30 /var/log/apt/history.log             # recent package changes
-sudo find /etc -mtime -2 -type f 2&gt;/dev/null    # config changed in 2 days
-journalctl --list-boots | tail -3               # did it reboot?
-journalctl -b -1 -n 20 --no-pager               # end of the previous boot
-uptime</code></pre>
-<p>On Debian 13 the <code>last</code> command is gone; the previous boot's journal answers the same question.</p>
-<p>The rule that makes the whole order work: <strong>write down every change you make while troubleshooting</strong>, with the time. A text file in your home directory is enough. If the fix does not work, you can undo exactly what you did. And before changing anything on a VM you care about, take a snapshot, so a bad "fix" is two seconds from undone.</p>
-<h2 id="is-the-machine-itself-healthy">Is the machine itself healthy?</h2>
-<p>When the problem is "everything is slow" rather than "one thing is broken", look at the whole machine:</p>
-<pre><code>uptime          # how long it has run, and the load averages
-top             # live: CPU, memory, processes (q to quit)
-free -h         # memory and swap
-df -h           # disk space per filesystem
-sudo iotop -o   # who is using the disk right now (sudo apt install iotop)</code></pre>
-<h3 id="load-average-honestly">Load average, honestly</h3>
-<pre><code>$ uptime
- 10:42:17 up 12 days,  3:05,  2 users,  load average: 3.84, 2.10, 0.95</code></pre>
-<p>The three numbers are the average number of processes that were running or waiting to run over the last 1, 5 and 15 minutes. On Linux, processes waiting for disk I/O count too. Read them against the number of cores (<code>nproc</code>): on a 4-core VM, a load around 4 means the CPUs are fully busy, and well above it means work is queueing. The trend matters as much as the value: <code>3.84, 2.10, 0.95</code> is climbing, so something started recently. A high load with idle CPUs in <code>top</code> (low <code>us</code> and <code>sy</code>, high <code>wa</code>) points at the disk, not the processor.</p>
-<h3 id="memory-and-swap">Memory and swap</h3>
-<pre><code>$ free -h
-               total        used        free      shared  buff/cache   available
-Mem:           3.8Gi       2.9Gi       121Mi        12Mi       1.0Gi       880Mi
-Swap:          975Mi       410Mi       565Mi</code></pre>
-<p>A small <code>free</code> value is not a problem: Linux uses spare memory as disk cache and gives it back when programs need it. The column that matters is <strong>available</strong>. Swap in use is not a problem by itself; swap that keeps growing while <code>available</code> stays low means the machine needs more memory or a process is leaking. In <code>top</code>, press <code>M</code> to sort by memory.</p>
-<h2 id="when-the-kernel-kills-something">When the kernel kills something</h2>
-<p>When memory runs out completely, the kernel's out-of-memory killer picks a process and kills it. The service just "dies", sometimes restarted by systemd, and its own log says nothing useful. The kernel log does:</p>
-<pre><code>journalctl -k -b | grep -i -E 'out of memory|oom'
-sudo dmesg -T | grep -i -E 'killed process|oom'</code></pre>
-<p>The fix is never "turn off the OOM killer". Give the VM more memory, cap the hungry service (<code>MemoryMax=</code> in a systemd drop-in, or a memory limit on the container), or move it somewhere with room.</p>
-<h2 id="disk-full">Disk full</h2>
-<p>A full root filesystem breaks things in strange ways: services fail to start, logins hang, APT cannot write its lists, databases go read-only. Find where the space went, from the top down:</p>
-<pre><code>df -h                                          # which filesystem is full?
-df -i                                          # or out of inodes?
-sudo du -xh --max-depth=1 / | sort -h | tail   # which top-level directory?
-sudo du -xh --max-depth=1 /var | sort -h | tail
-sudo find / -xdev -type f -size +500M -exec ls -lh {} + 2&gt;/dev/null</code></pre>
-<p>The usual suspects:</p>
-<div class="table"><table><thead><tr><th>Where</th><th>What fills it</th><th>Fix</th></tr></thead><tbody><tr><td><code>/var/log/journal</code></td><td>The journal with no size cap</td><td><code>journalctl --vacuum-size=200M</code>, then cap it</td></tr><tr><td><code>/var/cache/apt</code></td><td>Downloaded package files</td><td><code>sudo apt clean</code></td></tr><tr><td><code>/var/lib/docker</code></td><td>Old images, stopped containers, build cache</td><td><code>docker system df</code>, then prune carefully</td></tr><tr><td><code>/var/log/*.log</code></td><td>An app logging in a loop</td><td>Fix the loop, then truncate the file</td></tr><tr><td>Deleted but open</td><td>A deleted file a process still writes to</td><td><code>sudo lsof +L1</code>, restart that process</td></tr></tbody></table></div>
-<p>Do not delete a log file that a running service is still writing to: the space is not freed until the service closes it. Truncate it instead with <code>sudo truncate -s 0 /var/log/app.log</code>. And never delete files in <code>/var/lib/docker</code> by hand; use Docker's own prune commands.</p>
-<h2 id="symptom-to-first-command">Symptom to first command</h2>
-<p>Where to start looking for the most common complaints. It is a starting point, not a diagnosis.</p>
-<div class="table"><table><thead><tr><th>Symptom</th><th>First command</th><th>Look for</th></tr></thead><tbody><tr><td>Service will not start</td><td><code>journalctl -u app -n 50</code></td><td>The first real error line</td></tr><tr><td>Works locally, not from LAN</td><td><code>sudo ss -tulpn</code></td><td>Bound to 127.0.0.1, or a firewall</td></tr><tr><td>"Connection refused"</td><td><code>sudo ss -tlpn 'sport = :PORT'</code></td><td>Nothing listening on that port</td></tr><tr><td>Timeout connecting</td><td><code>sudo nft list ruleset</code></td><td>A drop rule, here or on the router</td></tr><tr><td>Name does not resolve</td><td><code>dig name</code> and <code>dig @router name</code></td><td>Which DNS server is wrong</td></tr><tr><td>Service dies randomly</td><td><code>journalctl -k -b</code> with grep oom</td><td>The OOM killer</td></tr><tr><td>Cannot write files</td><td><code>df -h</code> and <code>df -i</code></td><td>A full filesystem or no inodes</td></tr><tr><td>"Permission denied"</td><td><code>namei -l /path</code></td><td>The missing permission on the path</td></tr><tr><td>Broke after an update</td><td><code>tail /var/log/apt/history.log</code></td><td>What changed, and when</td></tr><tr><td>SSH refused</td><td><code>sudo sshd -t</code> from the console</td><td>A config error after an edit</td></tr></tbody></table></div>
-<h2 id="asking-for-help-well">Asking for help well</h2>
-<p>When the answer is in a forum or a bug tracker, the people there can only help with what you show them:</p>
-<ul><li>The exact command you ran and its exact output, copied, not paraphrased.</li><li>The relevant log lines (<code>journalctl -u app -n 50 --no-pager</code>), with secrets removed.</li><li>Versions: <code>cat /etc/debian_version</code>, <code>uname -r</code>, and the app's version.</li><li>What you already tried, and what changed before it broke.</li></ul>
-<p>Writing that down often solves the problem before you post it, and it is exactly the note you will want next time.</p>
-<h2 id="checklist">Checklist</h2>
-<ul><li>Follow the order: running, listening, reachable, logs, changes.</li><li>Write down every change you make while troubleshooting.</li><li>Snapshot before trying a fix on anything important.</li><li>Read load average against <code>nproc</code>, and memory by the <code>available</code> column.</li><li>Check the kernel log for OOM kills when a service dies without a reason.</li><li>Truncate live logs instead of deleting them.</li></ul><p><a href="https://payhip.com/b/LV4qz">Go deeper: Linux Without the Guesswork</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
+<ul><li>You scan QR codes and barcodes often and want it to be instant.</li><li>You want a history you can search and export.</li><li>You sometimes need to scan a code from a screenshot or photo.</li><li>You prefer a scanner that keeps scans on your phone and does not need an account.</li></ul><p><a href="https://charleshartmann.com/apps/#sec-qr-scanner-code-reader">Get QR Scanner: Code Reader for Android</a></p>]]></content:encoded></item>
 </channel></rss>
