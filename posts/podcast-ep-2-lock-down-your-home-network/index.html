@@ -94,7 +94,7 @@
 <p><strong>IoT that still works (21:36).</strong> Why the cast button goes grey (mDNS 224.0.0.251 UDP 5353 and SSDP 239.255.255.250 UDP 1900 do not cross a router), the os-mdns-repeater plugin on TRUSTED and IOT only, narrow call-back rules for Chromecast/AirPlay, the SSDP relay, Home Assistant on a second network card in VLAN 30 (and the patching trade-off), the device-by-device list (ESPHome, MQTT on 1883/8883, printers on 631, cameras), and the NTP/DNS redirect for devices that ignore DHCP.</p>
 <p><strong>Listener question: locked out of my own firewall (32:13).</strong> The chapter 8 habit (write it down, restore point, one change, test card, keep or roll back), the ladder back in (console restore, snapshot rollback, set-interface-IP to plain HTTP, reinstall + config.xml), and chapter 6, WireGuard: the carrier-grade NAT check (100.64.0.0/10), key pairs instead of passwords, the home-wg instance on UDP 51820 with 10.99.0.1/24, one peer per device with its own /32, dynamic DNS as the endpoint, split vs full tunnel (AllowedIPs), the single WAN rule, and <code>wg show</code> for the handshake.</p>
 <h2 id="app-spot-28-29">App spot (28:29)</h2>
-<p><a href="https://www.amazon.com/dp/B0HR19BCTX">LiveCaptionN for Android</a>: free live captions in a floating window over any app, video or call, from the microphone or internal audio (Android 10+), real-time speech-to-text (Vosk) and translation into 59+ languages. Two modes: on-device (audio never leaves the phone) or self-hosted, pointing the app at your own server running Whisper ASR and LibreTranslate in Docker. Core features are free with ads; optional Ad-Free and Pro upgrades.</p>
+<p><a href="https://charleshartmann.com/apps/#sec-livecaptionn-live-captions">LiveCaptionN for Android</a>: free live captions in a floating window over any app, video or call, from the microphone or internal audio (Android 10+), real-time speech-to-text (Vosk) and translation into 59+ languages. Two modes: on-device (audio never leaves the phone) or self-hosted, pointing the app at your own server running Whisper ASR and LibreTranslate in Docker. Core features are free with ads; optional Ad-Free and Pro upgrades.</p>
 <h2 id="gear-mentioned-in-this-episode-30-53">Gear mentioned in this episode (30:53)</h2>
 <p>As an Amazon Associate the show earns from qualifying purchases. These are affiliate links; the price you pay is the same.</p>
 <ul><li><a href="https://www.amazon.com/dp/B07PLFCQVK?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">NETGEAR GS308E 8-port gigabit Plus switch</a>: the example for the book's "managed switch with 802.1Q VLAN support". What to check on any model: per-port tagged/untagged, VLAN 1 removable from ports that don't need it, and a management address you can park on the management VLAN.</li><li>From episode 1: <a href="https://www.amazon.com/dp/B00A128S24?tag=homelabrightw-20" rel="sponsored nofollow noopener" target="_blank">TP-Link TL-SG105 5-port gigabit switch</a>, unmanaged, still right for a desk.</li></ul>
@@ -132,22 +132,22 @@
 </div>
 </div>
 </article>
-<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/avoid-smr-drives-and-raid-cards-in-zfs-homelabs/">
+<section class="wrap section"><div class="sec-head reveal"><h2>More articles</h2></div><ul class="grid posts"><li class="card post reveal" style="--i:0"><a href="/homelab-the-right-way/posts/home-assistant-without-regret-a-setup-guide/">
+<div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
+<div class="body"><p class="meta"><time datetime="2026-11-19">November 19, 2026</time> · 5 min read</p>
+<h3>Home Assistant Without Regret: A Setup Guide</h3>
+<p>Avoid common pitfalls in Home Assistant deployment by choosing the right install method, securing backups, bridging MQTT brokers, cleaning stale automations, and configuring safe remote access.</p>
+<p class="tags"><span>home assistant</span><span>homelab</span><span>automation</span><span>mqtt</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/avoid-smr-drives-and-raid-cards-in-zfs-homelabs/">
 <div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"></div>
 <div class="body"><p class="meta"><time datetime="2026-11-18">November 18, 2026</time> · 5 min read</p>
 <h3>Avoid SMR drives and RAID cards in ZFS homelabs</h3>
 <p>Learn why hardware RAID controllers and SMR hard drives destroy ZFS performance and reliability, and how to use HBAs, CMR disks, and persistent names instead.</p>
-<p class="tags"><span>zfs</span><span>hba</span><span>smr</span><span>cmr</span></p></div></a></li><li class="card post reveal" style="--i:1"><a href="/homelab-the-right-way/posts/median-of-32-reads-taming-noisy-analog-probes/">
+<p class="tags"><span>zfs</span><span>hba</span><span>smr</span><span>cmr</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/median-of-32-reads-taming-noisy-analog-probes/">
 <div class="thumb"><img src="/homelab-the-right-way/assets/img/og.jpg" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
 <div class="body"><p class="meta"><time datetime="2026-11-17">November 17, 2026</time> · 4 min read</p>
 <h3>Median of 32 reads: taming noisy analog probes</h3>
 <p>Learn how the firmware uses median filtering on 32 samples to reject noise spikes from pumps and lamps, ensuring stable TDS and turbidity readings.</p>
-<p class="tags"><span>firmware</span><span>esp32</span><span>median-filter</span><span>analog-sensors</span></p></div></a></li><li class="card post reveal" style="--i:2"><a href="/homelab-the-right-way/posts/pbs-maintenance-prune-gc-and-verify-jobs/">
-<div class="thumb"><img src="/homelab-the-right-way/assets/img/posts/2026-11-16-sm.webp" width="640" height="360" alt="" loading="lazy"><span class="pill live">▶ Video</span></div>
-<div class="body"><p class="meta"><time datetime="2026-11-16">November 16, 2026</time> · 3 min read</p>
-<h3>PBS Maintenance: Prune, GC, and Verify Jobs</h3>
-<p>Proxmox Backup Server requires three specific maintenance jobs to stay healthy. Learn how to schedule prune, garbage collection, and verify tasks to ensure data integrity and free up space.</p>
-<p class="tags"><span>proxmox</span><span>backup</span><span>pbs</span><span>homelab</span></p></div></a></li></ul></section>
+<p class="tags"><span>firmware</span><span>esp32</span><span>median-filter</span><span>analog-sensors</span></p></div></a></li></ul></section>
 
 </main>
 <footer class="foot"><div class="wrap">
