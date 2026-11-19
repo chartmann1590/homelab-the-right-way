@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+<linearGradient id="cho-pl" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#7d86ff"/><stop offset="1" stop-color="#4b4fd6"/></linearGradient>
+<radialGradient id="cho-plh" cx="0.26" cy="0.12" r="0.8"><stop offset="0" stop-color="#fff" stop-opacity="0.2"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.05"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="cho-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.42"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.86" stop-color="#1c1d7a" stop-opacity="0"/><stop offset="1" stop-color="#1c1d7a" stop-opacity="0.35"/></linearGradient>
+<clipPath id="cho-clip"><rect x="82" y="82" width="860" height="860" rx="202"/></clipPath>
+<filter id="cho-amb" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="56"/></filter>
+<filter id="cho-sh" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="22"/></filter>
+<filter id="cho-hsoft" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2"/></filter>
+<linearGradient id="cho-obj" x1="0.1" y1="0.05" x2="0.9" y2="0.95"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe4f4"/></linearGradient>
+<linearGradient id="cho-fold" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#c9cff0"/><stop offset="1" stop-color="#eef0fb"/></linearGradient>
+<linearGradient id="cho-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d76ff"/><stop offset="1" stop-color="#4b4fd6"/></linearGradient>
+<mask id="cho-hl" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" transform="rotate(-4 514 499)" fill="#fff"/><path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" transform="translate(7 8.4) rotate(-4 514 499)" fill="#000"/></mask>
+<mask id="cho-lo" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" transform="rotate(-4 514 499)" fill="#fff"/><path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" transform="translate(-7 -8.4) rotate(-4 514 499)" fill="#000"/></mask>
+</defs>
+<g id="plate"><rect x="82" y="82" width="860" height="860" rx="202" fill="url(#cho-pl)"/><rect x="82" y="82" width="860" height="860" rx="202" fill="url(#cho-plh)"/></g>
+<g id="ambient-shadow" clip-path="url(#cho-clip)"><ellipse cx="520" cy="700" rx="320" ry="170" fill="#1c1d7a" opacity="0.36" filter="url(#cho-amb)"/></g>
+<g id="object-shadow" clip-path="url(#cho-clip)"><g opacity="0.32" filter="url(#cho-sh)"><path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" transform="translate(12 26) rotate(-4 514 499)" fill="#1c1d7a"/></g></g>
+<g id="object-main" transform="rotate(-4 514 499)">
+<path d="M330 262H624L728 366V706A30 30 0 0 1 698 736H330A30 30 0 0 1 300 706V292A30 30 0 0 1 330 262Z" fill="url(#cho-obj)"/>
+<path d="M624 262V336A30 30 0 0 0 654 366H728Z" fill="url(#cho-fold)"/>
+<g filter="url(#cho-hsoft)"><rect width="1024" height="1024" fill="#5a5f8c" opacity="0.25" mask="url(#cho-lo)" transform="rotate(4 514 499)"/><rect width="1024" height="1024" fill="#fff" mask="url(#cho-hl)" transform="rotate(4 514 499)"/></g>
+<g fill="none" stroke="#4b4fd6" stroke-linecap="round"><path d="M362 352H552" stroke-width="30"/><path d="M362 426H664" stroke-width="20" opacity="0.45"/><path d="M362 478H630" stroke-width="20" opacity="0.45"/></g>
+<rect x="374" y="580" width="58" height="104" rx="14" fill="url(#cho-bar)" opacity="0.55"/>
+<rect x="458" y="542" width="58" height="142" rx="14" fill="url(#cho-bar)" opacity="0.78"/>
+<rect x="542" y="604" width="58" height="80" rx="14" fill="url(#cho-bar)" opacity="0.55"/>
+<rect x="626" y="562" width="58" height="122" rx="14" fill="url(#cho-bar)"/>
+</g>
+<g id="plate-rim" clip-path="url(#cho-clip)"><rect x="82" y="82" width="860" height="860" rx="202" fill="none" stroke="url(#cho-rim)" stroke-width="8"/></g>
+</svg>

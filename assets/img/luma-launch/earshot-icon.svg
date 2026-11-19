@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+<linearGradient id="esh-pl" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#ff9a5c"/><stop offset="1" stop-color="#e2456e"/></linearGradient>
+<radialGradient id="esh-plh" cx="0.26" cy="0.12" r="0.8"><stop offset="0" stop-color="#fff" stop-opacity="0.22"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.05"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="esh-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.42"/><stop offset="0.1" stop-color="#fff" stop-opacity="0"/><stop offset="0.86" stop-color="#7a1838" stop-opacity="0"/><stop offset="1" stop-color="#7a1838" stop-opacity="0.35"/></linearGradient>
+<clipPath id="esh-clip"><rect x="82" y="82" width="860" height="860" rx="202"/></clipPath>
+<filter id="esh-amb" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="56"/></filter>
+<filter id="esh-sh" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="20"/></filter>
+<linearGradient id="esh-obj" x1="0.1" y1="0.05" x2="0.9" y2="0.95"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffe6e0"/></linearGradient>
+<linearGradient id="esh-core" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8f5e"/><stop offset="1" stop-color="#e2456e"/></linearGradient>
+</defs>
+<g id="plate"><rect x="82" y="82" width="860" height="860" rx="202" fill="url(#esh-pl)"/><rect x="82" y="82" width="860" height="860" rx="202" fill="url(#esh-plh)"/></g>
+<g id="ambient-shadow" clip-path="url(#esh-clip)"><ellipse cx="512" cy="720" rx="300" ry="150" fill="#7a1838" opacity="0.34" filter="url(#esh-amb)"/></g>
+<g id="object-shadow" clip-path="url(#esh-clip)" opacity="0.3" filter="url(#esh-sh)" transform="translate(10 24)">
+  <circle cx="512" cy="468" r="118" fill="#7a1838"/>
+  <rect x="482" y="560" width="60" height="196" rx="30" fill="#7a1838"/>
+  <g fill="none" stroke="#7a1838" stroke-width="54" stroke-linecap="round">
+    <path d="M351 307A228 228 0 0 0 351 629"/><path d="M673 307A228 228 0 0 1 673 629"/>
+    <path d="M262 218A354 354 0 0 0 262 718"/><path d="M762 218A354 354 0 0 1 762 718"/>
+  </g>
+</g>
+<g id="object-main">
+  <rect x="482" y="560" width="60" height="196" rx="30" fill="url(#esh-obj)"/>
+  <circle cx="512" cy="468" r="118" fill="url(#esh-obj)"/>
+  <circle cx="512" cy="468" r="52" fill="url(#esh-core)"/>
+  <g fill="none" stroke="url(#esh-obj)" stroke-width="54" stroke-linecap="round">
+    <path d="M351 307A228 228 0 0 0 351 629"/><path d="M673 307A228 228 0 0 1 673 629"/>
+    <path d="M262 218A354 354 0 0 0 262 718" opacity="0.72"/><path d="M762 218A354 354 0 0 1 762 718" opacity="0.72"/>
+  </g>
+</g>
+<g id="plate-rim" clip-path="url(#esh-clip)"><rect x="82" y="82" width="860" height="860" rx="202" fill="none" stroke="url(#esh-rim)" stroke-width="8"/></g>
+</svg>
