@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/</loc><lastmod>2026-11-20</lastmod><changefreq>daily</changefreq><priority>1.0</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/about/</loc><lastmod>2026-11-20</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/privacy/</loc><lastmod>2026-11-20</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/terms/</loc><lastmod>2026-11-20</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/links/</loc><lastmod>2026-11-20</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/newsletter/</loc><lastmod>2026-11-20</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/apps/</loc><lastmod>2026-11-20</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-<url><loc>https://chartmann1590.github.io/homelab-the-right-way/merch/</loc><lastmod>2026-11-20</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/</loc><lastmod>2026-11-21</lastmod><changefreq>daily</changefreq><priority>1.0</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/about/</loc><lastmod>2026-11-21</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/privacy/</loc><lastmod>2026-11-21</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/terms/</loc><lastmod>2026-11-21</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/links/</loc><lastmod>2026-11-21</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/newsletter/</loc><lastmod>2026-11-21</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/apps/</loc><lastmod>2026-11-21</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/merch/</loc><lastmod>2026-11-21</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/trap-using-debug-builds-for-performance-benchmarks/</loc><lastmod>2026-11-21</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/trunk-access-pvid-the-only-vlan-words-that-matter/</loc><lastmod>2026-11-20</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/luma-os-alpha-what-to-try-in-a-vm/</loc><lastmod>2026-11-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/luma-launch/luma-start-in-a-vm-og.webp</image:loc></image:image></url>
 <url><loc>https://chartmann1590.github.io/homelab-the-right-way/posts/home-assistant-without-regret-a-setup-guide/</loc><lastmod>2026-11-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority><image:image><image:loc>https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg</image:loc></image:image></url>

@@ -1,9 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Fri, 20 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sat, 21 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Trunk, access, PVID: the only VLAN words that matter</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/trunk-access-pvid-the-only-vlan-words-that-matter/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/trunk-access-pvid-the-only-vlan-words-that-matter/</guid>
+<item><title>Trap: Using Debug Builds for Performance Benchmarks</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/trap-using-debug-builds-for-performance-benchmarks/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/trap-using-debug-builds-for-performance-benchmarks/</guid>
+<pubDate>Sat, 21 Nov 2026 12:30:00 -0500</pubDate><description>You might measure performance using debug builds, but these contain overhead that skews results. Learn why you must use profileable release builds and the exact Gradle configuration to get accurate data.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>benchmarking</category><category>profiling</category><category>gradle</category><category>performance</category><category>macrobenchmark</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most developers pick the tool they know first rather than the question they need answered. This leads to a specific, expensive trap: measuring performance using debug builds. Debug builds contain instrumentation and overhead that distort timing data. When you run benchmarks on these builds, you are not measuring how your app performs for users; you are measuring how fast it runs with extra diagnostic baggage attached. The result is misleading data that looks good in testing but fails in production.</p>
+<p>The chapter "The Tools" in the book <em>Fast by Default</em> provides a map of which tool answers which question. It explicitly states that modern Android Studio versions can profile either a debuggable build with complete data or a profileable release build with low overhead. The rule is strict: use the low-overhead mode for anything about time; use complete data only when you need detail a profileable build cannot give, such as a heap dump with full allocation tracking. If you are measuring startup time, frame durations, or scrolling performance, you must use a release-like build that includes the `` tag.</p>
+<h2 id="the-trap-benchmarking-debug-builds">The trap: benchmarking debug builds</h2>
+<p>The easiest way to start a benchmark is to run a test against your current build configuration. However, if you do not explicitly configure a separate benchmark build type, Android Studio may default to running tests against a debuggable variant. Debug builds include extensive logging and instrumentation that slow down execution. This overhead masks the true performance characteristics of your code. You might see acceptable frame times in development but encounter jank in production because the release build lacks the safety nets and includes optimizations that change timing behavior.</p>
+<p>The book warns that Layout Inspector shows recomposition counts for debuggable builds, so it is a diagnostic tool, not a measuring tool. You should use it to find what recomposes, then confirm the effect on frame times with Macrobenchmark on a release build. This distinction applies to all timing measurements. If you want to know how long startup takes or if scrolling drops frames, you must use Macrobenchmark against a release-like build.</p>
+<h2 id="the-fix-configure-the-benchmark-module-correctly">The fix: configure the benchmark module correctly</h2>
+<p>To avoid this trap, you need to set up a separate <code>com.android.test</code> module that targets your app module. This module handles the installation, control, and execution of benchmarks against a real release-like build. The book provides the exact Gradle configuration required for this setup. You must define the plugin IDs, namespace, and dependencies in your macrobenchmark module's <code>build.gradle.kts</code> file.</p>
+<pre><code>// macrobenchmark/build.gradle.kts
+plugins {
+    id("com.android.test")
+    id("org.jetbrains.kotlin.android")
+}
+android {
+    namespace = "com.example.fieldnotes.macrobenchmark"
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 28
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    targetProjectPath = ":app"
+    experimentalProperties["android.experimental.self-instrumenting"] = true
+    buildTypes {
+        create("benchmark") {
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
+    }
+}
+dependencies {
+    implementation("androidx.test.ext:junit:1.3.0")
+    implementation("androidx.benchmark:benchmark-macro-junit4:1.5.0")
+}</code></pre>
+<p>Notice that the benchmark module is debuggable, not the app. This allows the test runner to instrument the benchmark code while keeping the target app close to a real release state. The book also notes that you should take whatever the module template generates for your Android Studio version rather than copying test library versions from a book, as these move independently.</p>
+<h2 id="the-fix-configure-the-app-build-type">The fix: configure the app build type</h2>
+<p>The next step is to ensure the target app module includes a matching benchmark build type. This build type must be a copy of the release build but signed with the debug key. This allows it to install on your test device without requiring your upload key, while still retaining the optimizations and lack of debug instrumentation found in the release variant.</p>
+<p>Add the following configuration to your app module's <code>build.gradle.kts</code>:</p>
+<pre><code>// app/build.gradle.kts
+android {
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro")
+        }
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
+    }
+}</code></pre>
+<p>This configuration ensures that when you run Macrobenchmark, it installs the app using the <code>benchmark</code> build type. This variant inherits <code>isMinifyEnabled</code> and <code>isShrinkResources</code> from release, meaning code is obfuscated and resources are shrunk. It also includes the `` tag, which Android Studio's Benchmark module template creates automatically. This tag tells the system to expose performance data without adding the overhead of full debug instrumentation.</p>
+<h2 id="the-fix-use-macrobenchmark-for-user-experience-metrics">The fix: use Macrobenchmark for user experience metrics</h2>
+<p>Once your build types are configured, you can use Jetpack Macrobenchmark to measure what users actually experience. Macrobenchmark drives interactions like app startup, scrolling, animations, and navigation from a separate test module. It installs the app, controls compilation, kills and restarts it, and runs your interaction many times. It reports metrics such as time to initial display and frame durations, plus a Perfetto trace of every iteration.</p>
+<p>The book provides a table that maps questions to tools. For "How long does startup take, really?" and "Does scrolling drop frames?", the correct tool is Macrobenchmark combined with <code>StartupTimingMetric</code> or <code>FrameTimingMetric</code>. For "Where did the time go?", you should use a Perfetto trace generated by Macrobenchmark or the profiler. If you are asking "Is this one function slow?", you might consider Microbenchmark, but only after a trace has shown that a specific function matters. Most startup and jank problems are not about one hot function, so Macrobenchmark is the right first tool for release-like builds.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Verify your macrobenchmark module uses the <code>com.android.test</code> plugin.</li><li>Ensure the app module has a <code>benchmark</code> build type that inherits from <code>release</code>.</li><li>Confirm the <code>benchmark</code> build type uses the debug signing config.</li><li>Check that the app includes the `` tag via the Android Studio template.</li><li>Use Macrobenchmark for startup, scrolling, and animation metrics on release-like builds.</li><li>Reserve Layout Inspector for finding recomposition issues in debug builds only.</li><li>Use Microbenchmark only after traces identify specific slow functions.</li><li>Take dependency versions from the module template rather than copying fixed versions.</li></ul><p><a href="https://payhip.com/b/4nGE6">Go deeper: Fast by Default</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Trunk, access, PVID: the only VLAN words that matter</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/trunk-access-pvid-the-only-vlan-words-that-matter/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/trunk-access-pvid-the-only-vlan-words-that-matter/</guid>
 <pubDate>Fri, 20 Nov 2026 12:30:00 -0500</pubDate><description>Stop guessing about switch ports. Learn how to configure tagged trunks and untagged access ports correctly to isolate IoT, trusted, and guest networks from day one.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>networking</category><category>vlans</category><category>switch</category><category>firewall</category><category>homelab</category><category>security</category>
@@ -747,27 +811,5 @@ echo "VERSION_CODE=$CODE" &gt;&gt; "$GITHUB_ENV"</code></pre>
 <p>A longer tank also makes the layout work better. The book puts heat and light over the dry dock at one end so the turtle can choose between warm-and-bright and cool-and-dim, which is how a turtle regulates its own temperature. The heater and filter go at the other end, where the filter's current spreads the heater's warmth. A tank with real length gives that gradient room to exist.</p>
 <p>The water itself still has to stay in the book's "fine" band of <strong>76 to 82 °F (about 24.5 to 28 °C)</strong>, held by a submersible heater with its own thermostat. A bigger volume of water does not change that number; it only changes how much the heater has to warm.</p>
 <h2 id="checklist">Checklist</h2>
-<ul><li>Measure the shell and plan on about 10 gallons of water per inch.</li><li>Assume growth: sliders grow fast, and an adult can need 75 gallons or more.</li><li>Note the date the turtle arrived and re-measure the shell now and then, so a too-small tank is caught early.</li><li>For a first tank, a clear storage tote works; pick one longer than it is tall.</li><li>Size the filter at two to three times the actual water volume, and resize it when the tank grows.</li><li>Change 25 to 50 percent of the water weekly, dechlorinated and temperature-matched.</li><li>Heat and light over the dock at one end, heater and filter at the other.</li><li>Keep the water at 76 to 82 °F with a thermostatic heater, whatever the tank size.</li><li>Check a care sheet for your species, and ask a reptile vet if anything looks off.</li></ul><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Owefolk: split shared expenses and settle up without the awkward part</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/owefolk-split-expenses-android-app/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/owefolk-split-expenses-android-app/</guid>
-<pubDate>Sat, 07 Nov 2026 12:30:00 -0500</pubDate><description>Owefolk splits group expenses by shares, amounts or percentages, scans receipts on-device, translates into 50+ languages and only counts confirmed payments.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.owefolk.jpg" type="image/jpeg" length="0"/>
-<category>android</category><category>finance</category><category>expenses</category><category>privacy</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og/app-com.charles.owefolk.jpg" alt=""></p><p>Shared costs are easy to start and hard to finish. Someone covers dinner, someone else books the rental, a subscription gets split four ways, and a month later nobody is sure who owes what. Owefolk is built to keep that math clear, so the money question never turns into a friendship question.</p>
-<h2 id="what-it-does">What it does</h2>
-<ul><li><strong>Clear balances.</strong> After you sign in you see your net balance, what you owe, who owes you, and which group each number comes from, down to the cent.</li><li><strong>Flexible splits.</strong> Split dinners, rent, trips and subscriptions by equal shares, exact amounts or custom percentages, and record who actually paid.</li><li><strong>On-device receipt scanning.</strong> Point the camera at a receipt and the app reads the merchant and total.</li><li><strong>On-device translation.</strong> Group names, expenses, balances and the activity feed in your language, chosen from 50+ languages.</li><li><strong>One-tap settling.</strong> When someone owes you, the app shows the exact amount and jumps to Venmo, Cash App, PayPal, Zelle or a custom payment link.</li><li><strong>Confirmed payments only.</strong> A payment counts only after the sender marks it sent and the recipient confirms it.</li><li><strong>Shared history.</strong> Everyone in a group sees the same activity history.</li></ul>
-<h2 id="why-only-real-money-moves-count-matters">Why "only real money moves count" matters</h2>
-<p>A common weak spot in shared-expense tracking is the gap between "will pay" and "has paid". Owefolk closes it with a two-step rule. Opening a payment app does not count as paying. You mark a payment as sent only after you have really sent it, and the balance changes only when the person receiving it confirms. Combined with the shared activity history, that means both sides always see the same story.</p>
-<h2 id="choosing-a-split">Choosing a split</h2>
-<p>Not every cost is split evenly, and Owefolk does not assume it is:</p>
-<div class="table"><table><thead><tr><th>Split type</th><th>Good for</th></tr></thead><tbody><tr><td>Equal shares</td><td>A group dinner where everyone ate about the same</td></tr><tr><td>Exact amounts</td><td>A bill where each person's items are known</td></tr><tr><td>Custom percentages</td><td>Rent or a shared plan where people pay different portions</td></tr></tbody></table></div>
-<p>Whatever you pick, the expense is tracked against the person who actually paid, so the balances stay honest.</p>
-<h2 id="what-stays-on-your-phone">What stays on your phone</h2>
-<p>Two features that usually rely on outside services run on the device here:</p>
-<ul><li><strong>Receipt scanning</strong> uses on-device recognition, and the listing says your receipt photos never leave your phone.</li><li><strong>Translation</strong> happens on the device too, so no text is sent to a translation service.</li></ul>
-<p>Diagnostics are anonymous and can be switched off, and you can delete your account at any time. Note that the app does use an account: you sign in to see balances and share groups.</p>
-<h2 id="getting-started">Getting started</h2>
-<ol><li>Sign in and pick your language during onboarding (you can change it later in settings).</li><li>Create a group for the trip, the apartment or the dinner club.</li><li>Add expenses as they happen, choosing how each one is split.</li><li>When it is time to settle, use the payment shortcuts, mark the payment sent once it really is, and let the other person confirm.</li></ol>
-<h2 id="good-to-know">Good to know</h2>
-<ul><li><strong>Price:</strong> free to download.</li><li><strong>Ads and purchases:</strong> it contains ads and offers in-app purchases.</li><li><strong>Account:</strong> sign-in is required; account deletion is available any time.</li><li><strong>Category and rating:</strong> Finance, rated Everyone.</li><li>Owefolk tracks who owes what. Money itself moves through the payment app you choose.</li></ul>
-<h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You split costs with roommates, a partner, a trip group or friends.</li><li>You want splits by shares, exact amounts or percentages, not just "divide by four".</li><li>You want receipts scanned and text translated without sending them to an outside service.</li><li>You want balances to change only when a payment is actually confirmed.</li></ul><p><a href="https://github.com/chartmann1590/owefolk/releases/tag/direct-14">Get Owefolk for Android</a></p>]]></content:encoded></item>
+<ul><li>Measure the shell and plan on about 10 gallons of water per inch.</li><li>Assume growth: sliders grow fast, and an adult can need 75 gallons or more.</li><li>Note the date the turtle arrived and re-measure the shell now and then, so a too-small tank is caught early.</li><li>For a first tank, a clear storage tote works; pick one longer than it is tall.</li><li>Size the filter at two to three times the actual water volume, and resize it when the tank grows.</li><li>Change 25 to 50 percent of the water weekly, dechlorinated and temperature-matched.</li><li>Heat and light over the dock at one end, heater and filter at the other.</li><li>Keep the water at 76 to 82 °F with a thermostatic heater, whatever the tank size.</li><li>Check a care sheet for your species, and ask a reptile vet if anything looks off.</li></ul><p><a href="https://payhip.com/b/k0nzS">Go deeper: Smart Turtle Tank</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
 </channel></rss>
