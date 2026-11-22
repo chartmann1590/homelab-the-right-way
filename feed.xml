@@ -3,7 +3,58 @@
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
 <description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Sun, 22 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>Podcast, episode 6: Rebuild Your Lab — Git, OpenTofu, and Golden Images</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-6-automate-your-homelab/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-6-automate-your-homelab/</guid>
+<item><title>Your Android App Has Native Code Even If You Never Wrote C++</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/your-android-app-has-native-code-even-if-you-never-wrote-c/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/your-android-app-has-native-code-even-if-you-never-wrote-c/</guid>
+<pubDate>Sun, 22 Nov 2026 12:30:00 -0500</pubDate><description>Hidden .so files in ML and media libraries can block your app from Google Play. Learn to check alignment, fix build configs, and ensure 16 KB page support before the February 2027 deadline.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>native-code</category><category>google-play</category><category>compliance</category><category>16kb-page-size</category><category>ndk</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>Most developers assume their app has no native code because they never wrote a single line of C or C++. That assumption is the trap. Machine learning runtimes, video and audio libraries, database engines, image codecs, and some analytics SDKs all ship .so files. If one of these dependencies was built for 4 KB pages only, your app is not compliant with Google Play requirements, even if you did not write the native code yourself.</p>
+<p>The requirement is strict: starting February 1, 2027, if your app updates do not support 16 KB memory page sizes, you will not be able to release them. For pure Kotlin or Java apps, this is not an issue. However, for any app with native code hidden inside a library, it can become a hard block on releasing updates. The following sections explain how to identify these hidden dependencies, verify their alignment, and apply the necessary fixes to your build configuration.</p>
+<h2 id="the-trap-hidden-native-dependencies">The Trap: Hidden Native Dependencies</h2>
+<p>The core misconception is that you are responsible only for the code you write. In reality, modern Android development relies heavily on third-party libraries that include precompiled native binaries. These .so files often go unnoticed during initial setup because they are bundled automatically with the app.</p>
+<p>Google Play now requires all apps targeting Android 15 (API level 35) and higher to support 16 KB memory page sizes on 64-bit devices. While pure Kotlin and Java applications already support these devices, any native code must be aligned correctly. A shared library loaded into memory in segments must have each segment start on a 16 KB boundary. If a library is linked for 4 KB pages, its segments start on 4 KB boundaries, which can cause the library to fail to load or crash on newer devices.</p>
+<p>The warning often appears in Play Console on someone else's code, not yours. This means you must audit your entire dependency tree, not just your source files. The deadline is fixed: February 1, 2027. After this date, non-compliant updates cannot be released to users.</p>
+<h2 id="step-1-identify-and-verify-native-code-alignment">Step 1: Identify and Verify Native Code Alignment</h2>
+<p>Before attempting any fixes, you must determine if your app contains native code and whether it is properly aligned. Android Studio provides a quick way to check this. Open Build &gt; Analyze APK and select your release APK. Look in the lib folder. If it is missing or empty, the app has no native code, and you are done. If there are .so files, the Alignment column shows a warning for each file with an alignment problem. Android Studio and lint also flag prebuilt libraries that are not 16 KB aligned.</p>
+<p>For a more rigorous verification, especially in a CI environment, you should check every library from the command line. You can unpack the APK and inspect the LOAD segments using tools from the SDK. Any LOAD line with align 2<strong>13, 2</strong>12, or lower indicates a library that needs rebuilding or replacing. The zipalign check ensures the package itself is stored correctly, ending with "Verification successful" when every library is aligned properly.</p>
+<p>The following commands demonstrate how to perform these checks:</p>
+<pre><code># 1. Unpack the APK
+unzip -q app-release.apk -d /tmp/apk_out
+
+# 2. Each LOAD segment must show align 2**14 (16 KB) or more
+NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+for so in /tmp/apk_out/lib/arm64-v8a/*.so /tmp/apk_out/lib/x86_64/*.so; do
+  [ -f "$so" ] || continue
+  echo "$so"
+  "$NDK_BIN/llvm-objdump" -p "$so" | grep LOAD
+done
+
+# 3. Zip alignment of the APK itself (Build-Tools 35.0.0 or newer)
+"$ANDROID_HOME"/build-tools/35.0.0/zipalign -v -c -P 16 4 app-release.apk</code></pre>
+<p>For App Bundles, use bundletool to check the configuration:</p>
+<pre><code>bundletool dump config --bundle=app-release.aab | grep alignment</code></pre>
+<p>PAGE_ALIGNMENT_16K means the bundle asks for 16 KB zip alignment, while PAGE_ALIGNMENT_4K indicates that APKs built from it will have 4 KB aligned .so files.</p>
+<h2 id="step-2-fix-the-build-configuration">Step 2: Fix the Build Configuration</h2>
+<p>The guide offers a straightforward path to compliance if you update your build tools. With AGP 8.5.1 or higher, NDK r28 or higher, and 16 KB compatible prebuilt dependencies, your app is 16 KB compatible by default. You must keep AGP current and ensure uncompressed packaging is used, as 16 KB devices require uncompressed shared libraries on a 16 KB zip-aligned boundary.</p>
+<p>For your own C and C++ code, NDK r28 and later compile 16 KB aligned by default. You should pin the version in Gradle so every machine uses the same one:</p>
+<pre><code>android {
+    // NDK r28+ produces 16 KB aligned libraries by default
+    ndkVersion = "28.2.13676358"
+}</code></pre>
+<p>If you are stuck on NDK r27 or older, you must add specific linker flags. With CMake, use:</p>
+<pre><code>target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+    "-Wl,-z,max-page-size=16384"
+    "-Wl,-z,common-page-size=16384")</code></pre>
+<p>With ndk-build, add this to Android.mk:</p>
+<pre><code>LOCAL_LDFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384</code></pre>
+<p>For prebuilt libraries from third parties, you cannot relink a binary you do not build. You must update the dependency to a version whose release notes say it supports 16 KB pages, or replace it entirely. The guide states that prebuilt shared libraries must be recompiled the same way and re-imported.</p>
+<p>If you cannot upgrade AGP to 8.5.1 or higher, the guide suggests having Gradle compress the shared libraries by setting <code>useLegacyPackaging = true</code>. However, this is only a workaround for packaging; it does not fix a library whose ELF segments are 4 KB aligned. Furthermore, compression causes the app to take more space once installed.</p>
+<h2 id="step-3-update-code-and-test">Step 3: Update Code and Test</h2>
+<p>Even with aligned libraries, native code that hard-codes the page size can still break. You must remove any code that relies on the PAGE_SIZE constant or assumes pages are 4096 bytes. Instead, use getpagesize() or sysconf(_SC_PAGESIZE). Review mmap() calls and other APIs that need page-aligned arguments. Check custom memory allocators if you have any.</p>
+<p>Finally, test the app on a 16 KB environment. Use an Android Emulator system image with 16 KB page size. Confirm the environment first:</p>
+<pre><code>adb shell getconf PAGE_SIZE      # should print 16384</code></pre>
+<p>Then exercise every feature that touches native code, such as ML models, video exports, and database operations. A library that loaded fine on 4 KB pages but crashes here is exactly what this step is designed to catch. Run these checks on every release build and fail the job if any LOAD segment is below 2**14.</p>
+<h2 id="checklist">Checklist</h2>
+<ul><li>You know whether the release APK contains any .so files, including from libraries</li><li>AGP 8.5.1 or newer (AGP 9.4.0 at the time of writing) and NDK r28 or newer, pinned with ndkVersion</li><li>Every arm64-v8a and x86_64 library shows LOAD alignment 2**14 or higher</li><li>zipalign -c -P 16 reports "Verification successful"</li><li>No native code assumes a 4096-byte page</li><li>The app tested on a 16 KB emulator image (getconf PAGE_SIZE = 16384)</li><li>Done before February 1, 2027, when non-compliant updates can no longer be released</li></ul><p><a href="https://payhip.com/b/YcoD4">Go deeper: Pass Google Play Review</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Podcast, episode 6: Rebuild Your Lab — Git, OpenTofu, and Golden Images</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-6-automate-your-homelab/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-6-automate-your-homelab/</guid>
 <pubDate>Sun, 22 Nov 2026 12:30:00 -0500</pubDate><description>Episode 6 of the Homelab the Right Way Podcast: three AI hosts on The Case for a Rebuildable Lab, Git for Your Lab, Golden Images with Cloud-Init from the book Automate Your Homelab, plus this week&#x27;s tech news and the Aria app. Player, chapters, sources and links.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>podcast</category><category>homelab</category><category>monitoring</category><category>self-hosting</category>
@@ -779,17 +830,5 @@ echo "VERSION_CODE=$CODE" &gt;&gt; "$GITHUB_ENV"</code></pre>
 <h2 id="good-to-know">Good to know</h2>
 <ul><li><strong>Price:</strong> free, with ads. No in-app purchases are listed.</li><li><strong>Category and rating:</strong> Finance, rated Everyone.</li><li><strong>Model sizes:</strong> on-device models range from 555 MB to 3.7 GB, so check your storage first.</li><li><strong>Disclaimer from the app:</strong> educational information and AI-generated recommendations only; not financial advice. Do your own research and consult a qualified financial advisor before making investment decisions. An AI recommendation can be wrong.</li></ul>
 <h2 id="is-it-for-you">Is it for you?</h2>
-<ul><li>You are new to investing and want structured lessons with quizzes and flashcards.</li><li>You want an AI you can ask questions without sending your chats to the cloud.</li><li>You already run Ollama and would like your phone to use it.</li><li>You want a watchlist, portfolio tracking and price alerts in the same place as your learning.</li></ul><p><a href="https://github.com/chartmann1590/hartmann-studios-apps/releases/tag/tradecoachai-direct-4">Get TradeCoach AI - Stock Coach for Android</a></p>]]></content:encoded></item><item><title>The Powered by E-Waste sticker</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/powered-by-e-waste-sticker/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/powered-by-e-waste-sticker/</guid>
-<pubDate>Sat, 07 Nov 2026 12:30:00 -0500</pubDate><description>The Powered by E-Waste sticker from merch drop 7: a round badge for the mini PC someone was throwing out and the old laptop that now runs the house. Sizes and prices.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-s8.jpg" type="image/jpeg" length="0"/>
-<category>merch</category><category>homelab</category><category>selfhosted</category><category>sticker</category><category>ewaste</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/merch/drop7-s8.jpg" alt=""></p><p>A lot of homelabs start with hardware somebody else was done with: an office mini PC on its way to recycling, a laptop with a cracked hinge, a desktop that got replaced. The <a href="https://homelab-the-right-way.printful.me/product/powered-by-e-waste-sticker">Powered by E-Waste Sticker</a> is a badge for that machine.</p>
-<h2 id="the-design">The design</h2>
-<p>A round badge: POWERED BY E-WASTE, with the line reclaimed, repurposed, running. It is sized for the lid or the front panel of exactly the machine it describes.</p>
-<h2 id="sizes-and-price">Sizes and price</h2>
-<ul><li>Kiss-cut vinyl sticker</li><li>3 x 3, 4 x 4 and 5.5 x 5.5 in</li><li>$4.50 to $5.50 depending on size, before shipping (Printful calculates shipping at checkout)</li><li>Printed to order by Printful</li></ul>
-<h2 id="making-the-old-box-a-reliable-one">Making the old box a reliable one</h2>
-<p>Old hardware is fine for a homelab. What makes it reliable is the setup around it: backup jobs that cover every guest, storage that does not fill the root disk, and a cluster that does not freeze when one node goes away. <a href="https://payhip.com/b/mJKnI">Homelab the Right Way</a> covers Proxmox, OPNsense and Home Assistant as the trap, the fix and a checklist for each, and the <a href="https://payhip.com/b/qon0W">free sample</a> shows the format.</p>
-<h2 id="get-it">Get it</h2>
-<p>The sticker is in the <a href="https://homelab-the-right-way.printful.me/product/powered-by-e-waste-sticker">merch store</a> with the rest of <a href="https://chartmann1590.github.io/homelab-the-right-way/posts/merch-drop-7/">drop 7</a> and every earlier design on the <a href="https://chartmann1590.github.io/homelab-the-right-way/merch/">merch page</a>.</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
+<ul><li>You are new to investing and want structured lessons with quizzes and flashcards.</li><li>You want an AI you can ask questions without sending your chats to the cloud.</li><li>You already run Ollama and would like your phone to use it.</li><li>You want a watchlist, portfolio tracking and price alerts in the same place as your learning.</li></ul><p><a href="https://github.com/chartmann1590/hartmann-studios-apps/releases/tag/tradecoachai-direct-4">Get TradeCoach AI - Stock Coach for Android</a></p>]]></content:encoded></item>
 </channel></rss>
