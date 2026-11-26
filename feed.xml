@@ -1,9 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link><atom:link href="https://chartmann1590.github.io/homelab-the-right-way/feed.xml" rel="self" type="application/rss+xml"/>
-<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Wed, 25 Nov 2026 12:30:00 -0500</lastBuildDate>
+<description>Practical homelab articles on Proxmox, OPNsense, Home Assistant, backups and DIY builds, based on the Homelab the Right Way ebooks. A new post every day.</description><language>en-us</language><lastBuildDate>Thu, 26 Nov 2026 12:30:00 -0500</lastBuildDate>
 <image><url>https://chartmann1590.github.io/homelab-the-right-way/assets/img/avatar.png</url><title>Homelab the Right Way</title><link>https://chartmann1590.github.io/homelab-the-right-way/</link></image>
-<item><title>One Disk for Everything Is One Bad Day Away</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/one-disk-for-everything-is-one-bad-day-away/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/one-disk-for-everything-is-one-bad-day-away/</guid>
+<item><title>Google refunds your purchase if you skip this one call</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/google-refunds-your-purchase-if-you-skip-this-one-call/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/google-refunds-your-purchase-if-you-skip-this-one-call/</guid>
+<pubDate>Thu, 26 Nov 2026 12:30:00 -0500</pubDate><description>Stop treating launchBillingFlow as a synchronous checkout. Learn why PENDING states require no action, how to verify and acknowledge within three days, and why querying purchases on every start is mandatory to avoid automatic refunds.</description>
+<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
+<category>android</category><category>billing</category><category>google play</category><category>app development</category><category>payments</category>
+<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>The purchase isn't done when <code>launchBillingFlow</code> returns. That is the trap. Most developers treat the return value of that function as a confirmation that the user has paid. It is not. The result arrives later in a listener, sometimes after the app was closed, sometimes as <code>PENDING</code>, and sometimes from a different device. If you grant entitlements immediately or skip the final confirmation step, Google's integration guide states that the purchase is automatically refunded and the entitlement revoked.</p>
+<p>The book <em>Get Paid for Your Android App</em> opens its billing chapter with exactly this warning under the heading "The trap". This post covers the lifecycle of a purchase, the specific handling required for <code>PENDING</code> states, and the mandatory refresh call that keeps your app compliant.</p>
+<p>One caveat, straight from the book: this guidance applies to Play Billing Library 9.1.0 (June 18, 2026) and later. Versions have strict deadlines; starting a new integration today means using version 9.1.0, which buys you until August 31, 2028. The author's TextPilot app serves as a real example of these deadlines arriving, where policy status required target API 36 and Billing 8.0.0.</p>
+<h2 id="the-trap-assuming-launchbillingflow-returns-paid">The trap: assuming launchBillingFlow returns "paid"</h2>
+<p>The most common mistake is treating <code>launchBillingFlow()</code> like a checkout that returns a synchronous "paid" status. It does not. The result arrives asynchronously in a listener. This delay introduces several risks. The payment might come back as <code>PENDING</code> if the user selects a delayed method like cash or certain wallets. If you grant access immediately, you risk giving away features for free if the payment fails later. Furthermore, the purchase event might arrive after the app has been closed, or it might originate from a different device where the user logged in with their Google account.</p>
+<p>Google gives every major version of the library a two-year life. If you are upgrading old code, note that version 8.0.0 removed several methods including <code>queryPurchaseHistory()</code> and <code>querySkuDetailsAsync()</code>. Version 9.0.0 changed the response for a blocked Play Store from <code>ERROR</code> to <code>BILLING_UNAVAILABLE</code>, and the library's <code>targetSdkVersion</code> became 35. You must ensure your client is connected properly before attempting any billing operations.</p>
+<pre><code>// BillingRepository.kt
+import com.android.billingclient.api.BillingClient.BillingResponseCode
+class BillingRepository(context: Context, private val scope: CoroutineScope) :
+    PurchasesUpdatedListener {
+
+    private val _purchases = MutableStateFlow&lt;List&lt;Purchase&gt;&gt;(emptyList())
+    val purchases: StateFlow&lt;List&lt;Purchase&gt;&gt; = _purchases
+
+    private val client = BillingClient.newBuilder(context)
+        .setListener(this)
+        .enablePendingPurchases(
+            PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build()
+        )
+        .enableAutoServiceReconnection()
+        .build()
+
+    fun connect() {
+        if (client.isReady) { refreshPurchases(); return }
+        client.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(result: BillingResult) {
+                if (result.responseCode == BillingResponseCode.OK) {
+                    refreshPurchases()
+                }
+             }
+             override fun onBillingServiceDisconnected() {
+                 // Auto reconnection handles retries; nothing to do here.
+             }
+        })
+    }
+
+    override fun onPurchasesUpdated(
+        result: BillingResult,
+        purchases: List&lt;Purchase&gt;?,
+    ) {
+        when (result.responseCode) {
+            BillingResponseCode.OK -&gt; purchases?.forEach(::process)
+            BillingResponseCode.USER_CANCELED -&gt; Unit
+            else -&gt; Log.w(TAG, "Update error ${result.responseCode}")
+        }
+    }
+    // refreshPurchases(), process() and acknowledge() follow below.
+    private companion object { const val TAG = "Billing" }
+}</code></pre>
+<h2 id="the-trap-granting-access-for-pending-purchases">The trap: granting access for PENDING purchases</h2>
+<p>When the listener returns a purchase with state <code>PENDING</code>, you must not grant any entitlements. A <code>PENDING</code> state means the user has started paying by a delayed method, but the transaction is not yet complete. Google's integration guide explicitly states that if your app does not acknowledge a purchase within three days, it is automatically refunded and the entitlement revoked.</p>
+<p>The lifecycle of a purchase requires you to verify the signature on your server (if you have one), grant the entitlement for <code>PURCHASED</code> states, and then acknowledge the purchase. For consumables like coins or credits, you consume them instead, which both acknowledges the purchase and allows the user to buy it again. A remove-ads unlock is never consumed.</p>
+<pre><code>private fun process(purchase: Purchase) {
+    when (purchase.purchaseState) {
+        Purchase.PurchaseState.PENDING -&gt; {
+            // Tell the user payment is pending. Grant nothing.
+        }
+
+        Purchase.PurchaseState.PURCHASED -&gt; {
+            // 1. Verify (on your server if you have one, Chapter 7).
+            // 2. Grant the entitlement (Chapter 6).
+            // 3. Acknowledge, unless it is a consumable you consume instead.
+            if (!purchase.isAcknowledged) acknowledge(purchase)
+        }
+        else -&gt; Unit
+    }
+    _purchases.update { current -&gt;
+        val token = purchase.purchaseToken
+        current.filterNot { it.purchaseToken == token } + purchase
+    }
+}
+
+private fun acknowledge(purchase: Purchase) {
+    val params = AcknowledgePurchaseParams.newBuilder()
+        .setPurchaseToken(purchase.purchaseToken)
+        .build()
+    client.acknowledgePurchase(params) { result -&gt;
+        if (result.responseCode != BillingResponseCode.OK) {
+            Log.w(TAG, "Ack failed ${result.responseCode}; retry on refresh")
+        }
+    }
+}</code></pre>
+<h2 id="the-trap-trusting-only-the-listener">The trap: trusting only the listener</h2>
+<p>Google lists several cases where the listener will miss a purchase. The network might drop after payment, the user might have bought something on another device, or a promotion might have been redeemed outside the app. A pending payment might also complete while the app was closed. Relying solely on <code>onPurchasesUpdated</code> is insufficient because it does not cover these offline or cross-device scenarios.</p>
+<p>The fix is to call <code>queryPurchasesAsync</code> on every start and whenever the app returns to the foreground. This one refresh also retries failed acknowledgements, keeping them well inside the three-day window. Because <code>process()</code> acknowledges anything not yet acknowledged, this periodic check ensures that no purchase remains in a limbo state that triggers an automatic refund.</p>
+<pre><code>fun refreshPurchases() {
+    val types = listOf(ProductType.INAPP, ProductType.SUBS)
+    types.forEach { type -&gt;
+        client.queryPurchasesAsync(
+            QueryPurchasesParams.newBuilder().setProductType(type).build()
+        ) { result, list -&gt;
+            if (result.responseCode == BillingResponseCode.OK) {
+                list.forEach(::process)
+            }
+        }
+    }
+}</code></pre>
+<h2 id="checklist">Checklist</h2>
+<ul><li>Never treat <code>launchBillingFlow()</code> as a synchronous payment confirmation; the result arrives later in a listener.</li><li>Check <code>purchase.purchaseState</code> for <code>PENDING</code>; grant nothing and inform the user that payment is processing.</li><li>For <code>PURCHASED</code> states, verify the signature, grant the entitlement, and acknowledge the purchase immediately.</li><li>Call <code>queryPurchasesAsync</code> for both <code>INAPP</code> and <code>SUBS</code> types every time the app starts or resumes to catch missed events.</li><li>Ensure your <code>BillingClient</code> uses <code>enableAutoServiceReconnection()</code> to handle network drops automatically.</li><li>Use <code>setObfuscatedAccountId()</code> when launching flows to help Google detect fraud and attribute purchases correctly; never pass readable data like email addresses.</li><li>Test using license testers in Play Console with test payment methods that simulate delays, declines, or chargebacks.</li><li>Verify your library version against Google's deprecation deadlines; as of October 2026, new apps require version 8 or later, with 9.1.0 being the current stable release.</li></ul><p><a href="https://payhip.com/b/zRXe3">Go deeper: Get Paid for Your Android App</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>One Disk for Everything Is One Bad Day Away</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/one-disk-for-everything-is-one-bad-day-away/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/one-disk-for-everything-is-one-bad-day-away/</guid>
 <pubDate>Wed, 25 Nov 2026 12:30:00 -0500</pubDate><description>Separate your system and data onto two physical drives to prevent a single hardware failure from destroying your server and photos simultaneously.</description>
 <enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
 <category>homelab</category><category>proxmox</category><category>immich</category><category>hardware</category><category>backup</category><category>storage</category>
@@ -847,17 +951,5 @@ echo "VERSION_CODE=$CODE" &gt;&gt; "$GITHUB_ENV"</code></pre>
 <p>If Tailscale is your only way in, have a second path. Run Tailscale on two machines that advertise the same routes (Tailscale will fail over between subnet routers), and keep it on the Proxmox host itself, so you can still reach the console when every VM is down.</p>
 <p>The trap is relying solely on one node. If that single node crashes or loses internet, you lose access to your homelab entirely. You might see this when you lose connection while traveling and cannot reach any of your services. The book warns that if Tailscale is your only way in, you have a single point of failure. The fix is to have a second path. Run Tailscale on two machines that advertise the same routes. Tailscale will fail over between subnet routers. You should also keep it on the Proxmox host itself, so you can still reach the console when every VM is down.</p>
 <h2 id="checklist-remote-access">Checklist: remote access</h2>
-<p>☐    No inbound port forwards for admin interfaces ☐    Tailscale on the Proxmox hosts plus a subnet router container ☐    Routes approved; key expiry disabled on servers ☐    Access policy with tags, not the allow-all default ☐    A second way in that doesn't depend on any single VM</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item><item><title>Podcast, episode 4: Is It Up? — Uptime, Alerts, and the Metrics Stack</title><link>https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-4-watch-your-homelab/</link><guid isPermaLink="true">https://chartmann1590.github.io/homelab-the-right-way/posts/podcast-ep-4-watch-your-homelab/</guid>
-<pubDate>Sun, 08 Nov 2026 12:30:00 -0500</pubDate><description>Episode 4 of the Homelab the Right Way Podcast: three AI hosts on Three Questions Every Homelab Should Answer, Is It Up? Uptime Kuma, Alerts on Your Phone with ntfy from the book Watch Your Homelab, plus this week&#x27;s tech news and the Ollama AI Chat app. Player, chapters, sources and links.</description>
-<enclosure url="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" type="image/jpeg" length="0"/>
-<category>podcast</category><category>homelab</category><category>monitoring</category><category>self-hosting</category>
-<content:encoded><![CDATA[<p><img src="https://chartmann1590.github.io/homelab-the-right-way/assets/img/og.jpg" alt=""></p><p>This episode covers the essentials of monitoring your homelab, including how to use Uptime Kuma to check if services are up, setting up phone alerts with ntfy, and building a metrics stack with Prometheus and node_exporter. It also discusses how to handle alerts when they fire, referencing the book 'Watch Your Homelab', and covers recent news on ransomware, new single-board computers, and a blog post on backdooring Bash.</p>
-<p><strong>A note on the hosts:</strong> Maya, Sam and Theo are fictional AI hosts. Their voices and the script are AI-generated. Every technical fact in the episode comes from the Homelab the Right Way books (this week: <em>Watch Your Homelab</em>); the news segment cites its sources below.</p>
-<h2 id="chapters">Chapters</h2>
-<ul><li>00:00 — Cold open: this week</li><li>02:07 — New tech this week</li><li>05:07 — Three Questions Every Homelab Should Answer</li><li>11:31 — Is It Up? Uptime Kuma</li><li>18:47 — Alerts on Your Phone with ntfy</li><li>25:12 — The Metrics Stack: Prometheus, node_exporter and cAdvisor</li><li>35:52 — App spot: Ollama AI Chat</li><li>38:14 — Listener question: When the Alert Fires: Runbooks, Budgets and the Monthly Review</li><li>41:42 — Merch, ebooks and the newsletter</li><li>44:28 — Outro: three takeaways</li></ul>
-<h2 id="new-tech-this-week-with-sources">New tech this week, with sources</h2>
-<ul><li><a href="https://www.bleepingcomputer.com/news/security/synology-warns-customers-of-ongoing-c3rb3r-ransomware-attacks/">Synology warns of C3RB3R ransomware attacks targeting NAS devices</a> (BleepingComputer, 2026-11-02)</li><li><a href="https://www.cnx-software.com/2026/11/02/banana-pi-bpi-m8-an-allwinner-a733-sbc-inspired-by-the-raspberry-pi-5-with-pcie-ffc-connector-ufs-module-socket/">Banana Pi BPI-M8 – An Allwinner A733 SBC inspired by the Raspberry Pi 5 with PCIe FFC connector, UFS module socket</a> (CNX Software, 2026-11-02)</li><li><a href="https://www.phoronix.com/news/OpenShot-4.1-Released">OpenShot 4.1 Released With Auto-Optimize, CLI Automation &amp; ARM64 Linux Builds</a> (Phoronix, 2026-10-31)</li><li><a href="https://lwn.net/Articles/1104262/">How We Could Have Backdoored Bash (Hacktron blog)</a> (LWN, 2026-10-31)</li></ul>
-<h2 id="links">Links</h2>
-<ul><li>The book: <a href="https://payhip.com/HomelabtheRightWay">the ebooks, with free sample chapters</a></li><li><a href="https://homelab-the-right-way.printful.me/">Merch</a></li><li><a href="https://chartmann1590.github.io/homelab-the-right-way/newsletter/">The free weekly email</a></li><li><a href="https://www.youtube.com/@HomelabTheRightWay">YouTube</a></li><li>App spot: Ollama AI Chat, search its name on Google Play</li></ul>
-<p>As an Amazon Associate the show earns from qualifying purchases.</p><p><a href="https://payhip.com/b/An62R">Go deeper: Watch Your Homelab</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
+<p>☐    No inbound port forwards for admin interfaces ☐    Tailscale on the Proxmox hosts plus a subnet router container ☐    Routes approved; key expiry disabled on servers ☐    Access policy with tags, not the allow-all default ☐    A second way in that doesn't depend on any single VM</p><p><a href="https://payhip.com/b/mJKnI">Go deeper: Homelab the Right Way</a> · <a href="https://payhip.com/b/aMB6c">Everything Bundle: all 28 ebooks for $29 (was $89)</a></p>]]></content:encoded></item>
 </channel></rss>
